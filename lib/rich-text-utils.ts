@@ -2,13 +2,28 @@
  * Utility functions for handling RichTextField content from Django backend
  */
 
-export function getRichTextContent(data: string | null | undefined): string {
-  if (!data) return '';
-  
-  let content = data;
-  
+export function getRichTextContent(data: any): string {
+  if (data === null || data === undefined) return '';
+
+  let content = '';
+
+  // Handle different data types from CMS
+  if (typeof data === 'string') {
+    content = data;
+  } else if (typeof data === 'object') {
+    // Attempt to extract content from common rich text object structures
+    content = data.content || data.html || data.raw || '';
+    if (typeof content !== 'string') {
+      content = String(content || '');
+    }
+  } else {
+    content = String(data);
+  }
+
+  if (!content) return '';
+
   // Decode HTML entities to render proper text
-  if (content && content.includes('&')) {
+  if (content.includes('&')) {
     content = content
       .replace(/&#39;/g, "'")
       .replace(/&quot;/g, '"')
@@ -23,16 +38,31 @@ export function getRichTextContent(data: string | null | undefined): string {
       .replace(/&reg;/g, '®')
       .replace(/&trade;/g, '™');
   }
-  
+
   // Remove HTML tags for plain text display
   content = content.replace(/<[^>]*>/g, '');
-  
+
   return content;
 }
 
-export function getRichTextHTML(data: string | null | undefined): { __html: string } {
-  let content = data || '';
-  
+export function getRichTextHTML(data: any): { __html: string } {
+  if (data === null || data === undefined) return { __html: '' };
+
+  let content = '';
+
+  // Handle different data types from CMS
+  if (typeof data === 'string') {
+    content = data;
+  } else if (typeof data === 'object') {
+    // Attempt to extract content from common rich text object structures
+    content = data.content || data.html || data.raw || '';
+    if (typeof content !== 'string') {
+      content = String(content || '');
+    }
+  } else {
+    content = String(data);
+  }
+
   // Decode HTML entities to render proper HTML
   if (content && content.includes('&')) {
     content = content
@@ -49,6 +79,6 @@ export function getRichTextHTML(data: string | null | undefined): { __html: stri
       .replace(/&reg;/g, '®')
       .replace(/&trade;/g, '™');
   }
-  
+
   return { __html: content };
 }
