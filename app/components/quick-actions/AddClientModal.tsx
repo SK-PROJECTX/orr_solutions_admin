@@ -200,7 +200,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-400 placeholder-gray-600 focus:outline-none transition-all duration-200"
                   disabled
                 />
-                <p className="text-xs text-gray-500 mt-1">Username will be automatically generated from the email address</p>
+                <p className="text-xs text-black mt-1">Username will be automatically generated from the email address</p>
               </div>
 
               <div>

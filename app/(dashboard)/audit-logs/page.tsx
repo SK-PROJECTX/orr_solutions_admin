@@ -92,7 +92,7 @@ export default function AuditLogsPage() {
             {/* Filters & Search */}
             <div className="flex gap-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 text-gray-500" size={18} />
+                <Search className="absolute left-3 top-3 text-black" size={18} />
                 <input
                   type="text"
                   placeholder="Search by user or action..."
@@ -159,7 +159,7 @@ export default function AuditLogsPage() {
                           <p className="text-gray-400 text-sm">{log.timestamp}</p>
                         </td>
                         <td className="p-4">
-                          <p className="text-gray-500 text-sm font-mono">{log.ipAddress}</p>
+                          <p className="text-black text-sm font-mono">{log.ipAddress}</p>
                         </td>
                         <td className="p-4">
                           <span

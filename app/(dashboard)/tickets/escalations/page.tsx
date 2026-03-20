@@ -18,13 +18,13 @@ export default function EscalationsPage() {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/tickets/?source=ai_escalation', {
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/?is_escalated=true`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         const ticketsData = Array.isArray(data) ? data : (data.results || data.data || []);
@@ -54,7 +54,7 @@ export default function EscalationsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
@@ -87,11 +87,10 @@ export default function EscalationsPage() {
                         <span className="text-xs px-2 py-1 rounded border bg-purple-500/20 text-purple-300 border-purple-500/30">
                           🤖 AI ESCALATED
                         </span>
-                        <span className={`text-xs px-2 py-1 rounded border ${
-                          ticket.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                          ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
-                          'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded border ${ticket.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                            ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                              'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                          }`}>
                           {ticket.priority.toUpperCase()}
                         </span>
                       </div>
@@ -116,7 +115,7 @@ export default function EscalationsPage() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-black">
                       Escalated: {new Date(ticket.created_at).toLocaleString()}
                     </div>
                     <div className="flex items-center gap-3">

@@ -121,7 +121,7 @@ export default function AIOversightPage() {
                 {/* Search & Filter */}
                 <div className="flex flex-col gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 text-gray-500" size={18} />
+                    <Search className="absolute left-3 top-3 text-black" size={18} />
                     <input
                       type="text"
                       placeholder="Search conversations..."
@@ -173,8 +173,8 @@ export default function AIOversightPage() {
                               Good
                             </span>
                           )}
-                          <span className="text-xs text-gray-500">•</span>
-                          <span className="text-xs text-gray-500">{new Date(chat.created_at).toLocaleDateString()}</span>
+                          <span className="text-xs text-black">•</span>
+                          <span className="text-xs text-black">{new Date(chat.created_at).toLocaleDateString()}</span>
                         </div>
                       </button>
                     ))}
@@ -203,21 +203,21 @@ export default function AIOversightPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Client</p>
+                        <p className="text-xs text-black mb-1">Client</p>
                         <p className="text-white font-medium">{selectedChat.client_name}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Quality</p>
+                        <p className="text-xs text-black mb-1">Quality</p>
                         <p className={`font-medium ${selectedChat.needs_improvement ? 'text-orange-300' : 'text-green-300'}`}>
                           {selectedChat.needs_improvement ? "Needs Improvement" : "Good"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Date</p>
+                        <p className="text-xs text-black mb-1">Date</p>
                         <p className="text-white font-medium">{new Date(selectedChat.created_at).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Reviewed By</p>
+                        <p className="text-xs text-black mb-1">Reviewed By</p>
                         <p className="text-white font-medium">{selectedChat.reviewed_by_name || 'Not reviewed'}</p>
                       </div>
                     </div>
@@ -232,14 +232,14 @@ export default function AIOversightPage() {
                         <div className="flex-1">
                           <p className="text-sm font-medium text-blue-300">Client</p>
                           <p className="text-sm text-gray-300 mt-1">{selectedChat.summary}</p>
-                          <p className="text-xs text-gray-600 mt-2">{new Date(selectedChat.created_at).toLocaleTimeString()}</p>
+                          <p className="text-xs text-black mt-2">{new Date(selectedChat.created_at).toLocaleTimeString()}</p>
                         </div>
                       </div>
                       <div className="flex gap-3 justify-end">
                         <div className="flex-1 text-right">
                           <p className="text-sm font-medium text-primary">AI Assistant</p>
                           <p className="text-sm text-gray-300 mt-1">Thank you for your question. Based on your query, here's what I found...</p>
-                          <p className="text-xs text-gray-600 mt-2">2 minutes later</p>
+                          <p className="text-xs text-black mt-2">2 minutes later</p>
                         </div>
                         <div className="w-8 h-8 bg-primary rounded-full flex-shrink-0" />
                       </div>
@@ -273,7 +273,7 @@ export default function AIOversightPage() {
               ) : (
                 <div className="basis-[65%] bg-gradient-to-br from-white/15 to-white/5 rounded-xl border border-white/10 shadow-lg p-6 flex items-center justify-center">
                   <div className="text-center">
-                    <MessageSquare size={48} className="text-gray-500 mx-auto mb-4" />
+                    <MessageSquare size={48} className="text-black mx-auto mb-4" />
                     <p className="text-gray-400">Select a conversation to view details</p>
                   </div>
                 </div>

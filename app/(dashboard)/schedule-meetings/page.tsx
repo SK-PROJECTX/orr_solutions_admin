@@ -164,7 +164,7 @@ function page() {
               <div className="flex flex-col gap-4 max-h-[280px] xl:max-h-[600px] order-2 xl:order-1">
                 <div>
                   <h3 className="text-sm font-semibold text-white">My Meetings</h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-black mt-1">
                     Meetings assigned to you
                   </p>
                 </div>
@@ -185,7 +185,7 @@ function page() {
                           <p className="text-xs text-gray-400 truncate">
                             {event.meetingType}
                           </p>
-                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                          <div className="text-xs text-black mt-1 flex items-center gap-2">
                             <CalendarIcon size={13} className="text-primary flex-shrink-0" />
                             <span className="hidden lg:inline truncate">{format(event.start, "MMM d, yyyy HH:mm")}</span>
                             <span className="lg:hidden truncate">{format(event.start, "MMM d")}</span>

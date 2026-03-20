@@ -56,7 +56,7 @@ export default function BusinessSystemCardsManagement({
   const fetchCards = async () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/cms/business-system-cards/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/business-system-cards/`, {
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` })
@@ -82,7 +82,7 @@ export default function BusinessSystemCardsManagement({
     setSaving(`card-${cardId}`);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/cms/business-system-cards/${cardId}/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/business-system-cards/${cardId}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export default function BusinessSystemCardsManagement({
     setSaving('add-card');
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/cms/business-system-cards/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/business-system-cards/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

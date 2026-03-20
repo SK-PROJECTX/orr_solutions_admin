@@ -46,8 +46,8 @@ export default function SectorInsightsPage() {
     const fetchData = async () => {
       try {
         const [sectorRes, benchmarkRes] = await Promise.all([
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/sector-insights/sector-analytics/'),
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/sector-insights/industry-benchmarks/')
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/sector-insights/sector-analytics/`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/sector-insights/industry-benchmarks/`)
         ]);
         
         if (sectorRes.ok && benchmarkRes.ok) {

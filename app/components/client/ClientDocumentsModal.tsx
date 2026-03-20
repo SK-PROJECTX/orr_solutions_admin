@@ -377,7 +377,7 @@ export default function ClientDocumentsModal({ clientId, clientName, isOpen, onC
                             <p className="text-sm text-gray-400 mb-2">{doc.description}</p>
                           )}
                           
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-4 text-xs text-black">
                             <span>Size: {formatFileSize(doc.file_size)}</span>
                             <span>Uploaded: {formatDate(doc.created_at)}</span>
                             <span>Downloads: {doc.download_count}</span>

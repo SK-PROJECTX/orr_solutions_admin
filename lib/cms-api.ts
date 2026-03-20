@@ -1,6 +1,6 @@
 
 
-const API_BASE_URL = 'https://orr-backend.orr.solutions';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}`;
 
 export class CMSService {
   private getAuthHeaders() {

@@ -58,7 +58,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                   <p className="text-xs text-gray-400 line-clamp-1 mt-1">
                     {notif.message}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-black mt-1">
                     {new Date(notif.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -67,7 +67,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
           </div>
         ) : (
           <div className="text-center py-8">
-            <Bell size={48} className="text-gray-500 mx-auto mb-4" />
+            <Bell size={48} className="text-black mx-auto mb-4" />
             <p className="text-gray-400 text-sm">No pending notifications</p>
           </div>
         )}
@@ -105,7 +105,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                         <p className="text-xs text-gray-400 line-clamp-1 mt-1">
                           {ticket.subject}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-black mt-1">
                           {ticket.client_name}
                         </p>
                       </div>
@@ -124,7 +124,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
               </div>
             ) : (
               <div className="text-center py-6">
-                <AlertCircle size={32} className="text-gray-500 mx-auto mb-2" />
+                <AlertCircle size={32} className="text-black mx-auto mb-2" />
                 <p className="text-gray-400 text-sm">No pending tickets</p>
               </div>
             )}
@@ -163,7 +163,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                             meeting.confirmed_datetime || meeting.requested_datetime
                           ).toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-black mt-1">
                           {meeting.meeting_type} • {meeting.duration_minutes} min
                         </p>
                       </div>
@@ -176,7 +176,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
               </div>
             ) : (
               <div className="text-center py-6">
-                <Calendar size={32} className="text-gray-500 mx-auto mb-2" />
+                <Calendar size={32} className="text-black mx-auto mb-2" />
                 <p className="text-gray-400 text-sm">No upcoming meetings</p>
               </div>
             )}

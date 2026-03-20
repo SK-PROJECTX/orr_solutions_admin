@@ -12,7 +12,7 @@ interface EditableImageProps {
   fill?: boolean;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions/';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/`;
 
 export default function EditableImage({
   src,
@@ -119,7 +119,7 @@ export default function EditableImage({
       <div className={`${className} border-2 border-blue-500 rounded p-4 bg-white/90`}>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               Upload Image
             </label>
             <input
@@ -127,15 +127,15 @@ export default function EditableImage({
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm text-black file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               disabled={isSaving}
             />
           </div>
           
-          <div className="text-center text-gray-500">or</div>
+          <div className="text-center text-black">or</div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               Image URL
             </label>
             <input
@@ -182,7 +182,7 @@ export default function EditableImage({
         style={imageStyle}
         onClick={handleImageClick}
       >
-        <span className="text-gray-500 text-sm">📷 Add Image</span>
+        <span className="text-black text-sm">📷 Add Image</span>
       </div>
     ) : null;
   }

@@ -68,13 +68,13 @@ export default function ClientList({ clients, selectedClientId, loading, onClien
               <p className="text-xs text-gray-400 truncate">{client.email}</p>
               <p className="text-xs text-gray-400 truncate">{client.company}</p>
               {client.role && (
-                <p className="text-xs text-gray-500 truncate">{client.role}</p>
+                <p className="text-xs text-black truncate">{client.role}</p>
               )}
             </div>
             {client.is_portal_active ? (
               <ToggleRight className="text-green-400 flex-shrink-0" size={20} />
             ) : (
-              <ToggleLeft className="text-gray-500 flex-shrink-0" size={20} />
+              <ToggleLeft className="text-black flex-shrink-0" size={20} />
             )}
           </div>
 
@@ -90,7 +90,7 @@ export default function ClientList({ clients, selectedClientId, loading, onClien
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-black">
             <span>Last active: {formatDate(client.last_activity || "")}</span>
             {client.assigned_admin_name && (
               <span className="text-gray-400">Admin: {client.assigned_admin_name}</span>
