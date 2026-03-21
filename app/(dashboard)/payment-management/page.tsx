@@ -95,7 +95,7 @@ export default function PaymentManagementPage() {
       case "refunded":
         return "bg-red-500/20 text-red-500";
       default:
-        return "bg-gray-500/20 text-gray-500";
+        return "bg-gray-500/20 text-black";
     }
   };
 

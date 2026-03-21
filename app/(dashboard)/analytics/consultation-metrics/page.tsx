@@ -79,8 +79,8 @@ export default function ConsultationMetricsPage() {
     const fetchData = async () => {
       try {
         const [consultationRes, schedulingRes] = await Promise.all([
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/consultation-metrics/performance/'),
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/consultation-metrics/scheduling-analytics/')
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/consultation-metrics/performance/`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/consultation-metrics/scheduling-analytics/`)
         ]);
         
         if (consultationRes.ok && schedulingRes.ok) {

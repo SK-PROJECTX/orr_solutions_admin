@@ -124,7 +124,7 @@ export default function PendingMeetingsPage() {
                           </div>
                           <p className="text-sm text-gray-400 mb-1">{meeting.client_company}</p>
                           {meeting.host_name && (
-                            <p className="text-sm text-gray-500">Requested Host: {meeting.host_name}</p>
+                            <p className="text-sm text-black">Requested Host: {meeting.host_name}</p>
                           )}
                         </div>
                         <Clock className="text-orange-400" size={24} />
@@ -142,7 +142,7 @@ export default function PendingMeetingsPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-black">
                           Requested on {formatDateTime(meeting.created_at)}
                         </div>
                         <div className="flex items-center gap-3">

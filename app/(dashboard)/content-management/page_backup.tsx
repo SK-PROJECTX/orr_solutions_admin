@@ -15,7 +15,7 @@ export default function ContentManagement() {
     const fetchData = async () => {
       if (isAuthenticated) {
         try {
-          const endpoint = `https://orr-backend.orr.solutions/admin-portal/v1/cms/all-content/`;
+          const endpoint = `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/all-content/`;
           const [roleData, allContentResponse] = await Promise.all([
             cmsAPI.getUserRole(),
             fetch(endpoint)
@@ -76,15 +76,15 @@ export default function ContentManagement() {
           <form onSubmit={(e) => { e.preventDefault(); handleSave('homepage', { hero_title: content?.homepage?.hero_title, hero_subtitle: content?.homepage?.hero_subtitle, hero_cta_text: content?.homepage?.hero_cta_text }); }}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Hero Title</label>
+                <label className="block text-sm font-medium text-black mb-2">Hero Title</label>
                 <input type="text" value={content?.homepage?.hero_title || ''} onChange={(e) => setContent((prev: any) => ({ ...prev, homepage: { ...prev.homepage, hero_title: e.target.value } }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter hero title" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Hero Subtitle</label>
+                <label className="block text-sm font-medium text-black mb-2">Hero Subtitle</label>
                 <textarea value={content?.homepage?.hero_subtitle || ''} onChange={(e) => setContent((prev: any) => ({ ...prev, homepage: { ...prev.homepage, hero_subtitle: e.target.value } }))} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter hero subtitle" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">CTA Button Text</label>
+                <label className="block text-sm font-medium text-black mb-2">CTA Button Text</label>
                 <input type="text" value={content?.homepage?.hero_cta_text || ''} onChange={(e) => setContent((prev: any) => ({ ...prev, homepage: { ...prev.homepage, hero_cta_text: e.target.value } }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter CTA text" />
               </div>
               <button type="submit" disabled={saving} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">{saving ? 'Saving...' : 'Save Hero Section'}</button>

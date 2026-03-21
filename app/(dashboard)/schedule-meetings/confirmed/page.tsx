@@ -182,13 +182,13 @@ export default function ConfirmedMeetingsPage() {
                             <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                               <User size={16} />
                               <span>{meeting.client_name}</span>
-                              <span className="text-gray-500">•</span>
+                              <span className="text-black">•</span>
                               <span>{meeting.client_company}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
                               <Calendar size={16} />
                               <span>Confirmed: {formatDateTime(meetingDateTime)}</span>
-                              <span className="text-gray-500">•</span>
+                              <span className="text-black">•</span>
                               <Clock size={16} />
                               <span>{meeting.duration_minutes} minutes</span>
                             </div>

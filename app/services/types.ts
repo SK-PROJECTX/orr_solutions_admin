@@ -55,13 +55,13 @@ export enum MeetingStatus {
   CANCELLED = "cancelled",
 }
 
-export type NotificationType = 
-  | "ticket_created" 
-  | "ticket_assigned" 
-  | "meeting_assigned" 
-  | "meeting_confirmed" 
-  | "client_updated" 
-  | "content_published" 
+export type NotificationType =
+  | "ticket_created"
+  | "ticket_assigned"
+  | "meeting_assigned"
+  | "meeting_confirmed"
+  | "client_updated"
+  | "content_published"
   | "system_alert";
 
 export enum AdminRole {
@@ -142,6 +142,7 @@ export interface Ticket {
   internal_notes: string;
   related_meeting_info: string;
   related_content_info: string;
+  is_escalated: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -157,6 +158,7 @@ export interface TicketListItem {
   client_company: string;
   assigned_to_name: string;
   messages_count: number;
+  is_escalated: boolean;
   created_at: string;
   updated_at: string;
 }

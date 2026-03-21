@@ -68,7 +68,7 @@ export default function SystemNotificationsPage() {
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-12">
-              <Bell size={48} className="mx-auto text-gray-500 mb-4" />
+              <Bell size={48} className="mx-auto text-black mb-4" />
               <p className="text-gray-400">No notifications</p>
             </div>
           ) : (
@@ -80,7 +80,7 @@ export default function SystemNotificationsPage() {
                     <div className="flex-1">
                       <h3 className="text-white font-semibold mb-1">{notif.title}</h3>
                       <p className="text-gray-400 text-sm mb-2">{notif.message}</p>
-                      <span className="text-xs text-gray-500">{new Date(notif.created_at).toLocaleString()}</span>
+                      <span className="text-xs text-black">{new Date(notif.created_at).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

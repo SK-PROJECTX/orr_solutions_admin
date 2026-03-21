@@ -22,7 +22,7 @@ export default function HowWeOperatePage() {
   const fetchData = async () => {
     try {
       console.log('Fetching data from backend...');
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/cms/how-we-operate/');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/how-we-operate/`);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -58,7 +58,7 @@ export default function HowWeOperatePage() {
     setSaving(section);
     try {
       console.log('Saving data:', JSON.stringify(data, null, 2));
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/cms/how-we-operate/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/how-we-operate/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -145,7 +145,7 @@ export default function HowWeOperatePage() {
       const imageUrl = uploadResult.secure_url;
       
       // Update step with new image URL
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/cms/process-steps/${stepId}/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/cms/process-steps/${stepId}/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_url: imageUrl })

@@ -149,7 +149,7 @@ export default function page() {
               <div className="lg:basis-[35%] flex flex-col gap-4">
                 <div className="flex flex-col gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black" size={18} />
                     <input
                       type="text"
                       value={searchQuery}
@@ -294,7 +294,7 @@ export default function page() {
                                   {client.is_portal_active ? (
                                     <ToggleRight className="text-green-400 flex-shrink-0" size={20} />
                                   ) : (
-                                    <ToggleLeft className="text-gray-500 flex-shrink-0" size={20} />
+                                    <ToggleLeft className="text-black flex-shrink-0" size={20} />
                                   )}
                                 </div>
 
@@ -309,7 +309,7 @@ export default function page() {
                                   </span>
                                 </div>
 
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-black">
                                   Last active: {formatDate(client.last_activity || "")}
                                 </div>
                               </div>

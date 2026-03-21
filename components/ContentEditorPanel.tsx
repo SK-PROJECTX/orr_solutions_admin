@@ -36,7 +36,7 @@ export default function ContentEditorPanel() {
             <h3 className="text-lg font-semibold text-gray-800">Content Editor</h3>
             <button
               onClick={() => setIsExpanded(false)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-black hover:text-black"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -45,7 +45,7 @@ export default function ContentEditorPanel() {
           </div>
           
           <div className="space-y-3">
-            <div className="text-sm text-gray-600 mb-3">
+            <div className="text-sm text-black mb-3">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>Content Editor Mode Active</span>
@@ -54,7 +54,7 @@ export default function ContentEditorPanel() {
             </div>
             
             <div className="border-t pt-3">
-              <h4 className="font-medium text-gray-700 mb-2">Quick Actions</h4>
+              <h4 className="font-medium text-black mb-2">Quick Actions</h4>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -138,7 +138,7 @@ export default function ContentEditorPanel() {
             </div>
             
             <div className="border-t pt-3">
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-black">
                 <p><strong>Tip:</strong> Use Ctrl+Enter to save multi-line text</p>
                 <p><strong>Tip:</strong> Press Escape to cancel editing</p>
               </div>

@@ -142,7 +142,7 @@ export default function NotificationsPage() {
                           </h3>
                         </div>
                         <p className="text-sm text-gray-400 line-clamp-2">{notif.message}</p>
-                        <p className="text-xs text-gray-600 mt-2">{new Date(notif.created_at).toLocaleString()}</p>
+                        <p className="text-xs text-black mt-2">{new Date(notif.created_at).toLocaleString()}</p>
                       </div>
 
                       {/* Actions */}
@@ -169,7 +169,7 @@ export default function NotificationsPage() {
                 })
               ) : (
                 <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl border border-white/10 p-12 text-center">
-                  <Bell size={48} className="text-gray-500 mx-auto mb-4" />
+                  <Bell size={48} className="text-black mx-auto mb-4" />
                   <p className="text-gray-400">No notifications to display</p>
                 </div>
               )}

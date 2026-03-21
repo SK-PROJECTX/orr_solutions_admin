@@ -107,7 +107,7 @@ export default function UpcomingMeetingsPage() {
                           </div>
                           <p className="text-sm text-gray-400 mb-1">{meeting.client_company}</p>
                           {meeting.host_name && (
-                            <p className="text-sm text-gray-500">Host: {meeting.host_name}</p>
+                            <p className="text-sm text-black">Host: {meeting.host_name}</p>
                           )}
                         </div>
                         <Calendar className="text-green-400" size={24} />
@@ -125,7 +125,7 @@ export default function UpcomingMeetingsPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-black">
                           Status: <span className="text-green-400">Confirmed</span>
                         </div>
                         <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">

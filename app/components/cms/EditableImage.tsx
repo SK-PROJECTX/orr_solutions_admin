@@ -12,7 +12,7 @@ interface EditableImageProps {
   fill?: boolean;
 }
 
-const API_BASE_URL = 'https://orr-backend.orr.solutions';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}`;
 
 export default function EditableImage({
   src,
@@ -105,7 +105,7 @@ export default function EditableImage({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Image</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Upload Image
               </label>
               <input
@@ -113,7 +113,7 @@ export default function EditableImage({
                 type="file"
                 accept="image/*"
                 onChange={handleFileUpload}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                className="block w-full text-sm text-black file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 disabled={isSaving}
               />
             </div>
@@ -123,12 +123,12 @@ export default function EditableImage({
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
+                <span className="px-2 bg-white text-black">or</span>
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Image URL
               </label>
               <input
@@ -152,7 +152,7 @@ export default function EditableImage({
               <button
                 onClick={handleCancel}
                 disabled={isSaving}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-200 text-black rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
@@ -174,7 +174,7 @@ export default function EditableImage({
         style={fill ? undefined : { width, height }}
         onClick={handleImageClick}
       >
-        <span className="text-gray-500 text-sm">📷 Add Image</span>
+        <span className="text-black text-sm">📷 Add Image</span>
       </div>
     ) : null;
   }

@@ -109,8 +109,8 @@ export default function WorkspaceUsagePage() {
     const fetchData = async () => {
       try {
         const [workspaceRes, adoptionRes] = await Promise.all([
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/workspace-usage/analytics/'),
-          fetch('https://orr-backend.orr.solutions/admin-portal/v1/workspace-usage/feature-adoption/')
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/workspace-usage/analytics/`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/workspace-usage/feature-adoption/`)
         ]);
         
         if (workspaceRes.ok && adoptionRes.ok) {

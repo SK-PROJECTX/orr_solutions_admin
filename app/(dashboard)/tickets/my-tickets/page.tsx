@@ -99,7 +99,7 @@ export default function MyTicketsPage() {
           {/* Search & Filters */}
           <div className="flex flex-col gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-3 text-gray-500" size={18} />
+              <Search className="absolute left-3 top-3 text-black" size={18} />
               <input
                 type="text"
                 value={searchQuery}
@@ -183,7 +183,7 @@ export default function MyTicketsPage() {
                       <span className={`text-xs font-medium ${priorityColors[ticket.priority]}`}>
                         {ticket.priority}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-black">
                         {new Date(ticket.created_at).toLocaleDateString()}
                       </span>
                     </div>

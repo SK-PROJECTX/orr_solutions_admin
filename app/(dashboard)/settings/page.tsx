@@ -12,6 +12,7 @@ function page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   // Fetch all settings data
   useEffect(() => {
@@ -50,6 +51,24 @@ function page() {
     }
   };
 
+  const handleUserAction = async (userId: number, action: "activate" | "deactivate" | "reset_password") => {
+    try {
+      setActionLoading(userId);
+      await settingsAPI.performUserAction(userId, action as any);
+      setSuccessMessage(`User ${action} action completed`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+      // Refresh user list
+      const usersData = await settingsAPI.listUsers();
+      setUsers(Array.isArray(usersData) ? usersData : ((usersData as any).results || []));
+    } catch (err) {
+      console.error(`Failed to ${action} user:`, err);
+      setError(`Failed to peform action on user`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen text-white flex items-center justify-center">
@@ -85,7 +104,7 @@ function page() {
               </div>
               <div className="flex flex-col gap-2">
                 <label htmlFor="siteDescription" className="text-white">Site Description</label>
-                <textarea 
+                <textarea
                   id="siteDescription"
                   value={systemSettings.site_description || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, site_description: e.target.value })}
@@ -114,6 +133,7 @@ function page() {
                       <th className="text-left p-4 text-primary font-semibold">Email</th>
                       <th className="text-left p-4 text-primary font-semibold">Role</th>
                       <th className="text-left p-4 text-primary font-semibold">Status</th>
+                      <th className="text-left p-4 text-primary font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -132,6 +152,24 @@ function page() {
                           <span className={`text-xs px-2 py-1 rounded font-medium ${user.is_active ? "bg-green-500/30 text-green-300" : "bg-red-500/30 text-red-300"}`}>
                             {user.is_active ? "Active" : "Inactive"}
                           </span>
+                        </td>
+                        <td className="py-4 px-4 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUserAction(user.id, user.is_active ? "deactivate" : "activate")}
+                            disabled={actionLoading === user.id}
+                            className={`text-xs px-3 py-1 rounded border ${user.is_active ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'} transition-colors disabled:opacity-50`}
+                          >
+                            {user.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUserAction(user.id, "reset_password")}
+                            disabled={actionLoading === user.id}
+                            className="text-xs px-3 py-1 rounded border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-colors disabled:opacity-50"
+                          >
+                            Reset Password
+                          </button>
                         </td>
                       </tr>
                     ))}

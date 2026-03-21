@@ -19,7 +19,7 @@ export default function InternalCommsPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/tickets/my-tickets/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/my-tickets/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
@@ -116,7 +116,7 @@ export default function InternalCommsPage() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-black">
                       Created: {new Date(ticket.created_at).toLocaleDateString()}
                       {ticket.updated_at && (
                         <span className="ml-4">Updated: {new Date(ticket.updated_at).toLocaleDateString()}</span>

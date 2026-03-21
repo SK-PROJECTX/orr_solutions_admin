@@ -347,7 +347,7 @@ function page() {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <FileText size={48} className="text-gray-500 mx-auto mb-4" />
+                  <FileText size={48} className="text-black mx-auto mb-4" />
                   <p className="text-gray-400">No recent content available</p>
                 </div>
               )}

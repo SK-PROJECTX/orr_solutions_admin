@@ -20,7 +20,7 @@ export default function ClientMessagesPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('https://orr-backend.orr.solutions/admin-portal/v1/tickets/?source=manual_request', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/?source=manual_request`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
@@ -46,7 +46,7 @@ export default function ClientMessagesPage() {
     try {
       setSendingReply(ticketId);
       
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/tickets/${ticketId}/auto-reply/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/${ticketId}/auto-reply/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
@@ -116,7 +116,7 @@ export default function ClientMessagesPage() {
                         )}
                       </div>
                       <p className="text-sm text-gray-400 mb-2">{ticket.subject}</p>
-                      <p className="text-sm text-gray-500">{ticket.client_company}</p>
+                      <p className="text-sm text-black">{ticket.client_company}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs px-2 py-1 rounded border bg-green-500/20 text-green-300 border-green-500/30">
@@ -127,7 +127,7 @@ export default function ClientMessagesPage() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-black">
                       Created: {new Date(ticket.created_at).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-3">

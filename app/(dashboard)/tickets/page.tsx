@@ -5,6 +5,7 @@ import type { TicketListItem, TicketPriority, TicketSource, TicketStatus } from 
 import { MessageSquare, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNotificationContext } from "@/lib/contexts/NotificationContext";
+import CreateTicketModal from "@/components/CreateTicketModal";
 
 const statusColors: Record<TicketStatus, string> = {
   new: "bg-blue-500/30 text-blue-300 border-blue-500/30",
@@ -57,6 +58,7 @@ export default function TicketsPage() {
   const [newStatus, setNewStatus] = useState<TicketStatus | "">("");
   const [assignableUsers, setAssignableUsers] = useState<any[]>([]);
   const [newAssignedTo, setNewAssignedTo] = useState<number | "">("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { success, error: showError } = useNotificationContext();
 
   useEffect(() => {
@@ -99,13 +101,13 @@ export default function TicketsPage() {
   const fetchTicketMessages = async (ticketId: number) => {
     try {
       setMessagesLoading(true);
-      
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/tickets/${ticketId}/messages/`, {
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/${ticketId}/messages/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
       });
-      
+
       if (response.ok) {
         const messagesData = await response.json();
         const messages = Array.isArray(messagesData) ? messagesData : (messagesData?.results || messagesData?.data || []);
@@ -129,18 +131,18 @@ export default function TicketsPage() {
 
   const handleAssignmentChange = async () => {
     if (!selectedTicket || !newAssignedTo) return;
-    
+
     try {
       setActionLoading(true);
       setError(null);
-      
+
       await ticketAPI.partialUpdateTicket(selectedTicket.id, { assigned_to: newAssignedTo });
-      
+
       const assignedUser = assignableUsers.find(u => u.id === newAssignedTo);
       const userName = assignedUser?.full_name || assignedUser?.username || 'Unknown User';
-      
+
       success('Ticket Assigned', `Ticket ${selectedTicket.ticket_id} has been assigned to ${userName}`);
-      
+
       setNewAssignedTo("");
       fetchTickets();
       if (selectedTicket) {
@@ -158,14 +160,14 @@ export default function TicketsPage() {
 
   const handleStatusChange = async () => {
     if (!selectedTicket || !newStatus) return;
-    
+
     try {
       setActionLoading(true);
       setError(null);
       setError(null);
-      
+
       // Use direct PATCH update instead of actions
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/tickets/${selectedTicket.id}/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/${selectedTicket.id}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -173,12 +175,12 @@ export default function TicketsPage() {
         },
         body: JSON.stringify({ status: newStatus })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
-      
+
       setNewStatus("");
       fetchTickets();
       if (selectedTicket) {
@@ -195,29 +197,29 @@ export default function TicketsPage() {
 
   const handleAddMessage = async () => {
     if (!selectedTicket || !newMessage.trim()) return;
-    
+
     try {
       setActionLoading(true);
       setError(null);
-      
+
       // Use direct POST to messages endpoint
-      const response = await fetch(`https://orr-backend.orr.solutions/admin-portal/v1/tickets/${selectedTicket.id}/messages/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/${selectedTicket.id}/messages/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: newMessage,
-          is_internal: isInternal 
+          is_internal: isInternal
         })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
-      
+
       setNewMessage("");
       setIsInternal(false);
       fetchTicketMessages(selectedTicket.id);
@@ -239,9 +241,17 @@ export default function TicketsPage() {
         <div className="relative z-10 p-4 md:p-8">
           <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
             {/* Header */}
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white">Tickets</h1>
-              <p className="text-gray-400 text-xs md:text-sm mt-2">Manage and resolve support tickets</p>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl md:text-4xl font-bold text-white">Tickets</h1>
+                <p className="text-gray-400 text-xs md:text-sm mt-2">Manage and resolve support tickets</p>
+              </div>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md flex-shrink-0"
+              >
+                + Create Ticket
+              </button>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -250,7 +260,7 @@ export default function TicketsPage() {
                 {/* Search & Filters */}
                 <div className="flex flex-col gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 text-gray-500" size={18} />
+                    <Search className="absolute left-3 top-3 text-black" size={18} />
                     <input
                       type="text"
                       value={searchQuery}
@@ -326,32 +336,37 @@ export default function TicketsPage() {
                         <button
                           key={ticket.id}
                           onClick={() => handleSelectTicket(ticket)}
-                          className={`w-full p-4 text-left transition-all duration-200 hover:bg-white/10 ${
-                            selectedTicket?.id === ticket.id ? "bg-primary/20 border-l-2 border-primary" : ""
-                          }`}
+                          className={`w-full p-4 text-left transition-all duration-200 hover:bg-white/10 ${selectedTicket?.id === ticket.id ? "bg-primary/20 border-l-2 border-primary" : ""
+                            }`}
                         >
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-white text-sm">{ticket.ticket_id}</p>
-                              <span className={`text-xs px-2 py-0.5 rounded border ${sourceColors[ticket.source]}`}>
-                                {sourceIcons[ticket.source]} {ticket.source.replace('_', ' ')}
-                              </span>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-white text-sm">{ticket.ticket_id}</p>
+                                <span className={`text-xs px-2 py-0.5 rounded border ${sourceColors[ticket.source]}`}>
+                                  {sourceIcons[ticket.source]} {ticket.source.replace('_', ' ')}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-400 mt-1">{ticket.client_name}</p>
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">{ticket.client_name}</p>
+                            <span className={`text-xs px-2 py-1 rounded border ${statusColors[ticket.status]}`}>
+                              {ticket.status}
+                            </span>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded border ${statusColors[ticket.status]}`}>
-                            {ticket.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-300 line-clamp-2">{ticket.subject}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-xs font-medium ${priorityColors[ticket.priority]}`}>
-                            {ticket.priority}
-                          </span>
-                          <span className="text-xs text-gray-500">•</span>
-                          <span className="text-xs text-gray-500">{new Date(ticket.created_at).toLocaleDateString()}</span>
-                        </div>
+                          {ticket.is_escalated && (
+                            <div className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 w-fit mb-2 animate-pulse">
+                              <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                              ESCALATED
+                            </div>
+                          )}
+                          <p className="text-sm text-gray-300 line-clamp-2">{ticket.subject}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className={`text-xs font-medium ${priorityColors[ticket.priority]}`}>
+                              {ticket.priority}
+                            </span>
+                            <span className="text-xs text-black">•</span>
+                            <span className="text-xs text-black">{new Date(ticket.created_at).toLocaleDateString()}</span>
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -369,29 +384,36 @@ export default function TicketsPage() {
                         <h2 className="text-xl md:text-2xl font-bold text-white">{selectedTicket.ticket_id}</h2>
                         <p className="text-gray-400 text-xs md:text-sm mt-1">{selectedTicket.subject}</p>
                       </div>
-                      <span className={`text-xs md:text-sm px-3 py-1 rounded-lg border font-medium ${statusColors[selectedTicket.status]}`}>
-                        {selectedTicket.status}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`text-xs md:text-sm px-3 py-1 rounded-lg border font-medium ${statusColors[selectedTicket.status]}`}>
+                          {selectedTicket.status}
+                        </span>
+                        {selectedTicket.is_escalated && (
+                          <span className="text-xs px-2 py-0.5 rounded border bg-red-500/20 text-red-300 border-red-500/30 animate-pulse">
+                            ⚠️ IMMEDIATE ACTION REQUIRED
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Client</p>
+                        <p className="text-xs text-black mb-1">Client</p>
                         <p className="text-white font-medium">{selectedTicket.client_name}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Priority</p>
+                        <p className="text-xs text-black mb-1">Priority</p>
                         <p className={`font-medium ${priorityColors[selectedTicket.priority]}`}>{selectedTicket.priority}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Source</p>
+                        <p className="text-xs text-black mb-1">Source</p>
                         <p className="text-white font-medium capitalize">{selectedTicket.source.replace('_', ' ')}</p>
                         <button className="text-primary hover:text-primary/80 text-sm transition-colors">
                           Change
                         </button>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Created</p>
+                        <p className="text-xs text-black mb-1">Created</p>
                         <p className="text-white font-medium">{new Date(selectedTicket.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -399,11 +421,11 @@ export default function TicketsPage() {
 
                   {/* Assigned To */}
                   <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-xs text-gray-500 mb-2">Assigned To</p>
+                    <p className="text-xs text-black mb-2">Assigned To</p>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-medium">
-                          {selectedTicket.assigned_to_name ? 
+                          {selectedTicket.assigned_to_name ?
                             selectedTicket.assigned_to_name.trim().split(' ').filter(n => n.length > 0).slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'UN'
                             : 'UN'
                           }
@@ -413,7 +435,7 @@ export default function TicketsPage() {
                         <p className="text-white font-medium text-sm">{selectedTicket.assigned_to_name || 'Unassigned'}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <select 
+                        <select
                           value={newAssignedTo}
                           onChange={(e) => setNewAssignedTo(e.target.value ? parseInt(e.target.value) : "")}
                           className="bg-white/10 border border-white/20 px-2 py-1 rounded text-xs text-white focus:outline-none focus:border-primary/50"
@@ -426,7 +448,7 @@ export default function TicketsPage() {
                           ))}
                         </select>
                         {newAssignedTo && (
-                          <button 
+                          <button
                             onClick={handleAssignmentChange}
                             disabled={actionLoading}
                             className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-2 py-1 rounded text-xs transition-all duration-200"
@@ -461,34 +483,34 @@ export default function TicketsPage() {
                             if (words.length === 1) return words[0][0].toUpperCase();
                             return words.slice(0, 2).map(word => word[0]).join('').toUpperCase();
                           };
-                          
+
                           return (
-                          <div key={index} className={`flex gap-3 ${message.sender_type === 'admin' ? 'justify-end' : ''}`}>
-                            {message.sender_type !== 'admin' && (
-                              <div className="w-8 h-8 bg-blue-500 rounded-full flex-shrink-0 flex items-center justify-center">
-                                <span className="text-white text-xs font-medium">{getInitials(message.sender_name)}</span>
+                            <div key={index} className={`flex gap-3 ${message.sender_type === 'admin' ? 'justify-end' : ''}`}>
+                              {message.sender_type !== 'admin' && (
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex-shrink-0 flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">{getInitials(message.sender_name)}</span>
+                                </div>
+                              )}
+                              <div className={message.sender_type === 'admin' ? 'flex-1 text-right' : ''}>
+                                <p className={`text-sm ${message.sender_type === 'admin' ? 'text-primary' : 'text-gray-300'}`}>
+                                  {message.sender_name || 'Unknown User'} {message.is_internal && '(Internal)'}
+                                </p>
+                                <p className="text-xs text-gray-200 mt-1">{message.message}</p>
+                                <p className="text-xs text-gray-100 mt-2">
+                                  {new Date(message.created_at).toLocaleString()}
+                                </p>
                               </div>
-                            )}
-                            <div className={message.sender_type === 'admin' ? 'flex-1 text-right' : ''}>
-                              <p className={`text-sm ${message.sender_type === 'admin' ? 'text-primary' : 'text-gray-300'}`}>
-                                {message.sender_name || 'Unknown User'} {message.is_internal && '(Internal)'}
-                              </p>
-                              <p className="text-xs text-gray-200 mt-1">{message.message}</p>
-                              <p className="text-xs text-gray-100 mt-2">
-                                {new Date(message.created_at).toLocaleString()}
-                              </p>
+                              {message.sender_type === 'admin' && (
+                                <div className="w-8 h-8 bg-primary rounded-full flex-shrink-0 flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">{getInitials(message.sender_name)}</span>
+                                </div>
+                              )}
                             </div>
-                            {message.sender_type === 'admin' && (
-                              <div className="w-8 h-8 bg-primary rounded-full flex-shrink-0 flex items-center justify-center">
-                                <span className="text-white text-xs font-medium">{getInitials(message.sender_name)}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
+                          );
                         })
                       )}
                     </div>
-                    
+
                     {/* Add Message */}
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
@@ -533,7 +555,7 @@ export default function TicketsPage() {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t border-white/10">
-                    <select 
+                    <select
                       value={newStatus}
                       onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
                       className="flex-1 bg-white/10 border border-white/20 px-4 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
@@ -548,7 +570,7 @@ export default function TicketsPage() {
                       <option value="resolved" className="bg-gray-800">Resolved</option>
                       <option value="archived" className="bg-gray-800">Archived</option>
                     </select>
-                    <button 
+                    <button
                       onClick={handleStatusChange}
                       disabled={!newStatus || actionLoading}
                       className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
@@ -560,7 +582,7 @@ export default function TicketsPage() {
               ) : (
                 <div className="basis-[65%] bg-gradient-to-br from-white/15 to-white/5 rounded-xl border border-white/10 shadow-lg p-6 flex items-center justify-center">
                   <div className="text-center">
-                    <MessageSquare size={48} className="text-gray-500 mx-auto mb-4" />
+                    <MessageSquare size={48} className="text-black mx-auto mb-4" />
                     <p className="text-gray-400">Select a ticket to view details</p>
                   </div>
                 </div>
@@ -569,6 +591,16 @@ export default function TicketsPage() {
           </div>
         </div>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateTicketModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            fetchTickets();
+          }}
+        />
+      )}
     </div>
   );
 }

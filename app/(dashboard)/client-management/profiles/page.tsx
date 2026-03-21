@@ -98,7 +98,7 @@ export default function ClientProfilesPage() {
           {/* Search */}
           <div className="mb-6">
             <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black" size={18} />
               <input
                 type="text"
                 value={searchQuery}
@@ -161,7 +161,7 @@ export default function ClientProfilesPage() {
                           <p className="text-sm text-gray-400 mb-1">{client.email}</p>
                           <p className="text-sm text-gray-400">{client.company}</p>
                           {client.role && (
-                            <p className="text-xs text-gray-500 mt-1">{client.role}</p>
+                            <p className="text-xs text-black mt-1">{client.role}</p>
                           )}
                         </div>
                         <User className="text-gray-400" size={24} />
@@ -179,7 +179,7 @@ export default function ClientProfilesPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-black">
                         <div className="flex items-center gap-1">
                           <Calendar size={12} />
                           <span>Joined: {formatDate(client.created_at)}</span>
@@ -195,7 +195,7 @@ export default function ClientProfilesPage() {
 
                       {client.assigned_admin_name && (
                         <div className="mt-3 pt-3 border-t border-white/10">
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-black">
                             Admin: <span className="text-gray-400">{client.assigned_admin_name}</span>
                           </p>
                         </div>
