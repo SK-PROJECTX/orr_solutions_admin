@@ -172,7 +172,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               items={[
                 { label: "All Tickets", href: "/tickets" },
                 { label: "My Tickets", href: "/tickets/my-tickets" },
-                { label: "Client Messages", href: "/tickets/client-messages" },
+                { label: "Client Messages", href: "/messages" },
                 { label: "Internal Comms", href: "/tickets/internal-comms" },
                 { label: "Escalations", href: "/tickets/escalations" }
               ]}
