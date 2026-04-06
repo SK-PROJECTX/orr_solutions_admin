@@ -32,6 +32,7 @@ interface Ticket {
   created_at: string;
   client_name: string;
   client_company: string;
+  messages_count?: number;
 }
 
 interface Chat {
@@ -52,23 +53,73 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [seenCounts, setSeenCounts] = useState<Record<number, number>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const selectedChatRef = useRef(selectedChat);
+  const seenCountsRef = useRef(seenCounts);
+  
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+    seenCountsRef.current = seenCounts;
+  });
+
+  const scrollToBottom = (force = false) => {
+    if (force || !scrollContainerRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    const container = scrollContainerRef.current;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+
+    if (isAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    scrollToBottom(false);
   }, [messages]);
 
   useEffect(() => {
-    fetchTickets();
+    const saved = localStorage.getItem("seenAdminMessages");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setSeenCounts(parsed);
+      seenCountsRef.current = parsed;
+    }
   }, []);
 
-  const fetchTickets = async () => {
+  useEffect(() => {
+    fetchTickets(true);
+
+    // Refresh ticket list every 10 seconds
+    const ticketInterval = setInterval(() => fetchTickets(false), 10000);
+    return () => clearInterval(ticketInterval);
+  }, []);
+
+  useEffect(() => {
+    if (selectedChat) {
+      // Fetch messages immediately when chat changes
+      fetchMessages(selectedChat.id);
+      
+      // Force initial scroll
+      setTimeout(() => scrollToBottom(true), 100);
+
+      // Poll for new messages every 2 seconds
+      const messageInterval = setInterval(() => {
+        fetchMessages(selectedChat.id);
+      }, 2000);
+
+      return () => clearInterval(messageInterval);
+    }
+  }, [selectedChat]);
+
+  const fetchTickets = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
 
       const token = localStorage.getItem("auth-token");
 
@@ -125,16 +176,23 @@ export default function MessagesPage() {
         }
 
         // Convert tickets to chat format
-        const ticketChats: Chat[] = ticketsArray.map((ticket: any) => {
-          console.log("Processing ticket:", ticket);
-          console.log("Ticket ID:", ticket.id);
+        const sortedTickets = [...ticketsArray].sort((a, b) => {
+          const timeA = new Date(a.last_message_at || a.created_at).getTime();
+          const timeB = new Date(b.last_message_at || b.created_at).getTime();
+          return timeB - timeA;
+        });
+
+        const ticketChats: Chat[] = sortedTickets.map((ticket: any) => {
+          const totalMessages = ticket.messages_count || 0;
+          const seen = seenCountsRef.current[ticket.id] || 0;
+          const unread = Math.max(0, totalMessages - seen);
 
           return {
-            id: ticket.id, // Use the actual numeric ID from the API
+            id: ticket.id,
             name: ticket.client_name ? `Support - ${ticket.client_name}` : `Support - ${ticket.ticket_id}`,
             lastMessage: ticket.subject || "No subject",
-            timestamp: new Date(ticket.created_at).toLocaleDateString(),
-            unread: 0,
+            timestamp: new Date(ticket.last_message_at || ticket.created_at).toLocaleDateString(),
+            unread: unread,
             avatar: "🎧",
             online: ticket.status !== "resolved",
             ticket,
@@ -142,7 +200,7 @@ export default function MessagesPage() {
         });
 
         setChats(ticketChats);
-        if (ticketChats.length > 0 && !selectedChat) {
+        if (ticketChats.length > 0 && !selectedChatRef.current) {
           setSelectedChat(ticketChats[0]);
           fetchMessages(ticketChats[0].id);
         }
@@ -156,7 +214,7 @@ export default function MessagesPage() {
     } catch (error) {
       console.error("Failed to fetch tickets:", error);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -205,6 +263,14 @@ export default function MessagesPage() {
         }
 
         setMessages(messagesArray);
+
+        // Update seen count if we have more messages now (whatsapp style)
+        if (messagesArray.length > (seenCountsRef.current[ticketId] || 0)) {
+          const newSeen = { ...seenCountsRef.current, [ticketId]: messagesArray.length };
+          setSeenCounts(newSeen);
+          seenCountsRef.current = newSeen;
+          localStorage.setItem("seenAdminMessages", JSON.stringify(newSeen));
+        }
       } else {
         console.error(
           "Failed to fetch messages:",
@@ -241,8 +307,11 @@ export default function MessagesPage() {
 
         if (response.ok) {
           setNewMessage("");
-          // Refresh messages
+          // Refresh messages and force scroll
           await fetchMessages(selectedChat.id);
+          scrollToBottom(true);
+          // Refresh ticket list to update last activity and move it to top
+          fetchTickets(false);
         } else {
           console.error(
             "Failed to send message:",
@@ -318,7 +387,12 @@ export default function MessagesPage() {
                 key={chat.id}
                 onClick={() => {
                   setSelectedChat(chat);
-                  fetchMessages(chat.id);
+                  if (chat.unread > 0) {
+                    const newSeen = { ...seenCountsRef.current, [chat.id]: chat.ticket?.messages_count || 0 };
+                    setSeenCounts(newSeen);
+                    seenCountsRef.current = newSeen;
+                    localStorage.setItem("seenAdminMessages", JSON.stringify(newSeen));
+                  }
                 }}
                 className={`p-3 border-b border-white/10 cursor-pointer hover:bg-white/5 transition-colors ${
                   selectedChat?.id === chat.id
@@ -344,9 +418,21 @@ export default function MessagesPage() {
                           {chat.name}
                         </h3>
                       </div>
-                      <span className="text-[10px] text-foreground opacity-60">
-                        {chat.timestamp}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-[10px] text-foreground opacity-60">
+                          {chat.timestamp}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {chat.unread > 0 && (
+                            <span className="bg-primary text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                              {chat.unread}
+                            </span>
+                          )}
+                          <span className="text-[9px] text-foreground opacity-40 bg-white/5 px-1 rounded">
+                            {chat.ticket?.messages_count || 0} msgs
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className={`text-xs truncate ${selectedChat?.id === chat.id ? "text-foreground" : "text-foreground/70"}`}>
@@ -426,7 +512,10 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+            >
               {messages
                 .filter(msg => 
                   msg.sender_type !== "system" && 
@@ -441,33 +530,30 @@ export default function MessagesPage() {
                     key={message.id}
                     className={`flex ${isUs ? "justify-end" : "justify-start"}`}
                   >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        isInternal
-                          ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 shadow-sm"
-                          : isUs
-                            ? "bg-primary text-black shadow-md font-medium"
-                            : "bg-blue-500/15 text-blue-50 border border-blue-500/30 shadow-sm"
-                      }`}
-                    >
-                      {isInternal && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            🔒 Internal Note
-                          </span>
-                        </div>
-                      )}
-                      {!isUs && !isInternal && (
-                        <p className="text-[10px] font-bold text-blue-300 mb-1 uppercase tracking-tight">{message.sender_name}</p>
-                      )}
-                      <p className="text-sm">{message.message}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          isUs ? "text-black/70" : "text-foreground/60"
+                    <div className={`flex flex-col ${isUs ? "items-end" : "items-start"} max-w-[80%]`}>
+                      <span className="text-[10px] font-bold text-foreground/50 mb-1 px-1 uppercase tracking-wider">
+                        {isInternal ? "🔒 Internal Note" : `${message.sender_name} • ${isUs ? "YOU" : "CLIENT"}`}
+                      </span>
+                      <div
+                        className={`px-4 py-2.5 rounded-2xl shadow-sm ${
+                          isInternal
+                            ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 shadow-sm"
+                            : isUs
+                              ? "bg-primary text-black rounded-tr-none font-medium shadow-md"
+                              : "bg-blue-500/15 text-blue-50 border border-blue-500/30 rounded-tl-none shadow-sm"
                         }`}
                       >
-                        {formatTime(message.created_at)}
-                      </p>
+                        <p className="text-sm leading-relaxed">{message.message}</p>
+                        <div className="flex items-center justify-end gap-1 mt-1">
+                          <p
+                            className={`text-[10px] ${
+                              isUs ? "text-black/60" : "text-foreground/40"
+                            }`}
+                          >
+                            {formatTime(message.created_at)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
