@@ -6,6 +6,7 @@ import { clientAPI } from "@/app/services";
 import type { ClientListItem, Client } from "@/app/services/types";
 import ClientDocumentsModal from "@/app/components/client/ClientDocumentsModal";
 import Pagination from "@/app/components/common/Pagination";
+import { useLanguageStore } from "@/store/languageStore";
 
 const stageColors: Record<string, string> = {
   discover: "bg-blue-500/30 text-blue-300 border-blue-500/30",
@@ -23,6 +24,7 @@ const pillarColors: Record<string, string> = {
 };
 
 export default function page() {
+  const { t, language } = useLanguageStore();
   const [allClients, setAllClients] = useState<ClientListItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientEngagement, setClientEngagement] = useState<any>(null);
@@ -52,19 +54,19 @@ export default function page() {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('Fetching all clients');
       const response = await clientAPI.listClients({}) as any;
       console.log('API response:', response);
-      
+
       const clientsData = Array.isArray(response) ? response : (response.results || response.data || []);
       console.log('Processed clients:', clientsData);
-      
+
       setAllClients(clientsData);
     } catch (err: any) {
       console.error("Failed to fetch clients:", err);
-      setError(err.message || "Failed to load clients");
-      
+      setError(err.message || t('common.error') + ": Failed to load clients");
+
       setAllClients([]);
     } finally {
       setLoading(false);
@@ -82,7 +84,7 @@ export default function page() {
       setClientEngagement(engagementData);
     } catch (err) {
       console.error("Failed to fetch client details:", err);
-      setError("Failed to load client details");
+      setError(t('common.error') + ": Failed to load client details");
     } finally {
       setDetailsLoading(false);
     }
@@ -106,7 +108,7 @@ export default function page() {
       }
     } catch (err) {
       console.error("Failed to toggle portal access:", err);
-      setError("Failed to update portal access");
+      setError(t('common.error') + ": Failed to update portal access");
     }
   };
 
@@ -117,15 +119,15 @@ export default function page() {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return date.toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT', { month: "short", day: "numeric", year: "numeric" });
   };
 
   const formatDateTime = (dateString: string) => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", { 
-      month: "short", 
-      day: "numeric", 
+    return date.toLocaleString(language === 'en' ? 'en-US' : 'it-IT', {
+      month: "short",
+      day: "numeric",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit"
@@ -140,8 +142,8 @@ export default function page() {
         <div className="relative z-10 p-4 md:p-8">
           <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white">Client Management</h1>
-              <p className="text-gray-400 text-xs md:text-sm mt-2">View and manage client profiles, portal access, and engagement</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-white">{t('clients.title')}</h1>
+              <p className="text-gray-400 text-xs md:text-sm mt-2">{t('clients.subtitle')}</p>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -154,7 +156,7 @@ export default function page() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search by name, email, company..."
+                      placeholder={t('common.search_placeholder')}
                       className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200"
                     />
                   </div>
@@ -164,55 +166,55 @@ export default function page() {
                     className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-sm transition-all duration-200"
                   >
                     <Filter size={16} />
-                    Filters
+                    {t('common.filters')}
                     {(filterStage !== "all" || filterPillar !== "all" || filterPortalStatus !== "all") && (
-                      <span className="ml-auto bg-primary text-white text-xs px-2 py-0.5 rounded-full">Active</span>
+                      <span className="ml-auto bg-primary text-white text-xs px-2 py-0.5 rounded-full">{t('common.active')}</span>
                     )}
                   </button>
 
                   {showFilters && (
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4 flex flex-col gap-3">
                       <div>
-                        <label className="text-xs text-gray-400 mb-1 block">Stage</label>
+                        <label className="text-xs text-gray-400 mb-1 block">{t('clients.labels.stage')}</label>
                         <select
                           value={filterStage}
                           onChange={(e) => setFilterStage(e.target.value)}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
                         >
-                          <option value="all">All Stages</option>
-                          <option value="discover">Discover</option>
-                          <option value="diagnose">Diagnose</option>
-                          <option value="design">Design</option>
-                          <option value="deploy">Deploy</option>
-                          <option value="grow">Grow</option>
+                          <option value="all">{t('common.all_stages')}</option>
+                          <option value="discover">{t('clients.stages.discover')}</option>
+                          <option value="diagnose">{t('clients.stages.diagnose')}</option>
+                          <option value="design">{t('clients.stages.design')}</option>
+                          <option value="deploy">{t('clients.stages.deploy')}</option>
+                          <option value="grow">{t('clients.stages.grow')}</option>
                         </select>
                       </div>
 
                       <div>
-                        <label className="text-xs text-gray-400 mb-1 block">Primary Pillar</label>
+                        <label className="text-xs text-gray-400 mb-1 block">{t('clients.labels.pillar') || "Primary Pillar"}</label>
                         <select
                           value={filterPillar}
                           onChange={(e) => setFilterPillar(e.target.value)}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
                         >
-                          <option value="all">All Pillars</option>
-                          <option value="strategic">Strategic Vision, Planning & Growth</option>
-                          <option value="operational">Operational Excellence & Processes</option>
-                          <option value="financial">Financial Management & Planning</option>
-                          <option value="cultural">Cultural Transformation & People</option>
+                          <option value="all">{t('common.all_pillars')}</option>
+                          <option value="strategic">{t('clients.pillars.strategic')}</option>
+                          <option value="operational">{t('clients.pillars.operational')}</option>
+                          <option value="financial">{t('clients.pillars.financial')}</option>
+                          <option value="cultural">{t('clients.pillars.cultural')}</option>
                         </select>
                       </div>
 
                       <div>
-                        <label className="text-xs text-gray-400 mb-1 block">Portal Status</label>
+                        <label className="text-xs text-gray-400 mb-1 block">{t('clients.labels.portal') || "Portal Status"}</label>
                         <select
                           value={filterPortalStatus}
                           onChange={(e) => setFilterPortalStatus(e.target.value)}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
                         >
-                          <option value="all">All Status</option>
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
+                          <option value="all">{t('common.all_status')}</option>
+                          <option value="active">{t('common.active')}</option>
+                          <option value="inactive">{t('common.inactive')}</option>
                         </select>
                       </div>
 
@@ -225,7 +227,7 @@ export default function page() {
                         }}
                         className="text-xs text-primary hover:underline self-end"
                       >
-                        Clear Filters
+                        {t('common.clear_filters')}
                       </button>
                     </div>
                   )}
@@ -237,27 +239,27 @@ export default function page() {
                     let filteredClients = allClients.filter(client => {
                       const matchesStage = filterStage === "all" || client.stage === filterStage;
                       const matchesPillar = filterPillar === "all" || client.primary_pillar === filterPillar;
-                      const matchesPortal = filterPortalStatus === "all" || 
+                      const matchesPortal = filterPortalStatus === "all" ||
                         (filterPortalStatus === "active" && client.is_portal_active) ||
                         (filterPortalStatus === "inactive" && !client.is_portal_active);
-                      const matchesSearch = !searchQuery || 
+                      const matchesSearch = !searchQuery ||
                         client.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         client.company.toLowerCase().includes(searchQuery.toLowerCase());
-                      
+
                       return matchesStage && matchesPillar && matchesPortal && matchesSearch;
                     });
-                    
+
                     // Paginate filtered clients
                     const startIndex = (currentPage - 1) * itemsPerPage;
                     const endIndex = startIndex + itemsPerPage;
                     const paginatedClients = filteredClients.slice(startIndex, endIndex);
-                    
+
                     return (
                       <>
                         <div className="p-3 border-b border-white/10">
                           <p className="text-sm text-gray-400">
-                            {loading ? "Loading..." : `${filteredClients.length} client${filteredClients.length !== 1 ? "s" : ""} total`}
+                            {loading ? t('common.loading') : `${filteredClients.length} ${t('common.total')} client${filteredClients.length !== 1 ? "s" : ""}`}
                           </p>
                         </div>
 
@@ -280,11 +282,10 @@ export default function page() {
                               <div
                                 key={client.id}
                                 onClick={() => handleClientClick(client)}
-                                className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                                  selectedClient?.id === client.id
+                                className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${selectedClient?.id === client.id
                                     ? "bg-primary/20 border-2 border-primary"
                                     : "bg-white/5 border border-white/10 hover:bg-white/10"
-                                }`}
+                                  }`}
                               >
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                   <div className="flex-1 min-w-0">
@@ -300,23 +301,21 @@ export default function page() {
 
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className={`text-xs px-2 py-0.5 rounded border ${client.stage ? stageColors[client.stage] || "bg-gray-500/30 text-gray-300 border-gray-500/30" : "bg-gray-500/30 text-gray-300 border-gray-500/30"}`}>
-                                    {client.stage ? client.stage.charAt(0).toUpperCase() + client.stage.slice(1) : 'Unknown'}
+                                    {client.stage ? t(`clients.stages.${client.stage}`) : 'Unknown'}
                                   </span>
                                   <span className={`text-xs ${client.primary_pillar ? pillarColors[client.primary_pillar] || "text-gray-400" : "text-gray-400"}`}>
-                                    {client.primary_pillar === "strategic" ? "Strategic" : 
-                                     client.primary_pillar === "operational" ? "Operational" : 
-                                     client.primary_pillar === "financial" ? "Financial" : "Cultural"}
+                                    {client.primary_pillar ? t(`clients.pillars.${client.primary_pillar}`).split(' ')[0] : ''}
                                   </span>
                                 </div>
 
                                 <div className="mt-2 text-xs text-black">
-                                  Last active: {formatDate(client.last_activity || "")}
+                                  {t('common.last_active')}: {formatDate(client.last_activity || "")}
                                 </div>
                               </div>
                             ))
                           )}
                         </div>
-                        
+
                         {/* Pagination */}
                         {filteredClients.length > itemsPerPage && (
                           <div className="p-3 border-t border-white/10">
@@ -345,7 +344,7 @@ export default function page() {
                 {!selectedClient && !detailsLoading ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <Users size={48} className="mb-4 opacity-50" />
-                    <p className="text-lg">Select a client to view details</p>
+                    <p className="text-lg">{t('clients.select_prompt')}</p>
                   </div>
                 ) : detailsLoading ? (
                   <div className="flex items-center justify-center h-full">
@@ -370,16 +369,16 @@ export default function page() {
 
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className={`text-sm px-3 py-1 rounded border ${selectedClient.stage ? stageColors[selectedClient.stage] || "bg-gray-500/30 text-gray-300 border-gray-500/30" : "bg-gray-500/30 text-gray-300 border-gray-500/30"}`}>
-                        Stage: {selectedClient.stage ? selectedClient.stage.charAt(0).toUpperCase() + selectedClient.stage.slice(1) : 'Unknown'}
+                        {t('clients.labels.stage')}: {selectedClient.stage ? t(`clients.stages.${selectedClient.stage}`) : 'Unknown'}
                       </span>
                       <span className={`text-sm px-3 py-1 rounded border ${selectedClient.is_portal_active ? "bg-green-500/30 text-green-300 border-green-500/30" : "bg-red-500/30 text-red-300 border-red-500/30"}`}>
-                        Portal: {selectedClient.is_portal_active ? "Active" : "Inactive"}
+                        {t('clients.labels.portal')}: {selectedClient.is_portal_active ? t('clients.portal_status.active') : t('clients.portal_status.inactive')}
                       </span>
                       <button
                         onClick={() => handleTogglePortal(selectedClient.id)}
                         className="text-sm px-3 py-1 rounded border border-primary/50 bg-primary/20 text-primary hover:bg-primary/30 transition-all duration-200"
                       >
-                        Toggle Portal Access
+                        {t('clients.toggle_portal')}
                       </button>
                     </div>
 
@@ -387,62 +386,59 @@ export default function page() {
                       <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                         <FileText className="text-blue-400 mb-2" size={20} />
                         <p className="text-2xl font-bold text-white">{selectedClient.tickets_count}</p>
-                        <p className="text-xs text-gray-400">Tickets</p>
+                        <p className="text-xs text-gray-400">{t('clients.tickets')}</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                         <Calendar className="text-green-400 mb-2" size={20} />
                         <p className="text-2xl font-bold text-white">{selectedClient.meetings_count}</p>
-                        <p className="text-xs text-gray-400">Meetings</p>
+                        <p className="text-xs text-gray-400">{t('clients.meetings')}</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                         <FileText className="text-purple-400 mb-2" size={20} />
                         <p className="text-2xl font-bold text-white">{selectedClient.documents_count}</p>
-                        <p className="text-xs text-gray-400">Documents</p>
+                        <p className="text-xs text-gray-400">{t('clients.documents')}</p>
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-gray-400">Primary Pillar</label>
+                        <label className="text-xs text-gray-400">{t('clients.labels.pillar') || "Primary Pillar"}</label>
                         <p className={`text-sm font-medium ${selectedClient.primary_pillar ? pillarColors[selectedClient.primary_pillar] || "text-white" : "text-white"}`}>
-                          {selectedClient.primary_pillar === "strategic" ? "Strategic Vision, Planning & Growth" : 
-                           selectedClient.primary_pillar === "operational" ? "Operational Excellence & Processes" : 
-                           selectedClient.primary_pillar === "financial" ? "Financial Management & Planning" : 
-                           "Cultural Transformation & People"}
+                          {selectedClient.primary_pillar ? t(`clients.pillars.${selectedClient.primary_pillar}`) : ''}
                         </p>
                       </div>
 
                       {selectedClient.assigned_admin_name && (
                         <div>
-                          <label className="text-xs text-gray-400">Assigned Admin</label>
+                          <label className="text-xs text-gray-400">{t('clients.labels.assigned_admin')}</label>
                           <p className="text-sm font-medium text-white">{selectedClient.assigned_admin_name}</p>
                         </div>
                       )}
 
                       <div>
-                        <label className="text-xs text-gray-400">Date Joined</label>
+                        <label className="text-xs text-gray-400">{t('clients.labels.date_joined')}</label>
                         <p className="text-sm font-medium text-white">{formatDate(selectedClient.date_joined || "")}</p>
                       </div>
 
                       <div>
-                        <label className="text-xs text-gray-400">Last Login</label>
+                        <label className="text-xs text-gray-400">{t('clients.labels.last_login')}</label>
                         <p className="text-sm font-medium text-white">{formatDateTime(selectedClient.last_login || "")}</p>
                       </div>
 
                       <div>
-                        <label className="text-xs text-gray-400">Last Activity</label>
+                        <label className="text-xs text-gray-400">{t('clients.labels.last_activity')}</label>
                         <p className="text-sm font-medium text-white">{formatDateTime(selectedClient.last_activity || "")}</p>
                       </div>
 
                       <div>
-                        <label className="text-xs text-gray-400">Username</label>
+                        <label className="text-xs text-gray-400">{t('clients.labels.username')}</label>
                         <p className="text-sm font-medium text-white">{selectedClient.username}</p>
                       </div>
                     </div>
 
                     {selectedClient.internal_notes && (
                       <div>
-                        <label className="text-xs text-gray-400 mb-2 block">Internal Notes</label>
+                        <label className="text-xs text-gray-400 mb-2 block">{t('common.internal_notes')}</label>
                         <div className="bg-white/5 border border-white/10 rounded-lg p-3">
                           <p className="text-sm text-white whitespace-pre-wrap">{selectedClient.internal_notes}</p>
                         </div>
@@ -452,18 +448,18 @@ export default function page() {
                     <div className="flex items-center gap-3 pt-4 border-t border-white/10">
                       <button className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg text-white text-sm font-medium transition-all duration-200">
                         <Edit size={16} />
-                        Edit Client
+                        {t('clients.edit_client')}
                       </button>
-                      <button 
+                      <button
                         onClick={() => setShowDocuments(true)}
                         className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-white text-sm transition-all duration-200"
                       >
                         <FileText size={16} />
-                        Manage Documents
+                        {t('clients.manage_documents')}
                       </button>
                       <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-white text-sm transition-all duration-200">
                         <Eye size={16} />
-                        View Engagement History
+                        {t('clients.view_engagement')}
                       </button>
                     </div>
                   </div>

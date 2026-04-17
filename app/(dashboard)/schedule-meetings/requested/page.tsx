@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Clock, User, Calendar, CheckCircle, XCircle, Edit, Loader, AlertCircle } from "lucide-react";
 import { meetingAPI, authAPI } from "@/app/services";
 import type { Meeting } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function RequestedMeetingsPage() {
+  const { t } = useLanguageStore();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function RequestedMeetingsPage() {
       await fetchRequestedMeetings(userId);
     } catch (err: any) {
       console.error("Failed to fetch current user:", err);
-      setError("Failed to load user information");
+      setError(t('schedule_meetings.error_user'));
       setLoading(false);
     }
   };
@@ -39,7 +41,7 @@ export default function RequestedMeetingsPage() {
       setMeetings(meetingsData);
     } catch (err: any) {
       console.error("Failed to fetch requested meetings:", err);
-      setError(err.message || "Failed to load requested meetings");
+      setError(err.message || t('schedule_meetings.error_requested'));
     } finally {
       setLoading(false);
     }
@@ -59,10 +61,11 @@ export default function RequestedMeetingsPage() {
   };
 
   const formatDateTime = (dateString: string) => {
-    if (!dateString) return "Not specified";
+    if (!dateString) return t('schedule_meetings.no_specified');
     try {
       const date = new Date(dateString);
-      return date.toLocaleString("en-US", {
+      const { language } = useLanguageStore.getState();
+      return date.toLocaleString(language === 'en' ? "en-US" : "it-IT", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -70,18 +73,12 @@ export default function RequestedMeetingsPage() {
         minute: "2-digit"
       });
     } catch {
-      return "Invalid date";
+      return t('schedule_meetings.invalid_date');
     }
   };
 
   const getMeetingTypeDisplay = (type: string) => {
-    const typeMap: Record<string, string> = {
-      discovery: "Discovery Meeting",
-      consultation: "Consultation",
-      follow_up: "Follow-up Meeting",
-      review: "Review Meeting"
-    };
-    return typeMap[type] || type;
+    return t(`schedule_meetings.types.${type}` as any) || type;
   };
 
   if (loading) {
@@ -106,15 +103,15 @@ export default function RequestedMeetingsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Requested Meetings</h1>
-            <p className="text-gray-400">Review and manage meeting requests from clients</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('schedule_meetings.requested_title')}</h1>
+            <p className="text-gray-400">{t('schedule_meetings.requested_subtitle')}</p>
           </div>
 
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
               <AlertCircle size={20} className="flex-shrink-0 mt-0.5 text-red-400" />
               <div className="flex-1">
-                <p className="font-medium mb-1 text-red-300">Error</p>
+                <p className="font-medium mb-1 text-red-300">{t('common.error')}</p>
                 <p className="text-red-200">{error}</p>
               </div>
             </div>
@@ -123,8 +120,8 @@ export default function RequestedMeetingsPage() {
           {meetings.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
               <Clock size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Requested Meetings</h3>
-              <p className="text-gray-400">There are no pending meeting requests at the moment.</p>
+              <h3 className="text-xl font-semibold text-white mb-2">{t('schedule_meetings.no_requested')}</h3>
+              <p className="text-gray-400">{t('schedule_meetings.no_requested_desc')}</p>
             </div>
           ) : (
             <div className="grid gap-6">
@@ -151,21 +148,21 @@ export default function RequestedMeetingsPage() {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
                             <Calendar size={16} />
-                            <span>Requested: {formatDateTime(meeting.requested_datetime)}</span>
+                            <span>{t('schedule_meetings.requested' as any) || 'Requested'}: {formatDateTime(meeting.requested_datetime)}</span>
                             <span className="text-black">•</span>
-                            <span>{meeting.duration_minutes} minutes</span>
+                            <span>{meeting.duration_minutes} {t('meetings.minutes')}</span>
                           </div>
                           {meeting.agenda && (
                             <div className="bg-white/5 rounded-lg p-3 mb-3">
                               <p className="text-sm text-gray-300">
-                                <span className="font-medium text-white">Agenda:</span> {meeting.agenda}
+                                <span className="font-medium text-white">{t('schedule_meetings.agenda')}:</span> {meeting.agenda}
                               </p>
                             </div>
                           )}
                           {meeting.internal_notes && (
                             <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
                               <p className="text-sm text-blue-200">
-                                <span className="font-medium">Internal Notes:</span> {meeting.internal_notes}
+                                <span className="font-medium">{t('schedule_meetings.internal_notes')}:</span> {meeting.internal_notes}
                               </p>
                             </div>
                           )}
@@ -184,7 +181,7 @@ export default function RequestedMeetingsPage() {
                         ) : (
                           <CheckCircle size={16} />
                         )}
-                        Confirm
+                        {t('meetings.confirm')}
                       </button>
                       <button
                         onClick={() => {
@@ -199,7 +196,7 @@ export default function RequestedMeetingsPage() {
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 rounded-lg text-white text-sm font-medium transition-all duration-200"
                       >
                         <Edit size={16} />
-                        Reschedule
+                        {t('schedule_meetings.reschedule')}
                       </button>
                       <button
                         onClick={() => {
@@ -210,7 +207,7 @@ export default function RequestedMeetingsPage() {
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 rounded-lg text-white text-sm font-medium transition-all duration-200"
                       >
                         <XCircle size={16} />
-                        Decline
+                        {t('meetings.decline')}
                       </button>
                     </div>
                   </div>

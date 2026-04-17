@@ -1,6 +1,7 @@
 "use client";
 
 import { Lock } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface LockedFeatureProps {
   title: string;
@@ -10,9 +11,12 @@ interface LockedFeatureProps {
 
 export default function LockedFeature({ 
   title, 
-  description = "This feature is not available yet",
+  description,
   fullPage = false 
 }: LockedFeatureProps) {
+  const { t } = useLanguageStore();
+  const displayDescription = description || t('common.locked_desc');
+
   if (fullPage) {
     return (
       <div className="min-h-screen text-white relative overflow-hidden star">
@@ -24,10 +28,10 @@ export default function LockedFeature({
             </div>
             <div className="text-center">
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{title}</h1>
-              <p className="text-gray-400 text-lg">{description}</p>
+              <p className="text-gray-400 text-lg">{displayDescription}</p>
             </div>
             <div className="mt-6 px-6 py-3 bg-gray-500/10 border border-gray-500/30 rounded-lg">
-              <p className="text-gray-300 text-sm">Coming soon</p>
+              <p className="text-gray-300 text-sm">{t('common.coming_soon')}</p>
             </div>
           </div>
         </div>
@@ -42,7 +46,7 @@ export default function LockedFeature({
       </div>
       <div className="text-center">
         <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-        <p className="text-gray-400">{description}</p>
+        <p className="text-gray-400">{displayDescription}</p>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { ticketAPI } from "@/app/services";
 import type { TicketListItem, TicketPriority, TicketSource, TicketStatus } from "@/app/services/types";
 import { MessageSquare, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLanguageStore } from "@/store/languageStore";
 
 const statusColors: Record<TicketStatus, string> = {
   new: "bg-blue-500/30 text-blue-300 border-blue-500/30",
@@ -40,6 +41,7 @@ const sourceIcons: Record<TicketSource, React.ReactNode> = {
 };
 
 export default function MyTicketsPage() {
+  const { t } = useLanguageStore();
   const [tickets, setTickets] = useState<TicketListItem[]>([]);
   const [filterStatus, setFilterStatus] = useState<TicketStatus | "all">("all");
   const [filterPriority, setFilterPriority] = useState<TicketPriority | "all">("all");
@@ -55,10 +57,10 @@ export default function MyTicketsPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await ticketAPI.getMyTickets() as any;
       let ticketsData = Array.isArray(response) ? response : (response.results || response.data || []);
-      
+
       // Apply client-side filters
       if (filterStatus !== "all") {
         ticketsData = ticketsData.filter((ticket: TicketListItem) => ticket.status === filterStatus);
@@ -67,13 +69,13 @@ export default function MyTicketsPage() {
         ticketsData = ticketsData.filter((ticket: TicketListItem) => ticket.priority === filterPriority);
       }
       if (searchQuery) {
-        ticketsData = ticketsData.filter((ticket: TicketListItem) => 
+        ticketsData = ticketsData.filter((ticket: TicketListItem) =>
           ticket.ticket_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
           ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
           ticket.client_name.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
-      
+
       setTickets(Array.isArray(ticketsData) ? ticketsData : []);
     } catch (err: any) {
       console.error("Failed to fetch my tickets:", err);
@@ -92,8 +94,8 @@ export default function MyTicketsPage() {
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           {/* Header */}
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">My Tickets</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Tickets assigned to you</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('tickets.my_tickets')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('tickets.my_tickets_subtitle')}</p>
           </div>
 
           {/* Search & Filters */}
@@ -104,7 +106,7 @@ export default function MyTicketsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search tickets..."
+                placeholder={t('tickets.search_tickets')}
                 className="w-full bg-white/10 border border-white/20 pl-10 pr-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200"
               />
             </div>
@@ -116,15 +118,15 @@ export default function MyTicketsPage() {
                   onChange={(e) => setFilterStatus(e.target.value as TicketStatus | "all")}
                   className="w-full bg-white/10 border border-white/20 px-3 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                 >
-                  <option value="all" className="bg-gray-800">All Status</option>
-                  <option value="new" className="bg-gray-800">New</option>
-                  <option value="processing" className="bg-gray-800">Processing Payment</option>
-                  <option value="payment_failed" className="bg-gray-800">Payment Failed</option>
-                  <option value="payment_disputed" className="bg-gray-800">Payment Disputed</option>
-                  <option value="refund_requested" className="bg-gray-800">Refund Requested</option>
-                  <option value="refund_processed" className="bg-gray-800">Refund Processed</option>
-                  <option value="resolved" className="bg-gray-800">Resolved</option>
-                  <option value="archived" className="bg-gray-800">Archived</option>
+                  <option value="all" className="bg-gray-800">{t('tickets.all_status')}</option>
+                  <option value="new" className="bg-gray-800">{t('tickets.status.new')}</option>
+                  <option value="processing" className="bg-gray-800">{t('tickets.status.processing')}</option>
+                  <option value="payment_failed" className="bg-gray-800">{t('tickets.status.payment_failed')}</option>
+                  <option value="payment_disputed" className="bg-gray-800">{t('tickets.status.payment_disputed')}</option>
+                  <option value="refund_requested" className="bg-gray-800">{t('tickets.status.refund_requested')}</option>
+                  <option value="refund_processed" className="bg-gray-800">{t('tickets.status.refund_processed')}</option>
+                  <option value="resolved" className="bg-gray-800">{t('tickets.status.resolved')}</option>
+                  <option value="archived" className="bg-gray-800">{t('tickets.status.archived')}</option>
                 </select>
               </div>
               <div className="flex-1 min-w-[120px]">
@@ -133,11 +135,11 @@ export default function MyTicketsPage() {
                   onChange={(e) => setFilterPriority(e.target.value as TicketPriority | "all")}
                   className="w-full bg-white/10 border border-white/20 px-3 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                 >
-                  <option value="all" className="bg-gray-800">All Priority</option>
-                  <option value="low" className="bg-gray-800">Low</option>
-                  <option value="normal" className="bg-gray-800">Normal</option>
-                  <option value="high" className="bg-gray-800">High</option>
-                  <option value="urgent" className="bg-gray-800">Urgent</option>
+                  <option value="all" className="bg-gray-800">{t('tickets.all_priority')}</option>
+                  <option value="low" className="bg-gray-800">{t('tickets.priority_labels.low')}</option>
+                  <option value="normal" className="bg-gray-800">{t('tickets.priority_labels.normal')}</option>
+                  <option value="high" className="bg-gray-800">{t('tickets.priority_labels.high')}</option>
+                  <option value="urgent" className="bg-gray-800">{t('tickets.priority_labels.urgent')}</option>
                 </select>
               </div>
             </div>
@@ -152,7 +154,7 @@ export default function MyTicketsPage() {
             ) : tickets.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <MessageSquare size={32} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No tickets assigned to you</p>
+                <p className="text-sm">{t('tickets.no_assigned_tickets_desc')}</p>
                 {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
               </div>
             ) : (
@@ -173,15 +175,15 @@ export default function MyTicketsPage() {
                         <p className="text-xs text-gray-400">{ticket.client_name}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded border ${statusColors[ticket.status]}`}>
-                        {ticket.status}
+                        {t(`tickets.status.${ticket.status}`)}
                       </span>
                     </div>
-                    
+
                     <p className="text-sm text-gray-300 line-clamp-2 mb-3">{ticket.subject}</p>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-medium ${priorityColors[ticket.priority]}`}>
-                        {ticket.priority}
+                        {t(`tickets.priority_labels.${ticket.priority}`)}
                       </span>
                       <span className="text-xs text-black">
                         {new Date(ticket.created_at).toLocaleDateString()}

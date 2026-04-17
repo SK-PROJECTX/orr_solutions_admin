@@ -12,6 +12,7 @@ import {
   MessageSquare,
   CheckCircle,
 } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface TicketMessage {
   id: number;
@@ -47,6 +48,7 @@ interface Chat {
 }
 
 export default function MessagesPage() {
+  const { t, language } = useLanguageStore();
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<TicketMessage[]>([]);
@@ -189,9 +191,9 @@ export default function MessagesPage() {
 
           return {
             id: ticket.id,
-            name: ticket.client_name ? `Support - ${ticket.client_name}` : `Support - ${ticket.ticket_id}`,
-            lastMessage: ticket.subject || "No subject",
-            timestamp: new Date(ticket.last_message_at || ticket.created_at).toLocaleDateString(),
+            name: ticket.client_name ? `${t('tickets.support_prefix')} - ${ticket.client_name}` : `${t('tickets.support_prefix')} - ${ticket.ticket_id}`,
+            lastMessage: ticket.subject || t('tickets.no_subject'),
+            timestamp: new Date(ticket.last_message_at || ticket.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT'),
             unread: unread,
             avatar: "🎧",
             online: ticket.status !== "resolved",
@@ -326,7 +328,7 @@ export default function MessagesPage() {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return new Date(dateString).toLocaleTimeString(language === 'en' ? "en-US" : "it-IT", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
@@ -349,7 +351,7 @@ export default function MessagesPage() {
   if (loading) {
     return (
       <div className="h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Loading your messages...</div>
+        <div className="text-foreground">{t('tickets.loading_messages')}</div>
       </div>
     );
   }
@@ -361,13 +363,13 @@ export default function MessagesPage() {
         {/* Header */}
         <div className="p-4 border-b border-white/10">
           <h1 className="text-xl font-semibold text-foreground mb-4">
-            Support Messages
+            {t('tickets.support_messages')}
           </h1>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground opacity-40 w-4 h-4" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder={t('tickets.search_conversations')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-secondary/30 border border-white/10 rounded-lg text-foreground placeholder:opacity-60 focus:border-primary outline-none"
@@ -379,7 +381,7 @@ export default function MessagesPage() {
         <div className="flex-1 overflow-y-auto">
           {filteredChats.length === 0 ? (
             <div className="p-4 text-center text-foreground/60">
-              No support tickets found
+              {t('tickets.no_tickets_found')}
             </div>
           ) : (
             filteredChats.map((chat) => (
@@ -429,7 +431,7 @@ export default function MessagesPage() {
                             </span>
                           )}
                           <span className="text-[9px] text-foreground opacity-40 bg-white/5 px-1 rounded">
-                            {chat.ticket?.messages_count || 0} msgs
+                            {chat.ticket?.messages_count || 0} {t('consultations.reports_plural').toLowerCase()}
                           </span>
                         </div>
                       </div>
@@ -486,12 +488,12 @@ export default function MessagesPage() {
                   </h2>
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-foreground opacity-60">
-                      {selectedChat.online ? "Active" : "Resolved"}
+                      {selectedChat.online ? t('tickets.active') : t('tickets.resolved')}
                     </p>
                     {hasAutoReply && (
                       <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-300 flex items-center gap-1">
                         <CheckCircle size={10} />
-                        Auto-replied
+                        {t('tickets.auto_replied')}
                       </span>
                     )}
                   </div>
@@ -532,7 +534,7 @@ export default function MessagesPage() {
                   >
                     <div className={`flex flex-col ${isUs ? "items-end" : "items-start"} max-w-[80%]`}>
                       <span className="text-[10px] font-bold text-foreground/50 mb-1 px-1 uppercase tracking-wider">
-                        {isInternal ? "🔒 Internal Note" : `${message.sender_name} • ${isUs ? "YOU" : "CLIENT"}`}
+                        {isInternal ? `🔒 ${t('tickets.internal_note')}` : `${message.sender_name} • ${isUs ? t('tickets.you') : t('tickets.client_label')}`}
                       </span>
                       <div
                         className={`px-4 py-2.5 rounded-2xl shadow-sm ${
@@ -574,7 +576,7 @@ export default function MessagesPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    placeholder="Type a message as admin..."
+                    placeholder={t('tickets.type_message_admin')}
                     className="w-full px-4 py-3 bg-secondary/30 border border-white/10 rounded-lg text-foreground placeholder:opacity-60 focus:border-primary outline-none pr-12"
                   />
                   <button className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-secondary/60 transition-colors">
@@ -596,7 +598,7 @@ export default function MessagesPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-foreground/60">
               <MessageSquare size={48} className="mx-auto mb-4 opacity-40" />
-              <p>Select a conversation to start messaging</p>
+              <p>{t('tickets.select_conversation')}</p>
             </div>
           </div>
         )}

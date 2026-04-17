@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Activity, Users, FileText, MessageSquare, Calendar, TrendingUp, Clock } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface WorkspaceData {
   feature_usage: {
@@ -101,6 +102,7 @@ interface FeatureAdoptionData {
 }
 
 export default function WorkspaceUsagePage() {
+  const { t, language } = useLanguageStore();
   const [workspaceData, setWorkspaceData] = useState<WorkspaceData | null>(null);
   const [adoptionData, setAdoptionData] = useState<FeatureAdoptionData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -159,73 +161,71 @@ export default function WorkspaceUsagePage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Workspace Usage</h1>
-            <p className="text-gray-400">Client workspace activity and engagement analytics</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('sidebar.workspace_usage')}</h1>
+            <p className="text-gray-400">{t('analytics.performance_overview')}</p>
           </div>
 
           {/* Feature Usage Overview */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Feature Usage Overview</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.overview_analytics')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Users className="text-blue-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Active Users</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.active_users')}</h3>
                 <p className="text-2xl font-bold text-blue-400">{workspaceData?.feature_usage.total_active_users || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <MessageSquare className="text-green-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">AI Chat Users</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.ai_chat_users')}</h3>
                 <p className="text-2xl font-bold text-green-400">{workspaceData?.feature_usage.ai_chat_users || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Calendar className="text-purple-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Meeting Users</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.meeting_users')}</h3>
                 <p className="text-2xl font-bold text-purple-400">{workspaceData?.feature_usage.meeting_scheduler_users || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Activity className="text-orange-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Ticket Users</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.ticket_users')}</h3>
                 <p className="text-2xl font-bold text-orange-400">{workspaceData?.feature_usage.support_ticket_users || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <FileText className="text-cyan-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Document Users</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.document_users')}</h3>
                 <p className="text-2xl font-bold text-cyan-400">{workspaceData?.feature_usage.document_users || 0}</p>
               </div>
             </div>
           </div>
 
-
-
           {/* Adoption Funnel */}
           {adoptionData && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Feature Adoption Funnel</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.user_journey_funnel')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-blue-400">{adoptionData.adoption_funnel.registered_users}</p>
-                    <p className="text-gray-400 text-sm">Registered</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.registered_users')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-green-400">{adoptionData.adoption_funnel.activated_users}</p>
-                    <p className="text-gray-400 text-sm">Activated</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.activated_users')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-purple-400">{adoptionData.adoption_funnel.onboarding_started}</p>
-                    <p className="text-gray-400 text-sm">Started Onboarding</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.started_onboarding')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-orange-400">{adoptionData.adoption_funnel.onboarding_completed}</p>
-                    <p className="text-gray-400 text-sm">Completed</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.completed_onboarding')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-cyan-400">{adoptionData.adoption_funnel.first_feature_used}</p>
-                    <p className="text-gray-400 text-sm">First Feature</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.first_feature_used')}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-pink-400">{adoptionData.adoption_funnel.multi_feature_users}</p>
-                    <p className="text-gray-400 text-sm">Multi-Feature</p>
+                    <p className="text-gray-400 text-sm">{t('analytics.multi_feature_users')}</p>
                   </div>
                 </div>
               </div>
@@ -234,18 +234,18 @@ export default function WorkspaceUsagePage() {
 
           {/* Task Completion Rates */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Task Completion Rates</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.task_completion_rates')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Onboarding</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.onboarding')}</h3>
                 <p className="text-2xl font-bold text-blue-400">{workspaceData?.efficiency_metrics.task_completion_rates.onboarding_completion.toFixed(1) || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Meeting Completion</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.meeting_completion')}</h3>
                 <p className="text-2xl font-bold text-green-400">{workspaceData?.efficiency_metrics.task_completion_rates.meeting_completion.toFixed(1) || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Ticket Resolution</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.ticket_resolution')}</h3>
                 <p className="text-2xl font-bold text-purple-400">{workspaceData?.efficiency_metrics.task_completion_rates.ticket_resolution.toFixed(1) || 0}%</p>
               </div>
             </div>
@@ -254,22 +254,22 @@ export default function WorkspaceUsagePage() {
           {/* User Journey Patterns */}
           {workspaceData?.activity_patterns.user_journey_patterns && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">User Journey Patterns</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.user_journey_patterns')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Onboarding → AI</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.onboarding_to_ai')}</h3>
                   <p className="text-2xl font-bold text-cyan-400">{workspaceData.activity_patterns.user_journey_patterns.onboarding_to_ai}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">AI → Meeting</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.ai_to_meeting')}</h3>
                   <p className="text-2xl font-bold text-pink-400">{workspaceData.activity_patterns.user_journey_patterns.ai_to_meeting}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Meeting → Ticket</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.meeting_to_ticket')}</h3>
                   <p className="text-2xl font-bold text-yellow-400">{workspaceData.activity_patterns.user_journey_patterns.meeting_to_ticket}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Content → Meeting</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.content_to_meeting')}</h3>
                   <p className="text-2xl font-bold text-red-400">{workspaceData.activity_patterns.user_journey_patterns.content_to_meeting}%</p>
                 </div>
               </div>
@@ -279,22 +279,22 @@ export default function WorkspaceUsagePage() {
           {/* Feature Stickiness */}
           {adoptionData?.feature_stickiness && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Feature Retention Rates</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.feature_retention_rates')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">AI Chat</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.ai_chat')}</h3>
                   <p className="text-2xl font-bold text-blue-400">{adoptionData.feature_stickiness.ai_chat_retention}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Meetings</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.meetings')}</h3>
                   <p className="text-2xl font-bold text-green-400">{adoptionData.feature_stickiness.meeting_retention}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Tickets</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.tickets')}</h3>
                   <p className="text-2xl font-bold text-purple-400">{adoptionData.feature_stickiness.ticket_retention}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Overall Platform</h3>
+                  <h3 className="text-lg font-medium text-white mb-2">{t('analytics.overall_platform')}</h3>
                   <p className="text-2xl font-bold text-orange-400">{adoptionData.feature_stickiness.overall_platform_retention}%</p>
                 </div>
               </div>

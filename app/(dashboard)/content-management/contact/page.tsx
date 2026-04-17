@@ -6,6 +6,8 @@ import { Save, Loader } from 'lucide-react';
 import RichTextEditor from '../../../../components/RichTextEditor';
 import SuccessModal from '../../../components/ui/SuccessModal';
 import ErrorModal from '../../../components/ui/ErrorModal';
+import { useLanguageStore } from '@/store/languageStore';
+import { cleanContentObject } from "@/app/utils/htmlCleaner";
 
 interface ContactPageData {
   id: number;
@@ -40,6 +42,7 @@ export default function Contact() {
   const [data, setData] = useState<ContactPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const { t } = useLanguageStore();
   const cmsService = new CMSService();
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
   const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
@@ -50,7 +53,8 @@ export default function Contact() {
         console.log('🔄 Fetching Contact page data from backend...');
         const response = await cmsService.getContactPageContent();
         console.log('✅ Contact API Response:', response);
-        setData(response);
+        const cleanedData = cleanContentObject(response);
+        setData(cleanedData);
       } catch (error) {
         console.error('❌ Error fetching Contact data:', error);
         setData({
@@ -138,8 +142,8 @@ export default function Contact() {
       await cmsService.updateContactPageContent(cleanPayload);
       setSuccessModal({
         isOpen: true,
-        title: 'Content Saved',
-        message: 'Your changes have been saved successfully!'
+        title: t('content_management.content_saved'),
+        message: t('content_management.success_msg')
       });
       const result = await cmsService.getContactPageContent();
       setData(result);
@@ -147,7 +151,7 @@ export default function Contact() {
       console.error('Failed to save:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
+        title: t('content_management.save_failed'),
         message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     } finally {
@@ -183,40 +187,40 @@ export default function Contact() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">Contact Page Content</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Manage Contact page content and form fields</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('content_management.contact_title')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('content_management.contact_subtitle')}</p>
           </div>
 
           {/* Page Header Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Page Header</h2>
+            <h2 className={titleClass}>{t('content_management.page_header')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('page-header'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Hero Title"
+                label={t('content_management.hero_section')}
                 value={data?.hero_title || ''}
                 onChange={(value) => handleRichTextChange('hero_title', value)}
-                placeholder="Enter hero title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Title (SEO)"
+                label={t('content_management.meta_seo')}
                 value={data?.meta_title || ''}
                 onChange={(value) => handleRichTextChange('meta_title', value)}
-                placeholder="Enter meta title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Description (SEO)"
+                label={t('content_management.meta_desc_seo')}
                 value={data?.meta_description || ''}
                 onChange={(value) => handleRichTextChange('meta_description', value)}
-                placeholder="Enter meta description"
+                placeholder={t('content_management.enter_description')}
                 rows={3}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'page-header'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'page-header' ? 'Saving...' : 'Save Page Header'}
+                  {saving === 'page-header' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -263,7 +267,7 @@ export default function Contact() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'contact-info'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'contact-info' ? 'Saving...' : 'Save Contact Information'}
+                  {saving === 'contact-info' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -321,7 +325,7 @@ export default function Contact() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'form-labels'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'form-labels' ? 'Saving...' : 'Save Form Labels'}
+                  {saving === 'form-labels' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -415,7 +419,7 @@ export default function Contact() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'subject-options'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'subject-options' ? 'Saving...' : 'Save Subject Options'}
+                  {saving === 'subject-options' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -437,7 +441,7 @@ export default function Contact() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'submit-button'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'submit-button' ? 'Saving...' : 'Save Submit Button'}
+                  {saving === 'submit-button' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>

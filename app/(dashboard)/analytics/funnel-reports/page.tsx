@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TrendingDown, Users, ArrowRight, AlertTriangle, Target, Clock } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface ConversionFunnelData {
   main_funnel: {
@@ -80,6 +81,7 @@ interface TimeFunnelData {
 }
 
 export default function FunnelReportsPage() {
+  const { t } = useLanguageStore();
   const [conversionData, setConversionData] = useState<ConversionFunnelData | null>(null);
   const [timeData, setTimeData] = useState<TimeFunnelData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,14 +140,14 @@ export default function FunnelReportsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Funnel Reports</h1>
-            <p className="text-gray-400">Client journey and conversion analytics</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('sidebar.funnel_reports')}</h1>
+            <p className="text-gray-400">{t('analytics.user_journey_funnel')}</p>
           </div>
 
           {/* Main Conversion Funnel */}
           {conversionData?.main_funnel && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Main Conversion Funnel</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.main_conversion_funnel')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="flex flex-col space-y-4">
                   {conversionData.main_funnel.stages.map((stage, index) => (
@@ -162,7 +164,7 @@ export default function FunnelReportsPage() {
                         </div>
                         <div>
                           <h3 className="text-white font-medium">{stage.stage}</h3>
-                          <p className="text-gray-400 text-sm">{stage.conversion_rate}% conversion</p>
+                          <p className="text-gray-400 text-sm">{stage.conversion_rate}{t('analytics.conversion_label')}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -176,7 +178,7 @@ export default function FunnelReportsPage() {
                 </div>
                 <div className="mt-6 pt-6 border-t border-white/10">
                   <div className="flex justify-between items-center">
-                    <span className="text-white font-medium">Overall Conversion Rate</span>
+                    <span className="text-white font-medium">{t('analytics.overall_conversion_rate')}</span>
                     <span className="text-2xl font-bold text-green-400">{conversionData.main_funnel.overall_conversion_rate}%</span>
                   </div>
                 </div>
@@ -187,30 +189,30 @@ export default function FunnelReportsPage() {
           {/* Feature Engagement Funnels */}
           {conversionData?.engagement_funnel && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Feature Engagement Funnels</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.feature_engagement_funnels')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">AI Chat Funnel</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.ai_chat_funnel')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Total Clients</span>
+                      <span className="text-gray-400">{t('analytics.total_clients')}</span>
                       <span className="text-white">{conversionData.engagement_funnel.ai_chat_funnel.total_clients}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Tried AI Chat</span>
+                      <span className="text-gray-400">{t('analytics.ai_chat')}</span>
                       <span className="text-blue-400">{conversionData.engagement_funnel.ai_chat_funnel.tried_ai_chat}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Multiple Sessions</span>
+                      <span className="text-gray-400">{t('analytics.multi_feature_users')}</span>
                       <span className="text-green-400">{conversionData.engagement_funnel.ai_chat_funnel.multiple_ai_sessions}</span>
                     </div>
                     <div className="pt-3 border-t border-white/10">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Trial Rate</span>
+                        <span className="text-gray-400">{t('analytics.trial_rate')}</span>
                         <span className="text-purple-400">{conversionData.engagement_funnel.ai_chat_funnel.conversion_rates.trial_rate}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Retention Rate</span>
+                        <span className="text-gray-400">{t('analytics.retention_rate')}</span>
                         <span className="text-orange-400">{conversionData.engagement_funnel.ai_chat_funnel.conversion_rates.retention_rate}%</span>
                       </div>
                     </div>
@@ -218,27 +220,27 @@ export default function FunnelReportsPage() {
                 </div>
 
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Meeting Funnel</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.meeting_funnel')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Total Clients</span>
+                      <span className="text-gray-400">{t('analytics.total_clients')}</span>
                       <span className="text-white">{conversionData.engagement_funnel.meeting_funnel.total_clients}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Requested Meeting</span>
+                      <span className="text-gray-400">{t('meetings.pending_meetings')}</span>
                       <span className="text-blue-400">{conversionData.engagement_funnel.meeting_funnel.requested_meeting}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Completed Meeting</span>
+                      <span className="text-gray-400">{t('meetings.past_meetings')}</span>
                       <span className="text-green-400">{conversionData.engagement_funnel.meeting_funnel.completed_meeting}</span>
                     </div>
                     <div className="pt-3 border-t border-white/10">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Request Rate</span>
+                        <span className="text-gray-400">{t('analytics.request_rate')}</span>
                         <span className="text-purple-400">{conversionData.engagement_funnel.meeting_funnel.conversion_rates.request_rate}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Completion Rate</span>
+                        <span className="text-gray-400">{t('analytics.completion_rate')}</span>
                         <span className="text-orange-400">{conversionData.engagement_funnel.meeting_funnel.conversion_rates.completion_rate}%</span>
                       </div>
                     </div>
@@ -246,27 +248,27 @@ export default function FunnelReportsPage() {
                 </div>
 
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Support Funnel</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.support_funnel')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Total Clients</span>
+                      <span className="text-gray-400">{t('analytics.total_clients')}</span>
                       <span className="text-white">{conversionData.engagement_funnel.support_funnel.total_clients}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Created Ticket</span>
+                      <span className="text-gray-400">{t('tickets.create_button')}</span>
                       <span className="text-blue-400">{conversionData.engagement_funnel.support_funnel.created_ticket}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Resolved Ticket</span>
+                      <span className="text-gray-400">{t('tickets.resolved')}</span>
                       <span className="text-green-400">{conversionData.engagement_funnel.support_funnel.resolved_ticket}</span>
                     </div>
                     <div className="pt-3 border-t border-white/10">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Creation Rate</span>
+                        <span className="text-gray-400">{t('analytics.creation_rate')}</span>
                         <span className="text-purple-400">{conversionData.engagement_funnel.support_funnel.conversion_rates.creation_rate}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Resolution Rate</span>
+                        <span className="text-gray-400">{t('analytics.resolution_rate')}</span>
                         <span className="text-orange-400">{conversionData.engagement_funnel.support_funnel.conversion_rates.resolution_rate}%</span>
                       </div>
                     </div>
@@ -279,7 +281,7 @@ export default function FunnelReportsPage() {
           {/* Drop-off Analysis */}
           {conversionData?.dropoff_analysis && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Drop-off Analysis</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.dropoff_analysis')}</h2>
               <div className="space-y-4">
                 {conversionData.dropoff_analysis.dropoff_points.map((point, index) => (
                   <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-6">
@@ -288,12 +290,12 @@ export default function FunnelReportsPage() {
                         <AlertTriangle className="text-red-400" size={24} />
                         <div>
                           <h3 className="text-lg font-medium text-white">{point.stage}</h3>
-                          <p className="text-red-400">{point.dropoff_rate}% drop-off ({point.dropoff_count} users)</p>
+                          <p className="text-red-400">{point.dropoff_rate}% {t('analytics.dropoff_rate')} ({point.dropoff_count} {t('analytics.users_label')})</p>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm mb-2">Potential reasons:</p>
+                      <p className="text-gray-400 text-sm mb-2">{t('analytics.optimization_opportunities')}:</p>
                       <ul className="list-disc list-inside space-y-1">
                         {point.potential_reasons.map((reason, idx) => (
                           <li key={idx} className="text-gray-300 text-sm">{reason}</li>

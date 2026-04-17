@@ -5,6 +5,8 @@ import { Save, Loader, AlertCircle, Eye, Edit } from "lucide-react";
 import { cmsAPI } from "@/app/services";
 import SuccessModal from "../../../components/ui/SuccessModal";
 import ErrorModal from "../../../components/ui/ErrorModal";
+import { useLanguageStore } from '@/store/languageStore';
+import { cleanContentObject } from "@/app/utils/htmlCleaner";
 
 interface StrategicAdvisoryContent {
   id: number;
@@ -32,6 +34,7 @@ interface StrategicAdvisoryContent {
 }
 
 export default function StrategicAdvisoryAdminPage() {
+  const { t } = useLanguageStore();
   const [content, setContent] = useState<StrategicAdvisoryContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,9 +51,10 @@ export default function StrategicAdvisoryAdminPage() {
     try {
       setLoading(true);
       const response = await cmsAPI.getStrategicAdvisoryContent();
-      setContent((response as any).data);
+      const cleanedData = cleanContentObject((response as any).data);
+      setContent(cleanedData);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch Strategic Advisory content");
+      setError(err.message || t('content_management.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -65,18 +69,18 @@ export default function StrategicAdvisoryAdminPage() {
       await cmsAPI.updateStrategicAdvisoryContent(content);
       setSuccessModal({
         isOpen: true,
-        title: 'Content Saved',
-        message: 'Your changes have been saved successfully!'
+        title: t('content_management.content_saved'),
+        message: t('content_management.success_msg')
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
-        message: err.message || "Failed to save content"
+        title: t('content_management.save_failed'),
+        message: err.message || t('content_management.save_failed')
       });
-      setError(err.message || "Failed to save content");
+      setError(err.message || t('content_management.save_failed'));
     } finally {
       setSaving(false);
     }
@@ -100,8 +104,8 @@ export default function StrategicAdvisoryAdminPage() {
       <div className="min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={48} className="mx-auto mb-4 text-red-400" />
-          <h1 className="text-2xl font-bold mb-2">Content Not Found</h1>
-          <p className="text-gray-400">Unable to load Strategic Advisory content</p>
+          <h1 className="text-2xl font-bold mb-2">{t('content_management.load_failed')}</h1>
+          <p className="text-gray-400">{t('content_management.load_failed')}</p>
         </div>
       </div>
     );
@@ -115,8 +119,8 @@ export default function StrategicAdvisoryAdminPage() {
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Strategic Advisory & Compliance</h1>
-              <p className="text-gray-400">Edit page content and settings</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('content_management.strategic_advisory_title')}</h1>
+              <p className="text-gray-400">{t('content_management.strategic_advisory_subtitle')}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -125,7 +129,7 @@ export default function StrategicAdvisoryAdminPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg text-white text-sm font-medium transition-all duration-200 disabled:opacity-50"
               >
                 {saving ? <Loader className="animate-spin" size={16} /> : <Save size={16} />}
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t('content_management.saving') : t('content_management.save_changes')}
               </button>
             </div>
           </div>
@@ -143,7 +147,7 @@ export default function StrategicAdvisoryAdminPage() {
           {success && (
             <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 mb-6 flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-green-300">Content saved successfully!</p>
+              <p className="text-green-300">{t('content_management.success_msg')}</p>
             </div>
           )}
 
@@ -152,7 +156,7 @@ export default function StrategicAdvisoryAdminPage() {
             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                 <Edit size={20} />
-                Hero Section
+                {t('content_management.hero_section')}
               </h2>
               <div className="grid gap-4">
                 <div>
@@ -262,7 +266,7 @@ export default function StrategicAdvisoryAdminPage() {
 
             {/* CTA Section */}
             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">Call to Action Section</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('content_management.page_header')}</h2>
               <div className="grid gap-4">
                 <div>
                   <label className="text-sm text-gray-400 mb-2 block">CTA Title</label>

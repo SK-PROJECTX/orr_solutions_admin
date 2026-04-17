@@ -5,8 +5,10 @@ import { Calendar, CheckCircle, User, FileText, Loader, Eye } from "lucide-react
 import { meetingAPI } from "@/app/services";
 import type { MeetingListItem } from "@/app/services/types";
 import Pagination from "@/app/components/common/Pagination";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function PastMeetingsPage() {
+  const { t } = useLanguageStore();
   const [allMeetings, setAllMeetings] = useState<MeetingListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function PastMeetingsPage() {
       setAllMeetings(Array.isArray(meetingsData) ? meetingsData : []);
     } catch (err: any) {
       console.error("Failed to fetch past meetings:", err);
-      setError(err.message || "Failed to load meetings");
+      setError(err.message || t('consultations.error_loading_past'));
       setAllMeetings([]);
     } finally {
       setLoading(false);
@@ -36,9 +38,10 @@ export default function PastMeetingsPage() {
   };
 
   const formatDateTime = (dateString: string) => {
-    if (!dateString) return "Not scheduled";
+    if (!dateString) return t('consultations.no_content');
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
+    const { language } = useLanguageStore.getState();
+    return date.toLocaleString(language === 'en' ? "en-US" : "it-IT", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -60,12 +63,12 @@ export default function PastMeetingsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Past Client Meetings</h1>
-            <p className="text-gray-400">History of completed meetings</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('meetings.past_title')}</h1>
+            <p className="text-gray-400">{t('meetings.past_subtitle')}</p>
           </div>
 
           {loading ? (
@@ -76,12 +79,12 @@ export default function PastMeetingsPage() {
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedMeetings = allMeetings.slice(startIndex, endIndex);
-            
+
             return allMeetings.length === 0 ? (
               <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
                 <CheckCircle size={48} className="mx-auto text-green-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Past Meetings</h3>
-                <p className="text-gray-400">No completed meetings found</p>
+                <h3 className="text-xl font-semibold text-white mb-2">{t('meetings.no_past')}</h3>
+                <p className="text-gray-400">{t('meetings.no_past_desc')}</p>
                 {error && (
                   <p className="text-red-400 text-sm mt-2">{error}</p>
                 )}
@@ -90,10 +93,10 @@ export default function PastMeetingsPage() {
               <>
                 <div className="mb-6">
                   <p className="text-sm text-gray-400">
-                    Showing {paginatedMeetings.length} of {allMeetings.length} meeting{allMeetings.length !== 1 ? 's' : ''}
+                    {t('consultations.showing_meetings')} {paginatedMeetings.length} {t('consultations.of')} {allMeetings.length} {t('sidebar.client_meetings').toLowerCase()}
                   </p>
                 </div>
-                
+
                 <div className="grid gap-4 mb-8">
                   {paginatedMeetings.map((meeting) => (
                     <div key={meeting.id} className="bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/10 p-6">
@@ -102,15 +105,15 @@ export default function PastMeetingsPage() {
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-white">{meeting.client_name}</h3>
                             <span className={`text-xs px-2 py-1 rounded border ${getMeetingTypeColor(meeting.meeting_type)}`}>
-                              {meeting.meeting_type.replace('_', ' ').toUpperCase()}
+                              {t(`consultations.${meeting.meeting_type}` as any) || meeting.meeting_type.replace('_', ' ').toUpperCase()}
                             </span>
                             <span className="text-xs px-2 py-1 rounded border bg-green-500/20 text-green-300 border-green-500/30">
-                              COMPLETED
+                              {t('dashboard.completed').toUpperCase()}
                             </span>
                           </div>
                           <p className="text-sm text-gray-400 mb-1">{meeting.client_company}</p>
                           {meeting.host_name && (
-                            <p className="text-sm text-black">Host: {meeting.host_name}</p>
+                            <p className="text-sm text-black">{t('meetings.host')}: {meeting.host_name}</p>
                           )}
                         </div>
                         <CheckCircle className="text-green-400" size={24} />
@@ -118,34 +121,34 @@ export default function PastMeetingsPage() {
 
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="text-xs text-gray-400 mb-1 block">Meeting Date</label>
+                          <label className="text-xs text-gray-400 mb-1 block">{t('meetings.meeting_date')}</label>
                           <p className="text-sm text-white">{formatDateTime(meeting.confirmed_datetime || meeting.requested_datetime)}</p>
                         </div>
                         <div>
-                          <label className="text-xs text-gray-400 mb-1 block">Duration</label>
-                          <p className="text-sm text-white">{meeting.duration_minutes} minutes</p>
+                          <label className="text-xs text-gray-400 mb-1 block">{t('meetings.duration')}</label>
+                          <p className="text-sm text-white">{meeting.duration_minutes} {t('meetings.minutes')}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-white/10">
                         <div className="text-xs text-black">
-                          Completed on {formatDateTime(meeting.confirmed_datetime || meeting.created_at)}
+                          {t('meetings.completed_on')} {formatDateTime(meeting.confirmed_datetime || meeting.created_at)}
                         </div>
                         <div className="flex items-center gap-3">
                           <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                             <FileText size={14} />
-                            View Notes
+                            {t('meetings.view_notes')}
                           </button>
                           <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                             <Eye size={14} />
-                            View Details
+                            {t('tickets.view_details')}
                           </button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 {allMeetings.length > itemsPerPage && (
                   <Pagination
                     currentPage={currentPage}

@@ -2,36 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { CreditCard, DollarSign, TrendingUp, Users, Calendar, AlertCircle, CheckCircle, Clock, Download } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface BillingStats {
-  total_revenue: number;
-  pending_amount: number;
-  completed_transactions: number;
-  pending_transactions: number;
-  monthly_revenue: number[];
-  recent_revenue: number;
-  total_customers: number;
-  active_subscriptions: number;
+  total_revenue?: number;
+  pending_amount?: number;
+  completed_transactions?: number;
+  active_subscriptions?: number;
+  monthly_revenue?: number[];
 }
 
 interface BillingHistory {
-  id: number;
   reference_id: string;
-  transaction_date: string;
   client_name: string;
   client_email: string;
-  payment_method: string;
   amount: string;
-  status: string;
-  billing_title: string;
   currency: string;
+  status: string;
+  transaction_date: string;
   plan: string;
-  users: number;
   invoice_pdf?: string;
   hosted_invoice_url?: string;
 }
 
 export default function PaymentsBillingPage() {
+  const { t, language } = useLanguageStore();
   const [billingStats, setBillingStats] = useState<BillingStats | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistory[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,33 +47,16 @@ export default function PaymentsBillingPage() {
       if (filters.start_date) queryParams.append('start_date', filters.start_date);
       if (filters.end_date) queryParams.append('end_date', filters.end_date);
 
-      console.log('Fetching billing data...');
       const [statsRes, historyRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/billing-history/stats/`),
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/billing-history/?${queryParams}`)
       ]);
       
-      console.log('Stats response status:', statsRes.status);
-      console.log('History response status:', historyRes.status);
-      
       if (statsRes.ok && historyRes.ok) {
         const stats = await statsRes.json();
         const history = await historyRes.json();
-        console.log('Stats data:', stats);
-        console.log('History data:', history);
-        // Extract data from the nested response structure
         setBillingStats(stats.data || stats);
         setBillingHistory(history.data || history);
-      } else {
-        console.error('API Error:', statsRes.status, historyRes.status);
-        if (!statsRes.ok) {
-          const statsError = await statsRes.text();
-          console.error('Stats error:', statsError);
-        }
-        if (!historyRes.ok) {
-          const historyError = await historyRes.text();
-          console.error('History error:', historyError);
-        }
       }
     } catch (error) {
       console.error('Error fetching billing data:', error);
@@ -92,6 +70,14 @@ export default function PaymentsBillingPage() {
     if (status.toLowerCase().includes('pending')) return <Clock className="text-yellow-400" size={16} />;
     if (status.toLowerCase().includes('failed')) return <AlertCircle className="text-red-400" size={16} />;
     return <Clock className="text-gray-400" size={16} />;
+  };
+
+  const mapStatus = (status: string) => {
+    const s = status.toLowerCase();
+    if (s.includes('paid')) return t('analytics.successful');
+    if (s.includes('pending')) return t('analytics.pending');
+    if (s.includes('failed')) return t('analytics.failed');
+    return status;
   };
 
   const getStatusColor = (status: string) => {
@@ -129,33 +115,33 @@ export default function PaymentsBillingPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Payments & Billing</h1>
-            <p className="text-gray-400">Financial transactions and billing overview</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('sidebar.payments_billing')}</h1>
+            <p className="text-gray-400">{t('billing.subtitle')}</p>
           </div>
 
           {/* Billing Statistics */}
           {billingStats && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Financial Overview</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.financial_overview')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <DollarSign className="text-green-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Total Revenue</h3>
+                  <h3 className="text-lg font-medium text-white">{t('billing.total_revenue')}</h3>
                   <p className="text-2xl font-bold text-green-400">${(billingStats.total_revenue || 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <Clock className="text-yellow-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Pending Amount</h3>
+                  <h3 className="text-lg font-medium text-white">{t('analytics.pending_amount')}</h3>
                   <p className="text-2xl font-bold text-yellow-400">${(billingStats.pending_amount || 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <CheckCircle className="text-blue-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Completed Transactions</h3>
+                  <h3 className="text-lg font-medium text-white">{t('billing.completed_transactions')}</h3>
                   <p className="text-2xl font-bold text-blue-400">{billingStats.completed_transactions || 0}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <Users className="text-purple-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Active Subscriptions</h3>
+                  <h3 className="text-lg font-medium text-white">{t('billing.active_subscriptions')}</h3>
                   <p className="text-2xl font-bold text-purple-400">{billingStats.active_subscriptions || 0}</p>
                 </div>
               </div>
@@ -164,23 +150,23 @@ export default function PaymentsBillingPage() {
 
           {/* Filters */}
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Filter Transactions</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.filter_transactions')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t('billing.status')}</label>
                 <select 
                   value={filters.status} 
                   onChange={(e) => setFilters({...filters, status: e.target.value})}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
                 >
-                  <option value="">All Statuses</option>
-                  <option value="paid">Paid</option>
-                  <option value="pending">Pending</option>
-                  <option value="failed">Failed</option>
+                  <option value="">{t('analytics.all_statuses')}</option>
+                  <option value="paid">{t('analytics.successful')}</option>
+                  <option value="pending">{t('analytics.pending')}</option>
+                  <option value="failed">{t('analytics.failed')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t('common.filters')} (Start)</label>
                 <input 
                   type="date" 
                   value={filters.start_date} 
@@ -189,7 +175,7 @@ export default function PaymentsBillingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t('common.filters')} (End)</label>
                 <input 
                   type="date" 
                   value={filters.end_date} 
@@ -203,19 +189,19 @@ export default function PaymentsBillingPage() {
           {/* Billing History */}
           {billingHistory && Array.isArray(billingHistory) && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Recent Transactions</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('billing.recent_transactions')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-white/10">
-                        <th className="text-left text-white py-3">Invoice ID</th>
-                        <th className="text-left text-white py-3">Client</th>
-                        <th className="text-left text-white py-3">Amount</th>
-                        <th className="text-left text-white py-3">Status</th>
-                        <th className="text-left text-white py-3">Date</th>
-                        <th className="text-left text-white py-3">Plan</th>
-                        <th className="text-left text-white py-3">Actions</th>
+                        <th className="text-left text-white py-3">{t('analytics.invoice_id')}</th>
+                        <th className="text-left text-white py-3">{t('billing.client_name')}</th>
+                        <th className="text-left text-white py-3">{t('billing.amount')}</th>
+                        <th className="text-left text-white py-3">{t('billing.status')}</th>
+                        <th className="text-left text-white py-3">{t('dashboard.table_date')}</th>
+                        <th className="text-left text-white py-3">{t('analytics.plan')}</th>
+                        <th className="text-left text-white py-3">{t('common.manage')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -237,7 +223,7 @@ export default function PaymentsBillingPage() {
                             <div className="flex items-center space-x-2">
                               {getStatusIcon(transaction.status)}
                               <span className={`text-sm ${getStatusColor(transaction.status)}`}>
-                                {transaction.status}
+                                {mapStatus(transaction.status)}
                               </span>
                             </div>
                           </td>
@@ -283,7 +269,7 @@ export default function PaymentsBillingPage() {
           {/* Monthly Revenue Chart Placeholder */}
           {billingStats?.monthly_revenue && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Monthly Revenue Trend</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.monthly_revenue_trend')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="grid grid-cols-12 gap-2 h-32">
                   {billingStats.monthly_revenue && billingStats.monthly_revenue.map((revenue, index) => {
@@ -301,7 +287,7 @@ export default function PaymentsBillingPage() {
                     );
                   })}
                 </div>
-                <p className="text-center text-gray-400 text-sm mt-2">Monthly Revenue (Current Year)</p>
+                <p className="text-center text-gray-400 text-sm mt-2">{t('analytics.monthly_revenue_current_year')}</p>
               </div>
             </div>
           )}

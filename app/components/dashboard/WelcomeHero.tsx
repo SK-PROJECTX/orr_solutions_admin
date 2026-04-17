@@ -2,23 +2,26 @@
 
 import { Clock, TrendingUp } from "lucide-react";
 import { useRole, useIsSuperAdmin } from "@/lib/rbac/hooks";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function WelcomeHero() {
   const role = useRole();
   const isSuperAdmin = useIsSuperAdmin();
+  const { language, t } = useLanguageStore();
 
   const formatDate = () => {
-    return new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
   const getRoleDisplay = () => {
-    if (!role) return 'Admin';
-    return role.replace('_', ' ').toUpperCase();
+    if (!role) return t('sidebar.admin');
+    const localizedRole = role.replace('_', ' ').toUpperCase();
+    return localizedRole;
   };
 
   return (
@@ -26,11 +29,11 @@ export default function WelcomeHero() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex-1">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-3">
-            Welcome back, {getRoleDisplay()}
+            {t('common.welcome_back')}, {getRoleDisplay()}
             {isSuperAdmin && ' 👑'}
           </h1>
           <p className="text-gray-300 text-lg mb-4">
-            You're all set to manage operations and drive client success.
+            {t('common.operations_drive_success')}
           </p>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Clock size={16} />

@@ -3,6 +3,7 @@
 import { Bell, AlertCircle, Calendar, Users, FileText } from "lucide-react";
 import { Notification, TicketListItem, MeetingListItem } from "@/app/services/types";
 import PermissionGuard from "../admin/PermissionGuard";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface ActivityFeedProps {
   notifications: Notification[];
@@ -12,6 +13,28 @@ interface ActivityFeedProps {
 }
 
 export default function ActivityFeed({ notifications, tickets, meetings, loading = false }: ActivityFeedProps) {
+  const { t, language } = useLanguageStore();
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString(language === 'en' ? 'en-US' : 'it-IT');
+  };
+
+  const mapPriority = (priority: string) => {
+    const p = priority?.toLowerCase();
+    if (p === 'urgent') return t('dashboard.urgent');
+    if (p === 'high') return t('dashboard.high');
+    if (p === 'low') return t('dashboard.low');
+    return priority;
+  };
+
+  const mapStatus = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === 'pending') return t('dashboard.pending');
+    if (s === 'completed') return t('dashboard.completed');
+    if (s === 'confirmed') return t('dashboard.confirmed');
+    return status;
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -38,7 +61,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
             <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
               <Bell size={18} className="text-primary" />
             </div>
-            Notifications
+            {t('dashboard.notifications')}
           </h2>
           <span className="bg-primary/30 text-primary px-3 py-1 rounded-full text-xs font-bold">
             {notifications.length}
@@ -58,8 +81,8 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                   <p className="text-xs text-gray-400 line-clamp-1 mt-1">
                     {notif.message}
                   </p>
-                  <p className="text-xs text-black mt-1">
-                    {new Date(notif.created_at).toLocaleString()}
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formatDateTime(notif.created_at)}
                   </p>
                 </div>
               </div>
@@ -67,8 +90,8 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
           </div>
         ) : (
           <div className="text-center py-8">
-            <Bell size={48} className="text-black mx-auto mb-4" />
-            <p className="text-gray-400 text-sm">No pending notifications</p>
+            <Bell size={48} className="text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 text-sm">{t('dashboard.no_notifications')}</p>
           </div>
         )}
       </div>
@@ -83,7 +106,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                 <div className="p-2 bg-orange-500/20 rounded-lg group-hover:bg-orange-500/30 transition-colors">
                   <AlertCircle size={18} className="text-orange-400" />
                 </div>
-                Support Tickets
+                {t('dashboard.support_tickets')}
               </h2>
               <span className="bg-orange-500/30 text-orange-300 px-3 py-1 rounded-full text-xs font-bold">
                 {tickets.length}
@@ -105,7 +128,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                         <p className="text-xs text-gray-400 line-clamp-1 mt-1">
                           {ticket.subject}
                         </p>
-                        <p className="text-xs text-black mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           {ticket.client_name}
                         </p>
                       </div>
@@ -116,7 +139,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                           ? "bg-orange-500/20 text-orange-300"
                           : "bg-yellow-500/20 text-yellow-300"
                       }`}>
-                        {ticket.priority}
+                        {mapPriority(ticket.priority)}
                       </span>
                     </div>
                   </div>
@@ -124,8 +147,8 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
               </div>
             ) : (
               <div className="text-center py-6">
-                <AlertCircle size={32} className="text-black mx-auto mb-2" />
-                <p className="text-gray-400 text-sm">No pending tickets</p>
+                <AlertCircle size={32} className="text-gray-600 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">{t('dashboard.no_tickets')}</p>
               </div>
             )}
           </div>
@@ -139,7 +162,7 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                 <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
                   <Calendar size={18} className="text-blue-400" />
                 </div>
-                Upcoming Meetings
+                {t('dashboard.meetings')}
               </h2>
               <span className="bg-blue-500/30 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">
                 {meetings.length}
@@ -159,16 +182,14 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
                           {meeting.client_name}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {new Date(
-                            meeting.confirmed_datetime || meeting.requested_datetime
-                          ).toLocaleString()}
+                          {formatDateTime(meeting.confirmed_datetime || meeting.requested_datetime)}
                         </p>
-                        <p className="text-xs text-black mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           {meeting.meeting_type} • {meeting.duration_minutes} min
                         </p>
                       </div>
                       <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-300 flex-shrink-0 font-medium">
-                        {meeting.status}
+                        {mapStatus(meeting.status)}
                       </span>
                     </div>
                   </div>
@@ -176,8 +197,8 @@ export default function ActivityFeed({ notifications, tickets, meetings, loading
               </div>
             ) : (
               <div className="text-center py-6">
-                <Calendar size={32} className="text-black mx-auto mb-2" />
-                <p className="text-gray-400 text-sm">No upcoming meetings</p>
+                <Calendar size={32} className="text-gray-600 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">{t('dashboard.no_meetings')}</p>
               </div>
             )}
           </div>

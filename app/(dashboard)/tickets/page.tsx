@@ -6,6 +6,7 @@ import { MessageSquare, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNotificationContext } from "@/lib/contexts/NotificationContext";
 import CreateTicketModal from "@/components/CreateTicketModal";
+import { useLanguageStore } from "@/store/languageStore";
 
 const statusColors: Record<TicketStatus, string> = {
   new: "bg-blue-500/30 text-blue-300 border-blue-500/30",
@@ -42,6 +43,7 @@ const sourceIcons: Record<TicketSource, React.ReactNode> = {
 };
 
 export default function TicketsPage() {
+  const { t, language } = useLanguageStore();
   const [tickets, setTickets] = useState<TicketListItem[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<TicketListItem | null>(null);
   const [ticketMessages, setTicketMessages] = useState<any[]>([]);
@@ -91,7 +93,7 @@ export default function TicketsPage() {
       setTickets(Array.isArray(ticketsData) ? ticketsData : []);
     } catch (err: any) {
       console.error("Failed to fetch tickets:", err);
-      setError(err.message || "Failed to load tickets");
+      setError(err.message || t('common.error') + ": Failed to load tickets");
       setTickets([]);
     } finally {
       setLoading(false);
@@ -141,7 +143,7 @@ export default function TicketsPage() {
       const assignedUser = assignableUsers.find(u => u.id === newAssignedTo);
       const userName = assignedUser?.full_name || assignedUser?.username || 'Unknown User';
 
-      success('Ticket Assigned', `Ticket ${selectedTicket.ticket_id} has been assigned to ${userName}`);
+      success(t('tickets.assign'), `Ticket ${selectedTicket.ticket_id} has been assigned to ${userName}`);
 
       setNewAssignedTo("");
       fetchTickets();
@@ -151,7 +153,7 @@ export default function TicketsPage() {
       }
     } catch (err: any) {
       console.error("Failed to update ticket assignment:", err);
-      showError('Assignment Failed', err.message || "Failed to update assignment");
+      showError(t('tickets.assign') + ' Failed', err.message || "Failed to update assignment");
       setError(err.message || "Failed to update assignment");
     } finally {
       setActionLoading(false);
@@ -163,7 +165,6 @@ export default function TicketsPage() {
 
     try {
       setActionLoading(true);
-      setError(null);
       setError(null);
 
       // Use direct PATCH update instead of actions
@@ -231,8 +232,6 @@ export default function TicketsPage() {
     }
   };
 
-
-
   return (
     <div>
       <div className="min-h-screen text-white relative overflow-hidden star">
@@ -243,14 +242,14 @@ export default function TicketsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl md:text-4xl font-bold text-white">Tickets</h1>
-                <p className="text-gray-400 text-xs md:text-sm mt-2">Manage and resolve support tickets</p>
+                <h1 className="text-2xl md:text-4xl font-bold text-white">{t('tickets.title')}</h1>
+                <p className="text-gray-400 text-xs md:text-sm mt-2">{t('tickets.subtitle')}</p>
               </div>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md flex-shrink-0"
               >
-                + Create Ticket
+                {t('tickets.create_button')}
               </button>
             </div>
 
@@ -265,7 +264,7 @@ export default function TicketsPage() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search tickets..."
+                      placeholder={t('tickets.search_placeholder')}
                       className="w-full bg-white/10 border border-white/20 pl-10 pr-4 py-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200"
                     />
                   </div>
@@ -277,15 +276,15 @@ export default function TicketsPage() {
                         onChange={(e) => setFilterStatus(e.target.value as TicketStatus | "all")}
                         className="w-full bg-white/10 border border-white/20 px-3 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                       >
-                        <option value="all" className="bg-gray-800">All Status</option>
-                        <option value="new" className="bg-gray-800">New</option>
-                        <option value="processing" className="bg-gray-800">Processing Payment</option>
-                        <option value="payment_failed" className="bg-gray-800">Payment Failed</option>
-                        <option value="payment_disputed" className="bg-gray-800">Payment Disputed</option>
-                        <option value="refund_requested" className="bg-gray-800">Refund Requested</option>
-                        <option value="refund_processed" className="bg-gray-800">Refund Processed</option>
-                        <option value="resolved" className="bg-gray-800">Resolved</option>
-                        <option value="archived" className="bg-gray-800">Archived</option>
+                        <option value="all" className="bg-gray-800">{t('tickets.all_status')}</option>
+                        <option value="new" className="bg-gray-800">{t('tickets.status.new')}</option>
+                        <option value="processing" className="bg-gray-800">{t('tickets.status.processing')}</option>
+                        <option value="payment_failed" className="bg-gray-800">{t('tickets.status.payment_failed')}</option>
+                        <option value="payment_disputed" className="bg-gray-800">{t('tickets.status.payment_disputed')}</option>
+                        <option value="refund_requested" className="bg-gray-800">{t('tickets.status.refund_requested')}</option>
+                        <option value="refund_processed" className="bg-gray-800">{t('tickets.status.refund_processed')}</option>
+                        <option value="resolved" className="bg-gray-800">{t('tickets.status.resolved')}</option>
+                        <option value="archived" className="bg-gray-800">{t('tickets.status.archived')}</option>
                       </select>
                     </div>
                     <div className="flex-1 min-w-[120px]">
@@ -294,11 +293,11 @@ export default function TicketsPage() {
                         onChange={(e) => setFilterPriority(e.target.value as TicketPriority | "all")}
                         className="w-full bg-white/10 border border-white/20 px-3 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                       >
-                        <option value="all" className="bg-gray-800">All Priority</option>
-                        <option value="low" className="bg-gray-800">Low</option>
-                        <option value="normal" className="bg-gray-800">Normal</option>
-                        <option value="high" className="bg-gray-800">High</option>
-                        <option value="urgent" className="bg-gray-800">Urgent</option>
+                        <option value="all" className="bg-gray-800">{t('tickets.all_priority')}</option>
+                        <option value="low" className="bg-gray-800">{t('tickets.priority_labels.low')}</option>
+                        <option value="normal" className="bg-gray-800">{t('tickets.priority_labels.normal')}</option>
+                        <option value="high" className="bg-gray-800">{t('tickets.priority_labels.high')}</option>
+                        <option value="urgent" className="bg-gray-800">{t('tickets.priority_labels.urgent')}</option>
                       </select>
                     </div>
                     <div className="flex-1 min-w-[120px]">
@@ -307,12 +306,12 @@ export default function TicketsPage() {
                         onChange={(e) => setFilterSource(e.target.value as TicketSource | "all")}
                         className="w-full bg-white/10 border border-white/20 px-3 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                       >
-                        <option value="all" className="bg-gray-800">All Source</option>
-                        <option value="payment_webhook" className="bg-gray-800">Payment Webhook</option>
-                        <option value="billing_portal" className="bg-gray-800">Billing Portal</option>
-                        <option value="subscription_change" className="bg-gray-800">Subscription Change</option>
-                        <option value="manual_request" className="bg-gray-800">Manual Request</option>
-                        <option value="client_inquiry" className="bg-gray-800">Client Inquiry</option>
+                        <option value="all" className="bg-gray-800">{t('tickets.all_source')}</option>
+                        <option value="payment_webhook" className="bg-gray-800">{t('tickets.sources.payment_webhook')}</option>
+                        <option value="billing_portal" className="bg-gray-800">{t('tickets.sources.billing_portal')}</option>
+                        <option value="subscription_change" className="bg-gray-800">{t('tickets.sources.subscription_change')}</option>
+                        <option value="manual_request" className="bg-gray-800">{t('tickets.sources.manual_request')}</option>
+                        <option value="client_inquiry" className="bg-gray-800">{t('tickets.sources.client_inquiry')}</option>
                       </select>
                     </div>
                   </div>
@@ -327,7 +326,7 @@ export default function TicketsPage() {
                   ) : tickets.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
                       <MessageSquare size={32} className="mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No tickets found</p>
+                      <p className="text-sm">{t('tickets.no_tickets')}</p>
                       {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
                     </div>
                   ) : (
@@ -344,28 +343,28 @@ export default function TicketsPage() {
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-white text-sm">{ticket.ticket_id}</p>
                                 <span className={`text-xs px-2 py-0.5 rounded border ${sourceColors[ticket.source]}`}>
-                                  {sourceIcons[ticket.source]} {ticket.source.replace('_', ' ')}
+                                  {sourceIcons[ticket.source]} {t(`tickets.sources.${ticket.source}`)}
                                 </span>
                               </div>
                               <p className="text-xs text-gray-400 mt-1">{ticket.client_name}</p>
                             </div>
                             <span className={`text-xs px-2 py-1 rounded border ${statusColors[ticket.status]}`}>
-                              {ticket.status}
+                              {t(`tickets.status.${ticket.status}`)}
                             </span>
                           </div>
                           {ticket.is_escalated && (
                             <div className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 w-fit mb-2 animate-pulse">
                               <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                              ESCALATED
+                              {t('tickets.escalated')}
                             </div>
                           )}
                           <p className="text-sm text-gray-300 line-clamp-2">{ticket.subject}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <span className={`text-xs font-medium ${priorityColors[ticket.priority]}`}>
-                              {ticket.priority}
+                              {t(`tickets.priority_labels.${ticket.priority}`)}
                             </span>
                             <span className="text-xs text-black">•</span>
-                            <span className="text-xs text-black">{new Date(ticket.created_at).toLocaleDateString()}</span>
+                            <span className="text-xs text-black">{new Date(ticket.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT')}</span>
                           </div>
                         </button>
                       ))}
@@ -386,11 +385,11 @@ export default function TicketsPage() {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className={`text-xs md:text-sm px-3 py-1 rounded-lg border font-medium ${statusColors[selectedTicket.status]}`}>
-                          {selectedTicket.status}
+                          {t(`tickets.status.${selectedTicket.status}`)}
                         </span>
                         {selectedTicket.is_escalated && (
                           <span className="text-xs px-2 py-0.5 rounded border bg-red-500/20 text-red-300 border-red-500/30 animate-pulse">
-                            ⚠️ IMMEDIATE ACTION REQUIRED
+                            ⚠️ {t('tickets.action_required')}
                           </span>
                         )}
                       </div>
@@ -398,30 +397,30 @@ export default function TicketsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-black mb-1">Client</p>
+                        <p className="text-xs text-black mb-1">{t('tickets.client')}</p>
                         <p className="text-white font-medium">{selectedTicket.client_name}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-black mb-1">Priority</p>
-                        <p className={`font-medium ${priorityColors[selectedTicket.priority]}`}>{selectedTicket.priority}</p>
+                        <p className="text-xs text-black mb-1">{t('tickets.priority')}</p>
+                        <p className={`font-medium ${priorityColors[selectedTicket.priority]}`}>{t(`tickets.priority_labels.${selectedTicket.priority}`)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-black mb-1">Source</p>
-                        <p className="text-white font-medium capitalize">{selectedTicket.source.replace('_', ' ')}</p>
+                        <p className="text-xs text-black mb-1">{t('tickets.source')}</p>
+                        <p className="text-white font-medium capitalize">{t(`tickets.sources.${selectedTicket.source}`)}</p>
                         <button className="text-primary hover:text-primary/80 text-sm transition-colors">
-                          Change
+                          {t('common.change') || "Change"}
                         </button>
                       </div>
                       <div>
-                        <p className="text-xs text-black mb-1">Created</p>
-                        <p className="text-white font-medium">{new Date(selectedTicket.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-black mb-1">{t('tickets.created')}</p>
+                        <p className="text-white font-medium">{new Date(selectedTicket.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT')}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Assigned To */}
                   <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-xs text-black mb-2">Assigned To</p>
+                    <p className="text-xs text-black mb-2">{t('tickets.assigned_to')}</p>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-medium">
@@ -432,7 +431,7 @@ export default function TicketsPage() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="text-white font-medium text-sm">{selectedTicket.assigned_to_name || 'Unassigned'}</p>
+                        <p className="text-white font-medium text-sm">{selectedTicket.assigned_to_name || t('tickets.unassigned')}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <select
@@ -440,7 +439,7 @@ export default function TicketsPage() {
                           onChange={(e) => setNewAssignedTo(e.target.value ? parseInt(e.target.value) : "")}
                           className="bg-white/10 border border-white/20 px-2 py-1 rounded text-xs text-white focus:outline-none focus:border-primary/50"
                         >
-                          <option value="" className="bg-gray-800">Change assignee...</option>
+                          <option value="" className="bg-gray-800">{t('tickets.change_assignee')}</option>
                           {assignableUsers.map((user) => (
                             <option key={user.id} value={user.id} className="bg-gray-800">
                               {user.full_name || user.username}
@@ -453,7 +452,7 @@ export default function TicketsPage() {
                             disabled={actionLoading}
                             className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-2 py-1 rounded text-xs transition-all duration-200"
                           >
-                            {actionLoading ? 'Updating...' : 'Assign'}
+                            {actionLoading ? t('tickets.updating') : t('tickets.assign')}
                           </button>
                         )}
                       </div>
@@ -462,7 +461,7 @@ export default function TicketsPage() {
 
                   {/* Conversation Thread */}
                   <div className="flex-1 flex flex-col gap-4">
-                    <h3 className="text-lg font-semibold text-white">Conversation</h3>
+                    <h3 className="text-lg font-semibold text-white">{t('tickets.conversation')}</h3>
                     <div className="bg-white/5 rounded-lg p-4 border border-white/10 space-y-4 max-h-[250px] overflow-y-auto">
                       {messagesLoading ? (
                         <div className="flex items-center justify-center py-4">
@@ -470,7 +469,7 @@ export default function TicketsPage() {
                         </div>
                       ) : ticketMessages.length === 0 ? (
                         <div className="text-center py-4 text-gray-400">
-                          <p className="text-sm">No messages yet</p>
+                          <p className="text-sm">{t('tickets.no_messages')}</p>
                         </div>
                       ) : (
                         ticketMessages.map((message, index) => {
@@ -493,11 +492,11 @@ export default function TicketsPage() {
                               )}
                               <div className={message.sender_type === 'admin' ? 'flex-1 text-right' : ''}>
                                 <p className={`text-sm ${message.sender_type === 'admin' ? 'text-primary' : 'text-gray-300'}`}>
-                                  {message.sender_name || 'Unknown User'} {message.is_internal && '(Internal)'}
+                                  {message.sender_name || 'Unknown User'} {message.is_internal && `(${t('tickets.internal_message')})`}
                                 </p>
                                 <p className="text-xs text-gray-200 mt-1">{message.message}</p>
                                 <p className="text-xs text-gray-100 mt-2">
-                                  {new Date(message.created_at).toLocaleString()}
+                                  {new Date(message.created_at).toLocaleString(language === 'en' ? 'en-US' : 'it-IT')}
                                 </p>
                               </div>
                               {message.sender_type === 'admin' && (
@@ -521,14 +520,14 @@ export default function TicketsPage() {
                           onChange={(e) => setIsInternal(e.target.checked)}
                           className="rounded border-white/20 bg-white/10 text-primary focus:ring-primary/50"
                         />
-                        <label htmlFor="internal" className="text-sm text-gray-400">Internal message</label>
+                        <label htmlFor="internal" className="text-sm text-gray-400">{t('tickets.internal_message')}</label>
                       </div>
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
-                          placeholder="Type your message..."
+                          placeholder={t('tickets.type_message')}
                           className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
                           onKeyPress={(e) => e.key === 'Enter' && handleAddMessage()}
                         />
@@ -537,7 +536,7 @@ export default function TicketsPage() {
                           disabled={!newMessage.trim() || actionLoading}
                           className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all duration-200"
                         >
-                          Send
+                          {t('tickets.send')}
                         </button>
                       </div>
                     </div>
@@ -545,9 +544,9 @@ export default function TicketsPage() {
 
                   {/* Internal Notes */}
                   <div className="flex flex-col gap-2">
-                    <h3 className="text-lg font-semibold text-white">Internal Notes</h3>
+                    <h3 className="text-lg font-semibold text-white">{t('tickets.internal_notes_title')}</h3>
                     <textarea
-                      placeholder="Add internal notes (visible only to staff)..."
+                      placeholder={t('tickets.internal_notes_placeholder')}
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200 resize-none"
                       rows={3}
                     />
@@ -560,22 +559,22 @@ export default function TicketsPage() {
                       onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
                       className="flex-1 bg-white/10 border border-white/20 px-4 py-2 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50 transition-all duration-200"
                     >
-                      <option value="" className="bg-gray-800">Change Status...</option>
-                      <option value="new" className="bg-gray-800">New</option>
-                      <option value="processing" className="bg-gray-800">Processing Payment</option>
-                      <option value="payment_failed" className="bg-gray-800">Payment Failed</option>
-                      <option value="payment_disputed" className="bg-gray-800">Payment Disputed</option>
-                      <option value="refund_requested" className="bg-gray-800">Refund Requested</option>
-                      <option value="refund_processed" className="bg-gray-800">Refund Processed</option>
-                      <option value="resolved" className="bg-gray-800">Resolved</option>
-                      <option value="archived" className="bg-gray-800">Archived</option>
+                      <option value="" className="bg-gray-800">{t('tickets.change_status')}</option>
+                      <option value="new" className="bg-gray-800">{t('tickets.status.new')}</option>
+                      <option value="processing" className="bg-gray-800">{t('tickets.status.processing')}</option>
+                      <option value="payment_failed" className="bg-gray-800">{t('tickets.status.payment_failed')}</option>
+                      <option value="payment_disputed" className="bg-gray-800">{t('tickets.status.payment_disputed')}</option>
+                      <option value="refund_requested" className="bg-gray-800">{t('tickets.status.refund_requested')}</option>
+                      <option value="refund_processed" className="bg-gray-800">{t('tickets.status.refund_processed')}</option>
+                      <option value="resolved" className="bg-gray-800">{t('tickets.status.resolved')}</option>
+                      <option value="archived" className="bg-gray-800">{t('tickets.status.archived')}</option>
                     </select>
                     <button
                       onClick={handleStatusChange}
                       disabled={!newStatus || actionLoading}
                       className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                      {actionLoading ? 'Updating...' : 'Update Status'}
+                      {actionLoading ? t('tickets.updating') : t('tickets.update_status')}
                     </button>
                   </div>
                 </div>
@@ -583,7 +582,7 @@ export default function TicketsPage() {
                 <div className="basis-[65%] bg-gradient-to-br from-white/15 to-white/5 rounded-xl border border-white/10 shadow-lg p-6 flex items-center justify-center">
                   <div className="text-center">
                     <MessageSquare size={48} className="text-black mx-auto mb-4" />
-                    <p className="text-gray-400">Select a ticket to view details</p>
+                    <p className="text-gray-400">{t('tickets.no_tickets')}</p>
                   </div>
                 </div>
               )}

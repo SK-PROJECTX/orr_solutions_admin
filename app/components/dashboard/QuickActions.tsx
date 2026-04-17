@@ -3,42 +3,44 @@
 import { Users, AlertCircle, Calendar, FileText, ArrowRight, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PermissionGuard from "../admin/PermissionGuard";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function QuickActions() {
   const router = useRouter();
+  const { t, language } = useLanguageStore();
 
   const actions = [
     {
-      title: "Add New Client",
-      description: "Create a new client profile",
+      title: t('dashboard.add_client'),
+      description: t('dashboard.add_client_desc'),
       icon: Users,
       color: "primary",
       onClick: () => router.push("/client-management"),
-permission: "can_edit_clients" as const
+      permission: "can_edit_clients" as const
     },
     {
-      title: "Create Support Ticket",
-      description: "Handle client support requests",
+      title: t('dashboard.create_ticket'),
+      description: t('dashboard.create_ticket_desc'),
       icon: AlertCircle,
       color: "orange-500",
       onClick: () => router.push("/tickets"),
-permission: "can_manage_tickets" as const
+      permission: "can_manage_tickets" as const
     },
     {
-      title: "Schedule Meeting",
-      description: "Book consultation sessions",
+      title: t('dashboard.schedule_meeting'),
+      description: t('dashboard.schedule_meeting_desc'),
       icon: Calendar,
       color: "blue-500",
       onClick: () => router.push("/schedule-meetings"),
-permission: "can_manage_meetings" as const
+      permission: "can_manage_meetings" as const
     },
     {
-      title: "Create Content",
-      description: "Add new resources and articles",
+      title: t('dashboard.create_content'),
+      description: t('dashboard.create_content_desc'),
       icon: FileText,
       color: "green-500",
       onClick: () => router.push("/content-management/new"),
-permission: "can_create_content" as const
+      permission: "can_create_content" as const
     }
   ];
 
@@ -48,13 +50,13 @@ permission: "can_create_content" as const
         <div className="p-2 bg-primary/20 rounded-lg">
           <Plus size={18} className="text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
+        <h3 className="text-lg font-semibold text-white">{t('dashboard.quick_actions')}</h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {actions.map((action) => (
           <PermissionGuard key={action.title} permissions={[action.permission]}>
-            <button 
+            <button
               onClick={action.onClick}
               className="group flex items-center gap-3 p-4 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 hover:border-primary/30 transition-all duration-300 text-left w-full"
             >

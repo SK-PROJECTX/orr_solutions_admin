@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Save, Loader, Plus, Trash2, Edit } from 'lucide-react';
 import RichTextEditor from '../../../components/RichTextEditor';
 import { useNotificationContext } from '../../../lib/contexts/NotificationContext';
+import { useLanguageStore } from '@/store/languageStore';
+import { cleanContentObject, cleanHtmlContent } from "@/app/utils/htmlCleaner";
 
 interface BusinessSystemCard {
   id?: number;
@@ -32,6 +34,7 @@ export default function BusinessSystemCardsManagement({
   saving,
   setSaving
 }: BusinessSystemCardsManagementProps) {
+  const { t } = useLanguageStore();
   const [cards, setCards] = useState<BusinessSystemCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -39,14 +42,7 @@ export default function BusinessSystemCardsManagement({
   const { success, error } = useNotificationContext();
 
   const getStringValue = (value: any): string => {
-    if (typeof value === 'string') return value;
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'object' && value !== null) {
-      if (value.content) return String(value.content);
-      if (value.format !== undefined) return String(value.content || '');
-      return '';
-    }
-    return String(value || '');
+    return cleanHtmlContent(value);
   };
 
   useEffect(() => {
@@ -69,10 +65,11 @@ export default function BusinessSystemCardsManagement({
           cardsData = result.data;
         }
         const cardsArray = Array.isArray(cardsData) ? cardsData : [];
-        setCards(cardsArray.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)));
+        const cleanedCards = cardsArray.map((card: any) => cleanContentObject(card));
+        setCards(cleanedCards.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)));
       }
-    } catch (error) {
-      console.error('Failed to fetch business system cards:', error);
+    } catch (err) {
+      console.error('Failed to fetch business system cards:', err);
     } finally {
       setLoading(false);
     }
@@ -92,14 +89,14 @@ export default function BusinessSystemCardsManagement({
       });
 
       if (response.ok) {
-        success('Card saved successfully!', 'Business system card has been updated.');
+        success(t('content_management.success_save_title'), t('content_management.success_save_msg'));
         fetchCards();
       } else {
         throw new Error('Failed to save card');
       }
     } catch (err) {
       console.error('Failed to save card:', err);
-      error('Failed to save card', 'Please try again or contact support.');
+      error(t('content_management.error_save_title'), t('content_management.validation_error_msg'));
     } finally {
       setSaving(null);
     }
@@ -119,7 +116,7 @@ export default function BusinessSystemCardsManagement({
       });
 
       if (response.ok) {
-        success('Card added successfully!', 'New business system card has been created.');
+        success(t('content_management.success_save_title'), t('content_management.success_save_msg'));
         setShowAddForm(false);
         setNewCard({ title: '', description: '', order: cards.length + 1 });
         fetchCards();
@@ -128,7 +125,7 @@ export default function BusinessSystemCardsManagement({
       }
     } catch (err) {
       console.error('Failed to add card:', err);
-      error('Failed to add card', 'Please try again or contact support.');
+      error(t('content_management.error_save_title'), t('content_management.validation_error_msg'));
     } finally {
       setSaving(null);
     }
@@ -143,7 +140,7 @@ export default function BusinessSystemCardsManagement({
   if (loading) {
     return (
       <div className={sectionClass}>
-        <h2 className={titleClass}>Business System Cards</h2>
+        <h2 className={titleClass}>{t('content_management.business_system_section')}</h2>
         <div className="flex items-center justify-center py-8">
           <Loader className="animate-spin" size={24} />
         </div>
@@ -154,7 +151,7 @@ export default function BusinessSystemCardsManagement({
   return (
     <div className={sectionClass}>
       <div className="flex items-center justify-between mb-6">
-        <h2 className={titleClass}>Business System Cards</h2>
+        <h2 className={titleClass}>{t('content_management.business_system_section')}</h2>
         <button 
           onClick={() => {
             setNewCard({ title: '', description: '', order: cards.length + 1 });
@@ -163,21 +160,21 @@ export default function BusinessSystemCardsManagement({
           className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
         >
           <Plus size={18} />
-          Add Card
+          {t('content_management.add_card')}
         </button>
       </div>
       
       <p className="text-gray-400 text-sm mb-6">
-        All business system cards are shaped around your context - no generic playbooks. Add and edit business cards to customize the living system representation.
+        {t('content_management.cards_desc')}
       </p>
 
       <div className="flex flex-col gap-6">
         {showAddForm && (
           <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4 text-white">Add New Card</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.add_new_card')}</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleAddCard(); }} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className={labelClass}>Order</label>
+                <label className={labelClass}>{t('content_management.order')}</label>
                 <input 
                   type="number" 
                   value={newCard.order} 
@@ -186,25 +183,25 @@ export default function BusinessSystemCardsManagement({
                 />
               </div>
               <RichTextEditor
-                label="Title"
+                label={t('content_management.section_title')}
                 value={getStringValue(newCard.title)}
                 onChange={(value) => setNewCard({...newCard, title: value})}
-                placeholder="Enter card title"
+                placeholder={t('content_management.placeholder_card_title')}
               />
               <RichTextEditor
-                label="Description"
+                label={t('content_management.description')}
                 value={getStringValue(newCard.description)}
                 onChange={(value) => setNewCard({...newCard, description: value})}
-                placeholder="Enter card description"
+                placeholder={t('content_management.placeholder_card_description')}
                 rows={3}
               />
               <div className="flex gap-3">
                 <button type="submit" disabled={saving === 'add-card'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'add-card' ? 'Adding...' : 'Add Card'}
+                  {saving === 'add-card' ? t('content_management.adding') : t('content_management.add_card')}
                 </button>
                 <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 text-gray-300 px-6 py-2 rounded-lg font-medium transition-all duration-200">
-                  Cancel
+                  {t('content_management.cancel')}
                 </button>
               </div>
             </form>
@@ -213,13 +210,13 @@ export default function BusinessSystemCardsManagement({
 
         {cards.map((card, index) => (
           <div key={card.id} className="bg-white/5 border border-white/10 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4 text-white">Card {index + 1} - {getStringValue(card.title) || 'Untitled'}</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.card', { num: index + 1 })} - {getStringValue(card.title) || t('content_management.not_specified')}</h3>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               card.id && handleSave(card.id, card); 
             }} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className={labelClass}>Order</label>
+                <label className={labelClass}>{t('content_management.order')}</label>
                 <input 
                   type="number" 
                   value={card.order} 
@@ -228,22 +225,22 @@ export default function BusinessSystemCardsManagement({
                 />
               </div>
               <RichTextEditor
-                label="Title"
+                label={t('content_management.section_title')}
                 value={getStringValue(card.title)}
                 onChange={(value) => card.id && handleCardChange(card.id, 'title', value)}
-                placeholder="Enter card title"
+                placeholder={t('content_management.placeholder_card_title')}
               />
               <RichTextEditor
-                label="Description"
+                label={t('content_management.description')}
                 value={getStringValue(card.description)}
                 onChange={(value) => card.id && handleCardChange(card.id, 'description', value)}
-                placeholder="Enter card description"
+                placeholder={t('content_management.placeholder_card_description')}
                 rows={3}
               />
               <div className="flex gap-3">
                 <button type="submit" disabled={saving === `card-${card.id}`} className={buttonClass}>
                   <Save size={18} />
-                  {saving === `card-${card.id}` ? 'Saving...' : `Save Card ${index + 1}`}
+                  {saving === `card-${card.id}` ? t('content_management.saving') : t('content_management.save_faq', { num: index + 1 })}
                 </button>
               </div>
             </form>
@@ -252,10 +249,10 @@ export default function BusinessSystemCardsManagement({
 
         {cards.length === 0 && !showAddForm && (
           <div className="text-center py-8 text-gray-400">
-            <p>No business system cards found. Click "Add Card" to create your first card.</p>
+            <p>{t('content_management.no_cards')}</p>
           </div>
         )}
       </div>
     </div>
   );
-}
+}

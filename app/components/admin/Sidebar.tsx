@@ -18,6 +18,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "../../../lib/hooks/auth";
+import { useLanguageStore } from "@/store/languageStore";
 
 type OpenState = {
   home: boolean;
@@ -42,6 +43,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const { t, language } = useLanguageStore();
   const [open, setOpen] = useState<OpenState>({
     home: true,
     operational: true,
@@ -50,7 +52,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     content: false,
     analytics: false,
   });
-  const [subOpen, setSubOpen] = useState<{[key: string]: boolean}>({});
+  const [subOpen, setSubOpen] = useState<{ [key: string]: boolean }>({});
 
   const toggle = (key: keyof OpenState) => setOpen({ ...open, [key]: !open[key] });
   const toggleSub = (key: string) => setSubOpen({ ...subOpen, [key]: !subOpen[key] });
@@ -64,16 +66,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40" 
-          onClick={onClose} 
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`w-64 h-screen bg-card text-white flex flex-col justify-between p-4 flex-shrink-0 overflow-y-auto transition-transform duration-300 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0 fixed z-50`}>
+      <aside className={`w-64 h-screen bg-card text-white flex flex-col justify-between p-4 flex-shrink-0 overflow-y-auto transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 fixed z-50`}>
         <div>
           <div className="flex items-center px-2 mb-8">
             <img src="/images/logo.svg" alt="ORR Solutions" className="w-fit h-auto" />
@@ -82,12 +83,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <nav className="space-y-1">
             {/* Home / Dashboard */}
             <SidebarGroup
-              label="Home / Dashboard"
+              label={t('sidebar.home_dashboard')}
               icon={Home}
               open={open.home}
               onClick={() => toggle("home")}
               items={[
-                { label: "Dashboard", href: "/" }
+                { label: t('sidebar.dashboard'), href: "/" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
@@ -97,28 +98,28 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Operational Dashboard */}
             <SidebarGroup
-              label="Operational Dashboard"
+              label={t('sidebar.operational_dashboard')}
               icon={Settings}
               open={open.operational}
               onClick={() => toggle("operational")}
               items={[
-                { label: "Quick Actions", href: "/operational/quick-actions" },
-                { label: "System Notifications", href: "/operational/system-notifications" },
-                { label: "Billing & Credit Overview", href: "/operational/billing-credit" },
-                { 
-                  label: "Client Management", 
+                { label: t('sidebar.quick_actions'), href: "/operational/quick-actions" },
+                { label: t('sidebar.system_notifications'), href: "/operational/system-notifications" },
+                { label: t('sidebar.billing_credit'), href: "/operational/billing-credit" },
+                {
+                  label: t('sidebar.client_management'),
                   href: "/client-management",
                   subItems: [
-                    { label: "All Clients", href: "/client-management" },
-                    { label: "Client Profiles", href: "/client-management/profiles" },
-                    { label: "Client Workspaces", href: "/client-management/workspaces" },
-                    { 
-                      label: "Client Meetings", 
+                    { label: t('sidebar.all_clients'), href: "/client-management" },
+                    { label: t('sidebar.client_profiles'), href: "/client-management/profiles" },
+                    { label: t('sidebar.client_workspaces'), href: "/client-management/workspaces" },
+                    {
+                      label: t('sidebar.client_meetings'),
                       href: "/client-management/meetings",
                       subItems: [
-                        { label: "Past", href: "/client-management/meetings/past" },
-                        { label: "Upcoming", href: "/client-management/meetings/upcoming" },
-                        { label: "Pending", href: "/client-management/meetings/pending" }
+                        { label: t('sidebar.past'), href: "/client-management/meetings/past" },
+                        { label: t('sidebar.upcoming'), href: "/client-management/meetings/upcoming" },
+                        { label: t('sidebar.pending'), href: "/client-management/meetings/pending" }
                       ]
                     }
                   ]
@@ -132,28 +133,28 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Consultation Management */}
             <SidebarGroup
-              label="Consultation Management"
+              label={t('sidebar.consultation_management')}
               icon={UserCheck}
               open={open.consultation}
               onClick={() => toggle("consultation")}
               items={[
-                { 
-                  label: "All Consultations", 
+                {
+                  label: t('sidebar.all_consultations'),
                   href: "/consultations",
                   subItems: [
-                    { label: "Past Consultation Meetings", href: "/consultations/past" },
-                    { label: "Scheduled Consultation Meetings", href: "/consultations/scheduled" }
+                    { label: t('sidebar.past'), href: "/consultations/past" },
+                    { label: t('sidebar.upcoming'), href: "/consultations/scheduled" }
                   ]
                 },
-                { label: "Assigned Consultants", href: "/consultations/consultants" },
-                { label: "Reports (drafts/approved)", href: "/consultations/reports" },
-                { 
-                  label: "Meeting Management", 
+                { label: t('sidebar.assigned_consultants'), href: "/consultations/consultants" },
+                { label: t('sidebar.reports_drafts'), href: "/consultations/reports" },
+                {
+                  label: t('sidebar.meeting_management'),
                   href: "/schedule-meetings",
                   subItems: [
-                    { label: "My Meetings Calendar", href: "/schedule-meetings" },
-                    { label: "Requested Meetings", href: "/schedule-meetings/requested" },
-                    { label: "Confirmed Meetings", href: "/schedule-meetings/confirmed" }
+                    { label: t('sidebar.my_meetings'), href: "/schedule-meetings" },
+                    { label: t('sidebar.requested_meetings'), href: "/schedule-meetings/requested" },
+                    { label: t('sidebar.confirmed_meetings'), href: "/schedule-meetings/confirmed" }
                   ]
                 }
               ]}
@@ -165,16 +166,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Tickets & Communication */}
             <SidebarGroup
-              label="Tickets & Communication"
+              label={t('sidebar.tickets_communication')}
               icon={MessageSquare}
               open={open.tickets}
               onClick={() => toggle("tickets")}
               items={[
-                { label: "All Tickets", href: "/tickets" },
-                { label: "My Tickets", href: "/tickets/my-tickets" },
-                { label: "Client Messages", href: "/messages" },
-                { label: "Internal Comms", href: "/tickets/internal-comms" },
-                { label: "Escalations", href: "/tickets/escalations" }
+                { label: t('sidebar.all_tickets'), href: "/tickets" },
+                { label: t('sidebar.my_tickets'), href: "/tickets/my-tickets" },
+                { label: t('sidebar.client_messages'), href: "/messages" },
+                { label: t('sidebar.internal_comms'), href: "/tickets/internal-comms" },
+                { label: t('sidebar.escalations'), href: "/tickets/escalations" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
@@ -184,27 +185,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Content Management */}
             <SidebarGroup
-              label="Content Management"
+              label={t('sidebar.content_management')}
               icon={FileText}
               open={open.content}
               onClick={() => toggle("content")}
               items={[
-                { label: "Homepage Content", href: "/content-management" },
-                { label: "How We Operate", href: "/content-management/how-we-operate" },
-                { 
-                  label: "Services", 
+                { label: t('sidebar.homepage_content'), href: "/content-management" },
+                { label: t('sidebar.how_we_operate'), href: "/content-management/how-we-operate" },
+                {
+                  label: t('sidebar.services'),
                   href: "/content-management/services",
                   subItems: [
-                    { label: "Living Systems Regeneration", href: "/content-management/services/living-systems-regeneration" },
-                    { label: "Operational Systems Infrastructure", href: "/content-management/services/operational-systems-infrastructure" },
-                    { label: "Strategy Advisory Compliant", href: "/content-management/services/strategy-advisory-compliant" }
+                    { label: t('sidebar.living_systems'), href: "/content-management/services/living-systems-regeneration" },
+                    { label: t('sidebar.operational_systems'), href: "/content-management/services/operational-systems-infrastructure" },
+                    { label: t('sidebar.strategy_advisory'), href: "/content-management/services/strategy-advisory-compliant" }
                   ]
                 },
-                { label: "Resources & Blogs", href: "/content-management/resources-blogs" },
-                { label: "Legal & Policy", href: "/content-management/legal-policy" },
-                { label: "Contact", href: "/content-management/contact" },
-                { label: "Templates (Reports, Contracts, DS)", href: "/content-management/templates" },
-                { label: "Content Drafts", href: "/content-management/drafts" }
+                { label: t('sidebar.resources_blogs'), href: "/content-management/resources-blogs" },
+                { label: t('sidebar.legal_policy'), href: "/content-management/legal-policy" },
+                { label: t('sidebar.contact'), href: "/content-management/contact" },
+                { label: t('sidebar.templates'), href: "/content-management/templates" },
+                { label: t('sidebar.content_drafts'), href: "/content-management/drafts" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
@@ -214,22 +215,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Analytics & Insights */}
             <SidebarGroup
-              label="Analytics & Insights"
+              label={t('sidebar.analytics_insights')}
               icon={BarChart3}
               open={open.analytics}
               onClick={() => toggle("analytics")}
               items={[
-                { label: "Behaviour Analytics", href: "/analytics/behaviour" },
-                { label: "Sector Insights", href: "/analytics/sector" },
-                { label: "Consultation Metrics", href: "/analytics/consultation-metrics" },
-                { label: "Workspace Usage", href: "/analytics/workspace-usage" },
-                { label: "Funnel Reports", href: "/analytics/funnel-reports" },
-                { label: "Payments & Billing", href: "/analytics/payments-billing" },
-                { label: "Wallet Logs", href: "/analytics/wallet-logs" },
-                { label: "Pro-rata Approvals", href: "/analytics/pro-rata-approvals" },
-                { label: "Subscriptions", href: "/analytics/subscriptions" },
-                { label: "Invoicing", href: "/analytics/invoicing" },
-                { label: "Payment Disputes", href: "/analytics/payment-disputes" }
+                { label: t('sidebar.behaviour_analytics'), href: "/analytics/behaviour" },
+                { label: t('sidebar.sector_insights'), href: "/analytics/sector" },
+                { label: t('sidebar.consultation_metrics'), href: "/analytics/consultation-metrics" },
+                { label: t('sidebar.workspace_usage'), href: "/analytics/workspace-usage" },
+                { label: t('sidebar.funnel_reports'), href: "/analytics/funnel-reports" },
+                { label: t('sidebar.payments_billing'), href: "/analytics/payments-billing" },
+                { label: t('sidebar.wallet_logs'), href: "/analytics/wallet-logs" },
+                { label: t('sidebar.pro_rata'), href: "/analytics/pro-rata-approvals" },
+                { label: t('sidebar.subscriptions'), href: "/analytics/subscriptions" },
+                { label: t('sidebar.invoicing'), href: "/analytics/invoicing" },
+                { label: t('sidebar.payment_disputes'), href: "/analytics/payment-disputes" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
@@ -245,14 +246,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               {user?.username?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="leading-tight text-[12px] font-medium">
-              {user?.username || 'Admin'}
+              {user?.username || t('sidebar.admin')}
               <div className="text-[10px] opacity-80 truncate max-w-[120px]">{user?.email || ''}</div>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="p-2 hover:bg-background/20 rounded-lg transition-colors"
-            title="Logout"
+            title={t('sidebar.logout')}
           >
             <LogOut size={16} />
           </button>
@@ -262,41 +263,40 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   );
 }
 
-function SidebarGroup({ 
-  label, 
+function SidebarGroup({
+  label,
   icon: Icon,
-  open, 
-  onClick, 
-  items, 
+  open,
+  onClick,
+  items,
   pathname,
   subOpen,
   toggleSub,
   onLinkClick
-}: { 
+}: {
   label: string;
   icon: any;
-  open: boolean; 
-  onClick: () => void; 
-  items: NavItem[]; 
+  open: boolean;
+  onClick: () => void;
+  items: NavItem[];
   pathname: string;
-  subOpen: {[key: string]: boolean};
+  subOpen: { [key: string]: boolean };
   toggleSub: (key: string) => void;
   onLinkClick: () => void;
 }) {
-  const isActive = items.some(item => 
-    pathname === item.href || 
-    item.subItems?.some(sub => 
-      pathname === sub.href || 
+  const isActive = items.some(item =>
+    pathname === item.href ||
+    item.subItems?.some(sub =>
+      pathname === sub.href ||
       sub.subItems?.some(nested => pathname === nested.href)
     )
   );
-  
+
   return (
     <div>
       <div
-        className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition text-white ${
-          isActive ? "bg-lemon text-black" : "hover:bg-primary hover:bg-opacity-20"
-        }`}
+        className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition text-white ${isActive ? "bg-lemon text-black" : "hover:bg-primary hover:bg-opacity-20"
+          }`}
         onClick={onClick}
       >
         <div className="flex items-center gap-3">
@@ -309,11 +309,11 @@ function SidebarGroup({
       {open && items.length > 0 && (
         <div className="ml-6 mt-1 space-y-1">
           {items.map((item) => (
-            <NavItemComponent 
-              key={item.href} 
-              item={item} 
-              pathname={pathname} 
-              subOpen={subOpen} 
+            <NavItemComponent
+              key={item.href}
+              item={item}
+              pathname={pathname}
+              subOpen={subOpen}
               toggleSub={toggleSub}
               onLinkClick={onLinkClick}
               level={0}
@@ -325,23 +325,23 @@ function SidebarGroup({
   );
 }
 
-function NavItemComponent({ 
-  item, 
-  pathname, 
-  subOpen, 
-  toggleSub, 
+function NavItemComponent({
+  item,
+  pathname,
+  subOpen,
+  toggleSub,
   onLinkClick,
-  level 
-}: { 
-  item: NavItem; 
-  pathname: string; 
-  subOpen: {[key: string]: boolean}; 
+  level
+}: {
+  item: NavItem;
+  pathname: string;
+  subOpen: { [key: string]: boolean };
   toggleSub: (key: string) => void;
   onLinkClick: () => void;
   level: number;
 }) {
   const hasSubItems = item.subItems && item.subItems.length > 0;
-  const isActive = pathname === item.href || item.subItems?.some(sub => 
+  const isActive = pathname === item.href || item.subItems?.some(sub =>
     pathname === sub.href || sub.subItems?.some(nested => pathname === nested.href)
   );
 
@@ -349,12 +349,11 @@ function NavItemComponent({
     return (
       <div>
         <div className="flex items-center justify-between px-3 py-1 text-sm rounded hover:bg-primary hover:bg-opacity-10">
-          <Link 
+          <Link
             href={item.href}
             onClick={onLinkClick}
-            className={`flex-1 ${
-              isActive ? "text-lemon" : "text-white"
-            }`}
+            className={`flex-1 ${isActive ? "text-lemon" : "text-white"
+              }`}
           >
             {item.label}
           </Link>
@@ -365,8 +364,8 @@ function NavItemComponent({
             }}
             className="p-1 hover:bg-white/10 rounded"
           >
-            {subOpen[item.href] ? 
-              <ChevronDown size={14} className="transition" /> : 
+            {subOpen[item.href] ?
+              <ChevronDown size={14} className="transition" /> :
               <ChevronRight size={14} className="transition" />
             }
           </button>
@@ -374,11 +373,11 @@ function NavItemComponent({
         {subOpen[item.href] && (
           <div className="ml-4 mt-1 space-y-1">
             {item.subItems!.map((subItem) => (
-              <NavItemComponent 
-                key={subItem.href} 
-                item={subItem} 
-                pathname={pathname} 
-                subOpen={subOpen} 
+              <NavItemComponent
+                key={subItem.href}
+                item={subItem}
+                pathname={pathname}
+                subOpen={subOpen}
                 toggleSub={toggleSub}
                 onLinkClick={onLinkClick}
                 level={level + 1}
@@ -391,12 +390,11 @@ function NavItemComponent({
   }
 
   return (
-    <Link 
+    <Link
       href={item.href}
       onClick={onLinkClick}
-      className={`block px-3 py-1 text-${level > 0 ? 'xs' : 'sm'} rounded cursor-pointer hover:bg-primary hover:bg-opacity-10 ${
-        pathname === item.href ? "text-lemon" : "text-white opacity-70"
-      }`}
+      className={`block px-3 py-1 text-${level > 0 ? 'xs' : 'sm'} rounded cursor-pointer hover:bg-primary hover:bg-opacity-10 ${pathname === item.href ? "text-lemon" : "text-white opacity-70"
+        }`}
     >
       {item.label}
     </Link>

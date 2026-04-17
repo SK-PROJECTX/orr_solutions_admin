@@ -5,31 +5,33 @@ import { Zap, UserPlus, Calendar, Mail } from "lucide-react";
 import AddClientModal from "@/app/components/quick-actions/AddClientModal";
 import ScheduleMeetingModal from "@/app/components/quick-actions/ScheduleMeetingModal";
 import SendMessageModal from "@/app/components/quick-actions/SendMessageModal";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function QuickActionsPage() {
+  const { t } = useLanguageStore();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const quickActions = [
-    { 
+    {
       id: "add-client",
-      icon: UserPlus, 
-      label: "Add New Client", 
-      description: "Create a new client profile",
-      color: "bg-blue-500" 
+      icon: UserPlus,
+      label: t('operational.add_client'),
+      description: t('operational.add_client_desc'),
+      color: "bg-blue-500"
     },
-    { 
+    {
       id: "schedule-meeting",
-      icon: Calendar, 
-      label: "Schedule Meeting", 
-      description: "Book a new client meeting",
-      color: "bg-purple-500" 
+      icon: Calendar,
+      label: t('operational.schedule_meeting'),
+      description: t('operational.schedule_meeting_desc'),
+      color: "bg-purple-500"
     },
-    { 
+    {
       id: "send-message",
-      icon: Mail, 
-      label: "Send Message", 
-      description: "Create a new ticket or message",
-      color: "bg-orange-500" 
+      icon: Mail,
+      label: t('operational.send_message'),
+      description: t('operational.send_message_desc'),
+      color: "bg-orange-500"
     },
   ];
 
@@ -44,12 +46,12 @@ export default function QuickActionsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Quick Actions</h1>
-            <p className="text-gray-400">Perform common tasks quickly</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('operational.quick_actions')}</h1>
+            <p className="text-gray-400">{t('operational.quick_actions_subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -74,17 +76,17 @@ export default function QuickActionsPage() {
       </div>
 
       {/* Modals */}
-      <AddClientModal 
-        isOpen={activeModal === "add-client"} 
-        onClose={closeModal} 
+      <AddClientModal
+        isOpen={activeModal === "add-client"}
+        onClose={closeModal}
       />
-      <ScheduleMeetingModal 
-        isOpen={activeModal === "schedule-meeting"} 
-        onClose={closeModal} 
+      <ScheduleMeetingModal
+        isOpen={activeModal === "schedule-meeting"}
+        onClose={closeModal}
       />
-      <SendMessageModal 
-        isOpen={activeModal === "send-message"} 
-        onClose={closeModal} 
+      <SendMessageModal
+        isOpen={activeModal === "send-message"}
+        onClose={closeModal}
       />
     </div>
   );

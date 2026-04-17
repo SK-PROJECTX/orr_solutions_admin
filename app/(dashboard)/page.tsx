@@ -32,11 +32,13 @@ import { useRole, useIsSuperAdmin } from "@/lib/rbac/hooks";
 import WelcomeHero from "@/app/components/dashboard/WelcomeHero";
 import QuickActions from "@/app/components/dashboard/QuickActions";
 import ActivityFeed from "@/app/components/dashboard/ActivityFeed";
+import { useLanguageStore } from "@/store/languageStore";
 
 function page() {
   const router = useRouter();
   const role = useRole();
   const isSuperAdmin = useIsSuperAdmin();
+  const { t, language } = useLanguageStore();
 
   const defaultMetrics: DashboardMetrics = {
     active_clients: 0,
@@ -126,25 +128,25 @@ function page() {
         setPendingTickets(tickets as TicketListItem[]);
         setUpcomingMeetings(meetings as MeetingListItem[]);
         setRecentContent(content as ContentListItem[]);
-        
+
         // Set wallet balance from billing stats
         const billingData = extractData(billingStatsData);
         if (billingData && "total_revenue" in billingData) {
           const revenue = billingData.total_revenue;
           setWalletBalance(typeof revenue === "number" ? revenue : (typeof revenue === "string" ? parseFloat(revenue) : 0));
         }
-        
+
         setUpcomingConsultations(meetings.length);
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
-        setError("Failed to load some dashboard data");
+        setError(t('common.error') + ": " + t('dashboard.failed_load_dashboard'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
@@ -168,31 +170,31 @@ function page() {
             {/* Wallet Balance Card */}
             <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-300">Wallet Balance</h3>
+                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.wallet_balance')}</h3>
                 <Wallet size={18} className="text-green-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-3xl font-bold text-white">€{walletBalance.toFixed(2)}</p>
-              <p className="text-xs text-gray-400 mt-2">Available credits</p>
+              <p className="text-xs text-gray-400 mt-2">{t('dashboard.available_credits')}</p>
             </div>
 
             {/* Upcoming Consultations Card */}
             <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl p-6 border border-white/10 hover:border-blue-500/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-300">Upcoming Consultations</h3>
+                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.upcoming_consultations')}</h3>
                 <Calendar size={18} className="text-blue-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-3xl font-bold text-white">{upcomingConsultations}</p>
-              <p className="text-xs text-gray-400 mt-2">Next 7 days</p>
+              <p className="text-xs text-gray-400 mt-2">{t('dashboard.next_7_days')}</p>
             </div>
 
             {/* Key Notifications Card */}
             <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl p-6 border border-white/10 hover:border-orange-500/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-300">Key Notifications</h3>
+                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.key_notifications')}</h3>
                 <Bell size={18} className="text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-3xl font-bold text-white">{notifications.length}</p>
-              <p className="text-xs text-gray-400 mt-2">Pending actions</p>
+              <p className="text-xs text-gray-400 mt-2">{t('dashboard.pending_actions')}</p>
             </div>
           </div>
 
@@ -221,10 +223,10 @@ function page() {
                     <div className="bg-primary/30 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Users className="w-6 h-6 text-primary" />
                     </div>
-                    <span className="text-xs text-primary bg-primary/20 px-2 py-1 rounded-full">Active</span>
+                    <span className="text-xs text-primary bg-primary/20 px-2 py-1 rounded-full">{t('common.active')}</span>
                   </div>
                   <p className="text-2xl font-bold text-white mb-1">{metrics.active_clients}</p>
-                  <p className="text-sm text-gray-400">Active Clients</p>
+                  <p className="text-sm text-gray-400">{t('dashboard.active_clients')}</p>
                 </div>
               </div>
             </PermissionGuard>
@@ -238,10 +240,10 @@ function page() {
                     <div className="bg-orange-500/30 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <AlertCircle className="w-6 h-6 text-orange-400" />
                     </div>
-                    <span className="text-xs text-orange-300 bg-orange-500/20 px-2 py-1 rounded-full">Urgent</span>
+                    <span className="text-xs text-orange-300 bg-orange-500/20 px-2 py-1 rounded-full">{t('dashboard.urgent')}</span>
                   </div>
                   <p className="text-2xl font-bold text-white mb-1">{metrics.pending_tickets}</p>
-                  <p className="text-sm text-gray-400">Support Tickets</p>
+                  <p className="text-sm text-gray-400">{t('dashboard.support_tickets')}</p>
                 </div>
               </div>
             </PermissionGuard>
@@ -255,10 +257,10 @@ function page() {
                     <div className="bg-blue-500/30 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Calendar className="w-6 h-6 text-blue-400" />
                     </div>
-                    <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-1 rounded-full">7 days</span>
+                    <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-1 rounded-full">{t('dashboard.next_7_days')}</span>
                   </div>
                   <p className="text-2xl font-bold text-white mb-1">{metrics.upcoming_meetings}</p>
-                  <p className="text-sm text-gray-400">Meetings</p>
+                  <p className="text-sm text-gray-400">{t('dashboard.meetings')}</p>
                 </div>
               </div>
             </PermissionGuard>
@@ -275,14 +277,14 @@ function page() {
                     <span className="text-xs text-green-300 bg-green-500/20 px-2 py-1 rounded-full">€</span>
                   </div>
                   <p className="text-2xl font-bold text-white mb-1">€{walletBalance.toFixed(0)}</p>
-                  <p className="text-sm text-gray-400">Revenue</p>
+                  <p className="text-sm text-gray-400">{t('dashboard.revenue')}</p>
                 </div>
               </div>
             </PermissionGuard>
           </div>
 
           {/* Activity Feed */}
-          <ActivityFeed 
+          <ActivityFeed
             notifications={notifications}
             tickets={pendingTickets}
             meetings={upcomingMeetings}
@@ -294,63 +296,62 @@ function page() {
             {/* Recent Content Table */}
             <PermissionGuard permissions={['can_create_content', 'can_publish_content']}>
               <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl border border-white/10 overflow-hidden hover:border-primary/30 transition-all duration-300">
-              <div className="p-5 md:p-6 border-b border-white/10 flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <FileText size={18} className="text-primary" />
+                <div className="p-5 md:p-6 border-b border-white/10 flex items-center gap-3">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <FileText size={18} className="text-primary" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-white">{t('dashboard.recent_content')}</h2>
                 </div>
-                <h2 className="text-lg font-semibold text-white">Recent Content</h2>
-              </div>
-              {recentContent.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[640px]">
-                    <thead className="bg-white/5 border-b border-white/10">
-                      <tr>
-                        <th className="text-left p-4 text-primary font-semibold text-sm">Title</th>
-                        <th className="text-left p-4 text-primary font-semibold text-sm hidden sm:table-cell">Type</th>
-                        <th className="text-left p-4 text-primary font-semibold text-sm">Status</th>
-                        <th className="text-left p-4 text-primary font-semibold text-sm hidden lg:table-cell">Views</th>
-                        <th className="text-left p-4 text-primary font-semibold text-sm hidden md:table-cell">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {recentContent.map((item) => (
-                        <tr key={item.id} className="hover:bg-white/5 transition-colors duration-200 group/row">
-                          <td className="py-3 px-4">
-                            <span className="text-white font-medium line-clamp-1 text-sm group-hover/row:text-primary transition-colors">
-                              {item.title}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-gray-300 text-sm hidden sm:table-cell">
-                            <span className="capitalize">{item.content_type}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className={`w-fit px-3 py-1 rounded-lg font-medium text-xs capitalize ${
-                              item.status === "published"
-                                ? "bg-primary/30 text-primary border border-primary/30"
-                                : item.status === "draft"
-                                ? "bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
-                                : "bg-gray-500/30 text-gray-300 border border-gray-500/30"
-                            }`}>
-                              {item.status}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-gray-300 text-sm hidden lg:table-cell">
-                            {item.view_count}
-                          </td>
-                          <td className="py-3 px-4 text-gray-400 text-sm hidden md:table-cell">
-                            {new Date(item.created_at).toLocaleDateString()}
-                          </td>
+                {recentContent.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px]">
+                      <thead className="bg-white/5 border-b border-white/10">
+                        <tr>
+                          <th className="text-left p-4 text-primary font-semibold text-sm">{t('dashboard.table_title')}</th>
+                          <th className="text-left p-4 text-primary font-semibold text-sm hidden sm:table-cell">{t('dashboard.table_type')}</th>
+                          <th className="text-left p-4 text-primary font-semibold text-sm">{t('dashboard.table_status')}</th>
+                          <th className="text-left p-4 text-primary font-semibold text-sm hidden lg:table-cell">{t('dashboard.table_views')}</th>
+                          <th className="text-left p-4 text-primary font-semibold text-sm hidden md:table-cell">{t('dashboard.table_date')}</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="p-8 text-center">
-                  <FileText size={48} className="text-black mx-auto mb-4" />
-                  <p className="text-gray-400">No recent content available</p>
-                </div>
-              )}
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {recentContent.map((item) => (
+                          <tr key={item.id} className="hover:bg-white/5 transition-colors duration-200 group/row">
+                            <td className="py-3 px-4">
+                              <span className="text-white font-medium line-clamp-1 text-sm group-hover/row:text-primary transition-colors">
+                                {item.title}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-gray-300 text-sm hidden sm:table-cell">
+                              <span className="capitalize">{t(`common.content_types.${item.content_type as keyof typeof t}` as any) || item.content_type}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className={`w-fit px-3 py-1 rounded-lg font-medium text-xs capitalize ${item.status === "published"
+                                  ? "bg-primary/30 text-primary border border-primary/30"
+                                  : item.status === "draft"
+                                    ? "bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                                    : "bg-gray-500/30 text-gray-300 border border-gray-500/30"
+                                }`}>
+                                {t(`common.status.${item.status as keyof typeof t}` as any) || item.status}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-gray-300 text-sm hidden lg:table-cell">
+                              {item.view_count}
+                            </td>
+                            <td className="py-3 px-4 text-gray-400 text-sm hidden md:table-cell">
+                              {new Date(item.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'it-IT')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <FileText size={48} className="text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">{t('dashboard.no_recent_content')}</p>
+                  </div>
+                )}
               </div>
             </PermissionGuard>
           </div>

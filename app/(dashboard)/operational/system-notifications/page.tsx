@@ -4,8 +4,10 @@ import { Bell, AlertCircle, Info, CheckCircle, XCircle, Loader } from "lucide-re
 import { useState, useEffect } from "react";
 import { notificationAPI } from "@/app/services";
 import type { Notification } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function SystemNotificationsPage() {
+  const { t } = useLanguageStore();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export default function SystemNotificationsPage() {
         setNotifications(notifList);
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
-        setError("Failed to load notifications");
+        setError(t('operational.failed_load_notifications'));
         setNotifications([]);
       } finally {
         setLoading(false);
@@ -50,12 +52,12 @@ export default function SystemNotificationsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">System Notifications</h1>
-            <p className="text-gray-400">Important system alerts and updates</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('operational.notifications')}</h1>
+            <p className="text-gray-400">{t('operational.notifications_subtitle')}</p>
           </div>
 
           {loading ? (
@@ -69,7 +71,7 @@ export default function SystemNotificationsPage() {
           ) : notifications.length === 0 ? (
             <div className="text-center py-12">
               <Bell size={48} className="mx-auto text-black mb-4" />
-              <p className="text-gray-400">No notifications</p>
+              <p className="text-gray-400">{t('operational.no_notifications')}</p>
             </div>
           ) : (
             <div className="space-y-4">

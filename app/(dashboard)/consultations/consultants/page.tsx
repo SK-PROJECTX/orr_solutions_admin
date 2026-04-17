@@ -4,6 +4,7 @@ import { Users, UserCheck, Loader, Calendar, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { settingsAPI, meetingAPI } from "@/app/services";
 import Pagination from "@/app/components/common/Pagination";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface Consultant {
   id: number;
@@ -15,6 +16,7 @@ interface Consultant {
 }
 
 export default function AssignedConsultantsPage() {
+  const { t } = useLanguageStore();
   const [allConsultants, setAllConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,39 +31,39 @@ export default function AssignedConsultantsPage() {
           settingsAPI.listUsers(),
           meetingAPI.getStats()
         ]);
-        
+
         const users = (usersResponse as any)?.data || usersResponse || [];
         const meetingStats = (meetingsResponse as any)?.data || meetingsResponse;
-        
+
         // Filter for admin users who can be consultants
-        const adminUsers = Array.isArray(users) ? users.filter((user: any) => 
-          user.is_staff || user.groups?.some((group: any) => 
-            group.name?.toLowerCase().includes('admin') || 
+        const adminUsers = Array.isArray(users) ? users.filter((user: any) =>
+          user.is_staff || user.groups?.some((group: any) =>
+            group.name?.toLowerCase().includes('admin') ||
             group.name?.toLowerCase().includes('consultant')
           )
         ) : [];
-        
+
         setAllConsultants(adminUsers);
       } catch (err) {
         console.error('Failed to fetch consultants:', err);
-        setError('Failed to load consultants');
+        setError(t('consultations.error_loading_consultants'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchConsultants();
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Assigned Consultants</h1>
-            <p className="text-gray-400">Manage consultant assignments</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('consultations.consultants_page_title')}</h1>
+            <p className="text-gray-400">{t('consultations.consultants_page_subtitle')}</p>
           </div>
 
           {error && (
@@ -78,21 +80,21 @@ export default function AssignedConsultantsPage() {
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedConsultants = allConsultants.slice(startIndex, endIndex);
-            
+
             return allConsultants.length === 0 ? (
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
                 <UserCheck size={48} className="mx-auto text-purple-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Consultants Found</h3>
-                <p className="text-gray-400">No consultants available at the moment</p>
+                <h3 className="text-xl font-semibold text-white mb-2">{t('consultations.no_consultants')}</h3>
+                <p className="text-gray-400">{t('consultations.no_consultants_desc')}</p>
               </div>
             ) : (
               <>
                 <div className="mb-6">
                   <p className="text-sm text-gray-400">
-                    Showing {paginatedConsultants.length} of {allConsultants.length} consultant{allConsultants.length !== 1 ? 's' : ''}
+                    {t('consultations.showing_consultants')} {paginatedConsultants.length} {t('consultations.of')} {allConsultants.length} {allConsultants.length !== 1 ? t('consultations.consultants_plural') : t('consultations.consultant')}
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {paginatedConsultants.map((consultant) => (
                     <div key={consultant.id} className="bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-6 hover:border-purple-500/30 transition-all duration-300">
@@ -104,39 +106,39 @@ export default function AssignedConsultantsPage() {
                           <h3 className="text-lg font-semibold text-white">
                             {consultant.first_name} {consultant.last_name}
                           </h3>
-                          <p className="text-sm text-gray-400">Consultant</p>
+                          <p className="text-sm text-gray-400">{t('consultations.consultant_role')}</p>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-gray-300">
                           <Mail className="w-4 h-4" />
                           <span>{consultant.email}</span>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                           <div className="text-center">
                             <div className="text-lg font-semibold text-white">
                               {consultant.assigned_meetings || 0}
                             </div>
-                            <div className="text-xs text-gray-400">Assigned</div>
+                            <div className="text-xs text-gray-400">{t('consultations.assigned')}</div>
                           </div>
                           <div className="text-center">
                             <div className="text-lg font-semibold text-white">
                               {consultant.completed_meetings || 0}
                             </div>
-                            <div className="text-xs text-gray-400">Completed</div>
+                            <div className="text-xs text-gray-400">{t('consultations.completed')}</div>
                           </div>
                         </div>
-                        
+
                         <button className="w-full mt-4 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-purple-300 text-sm font-medium transition-colors">
-                          View Assignments
+                          {t('consultations.view_assignments')}
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 {allConsultants.length > itemsPerPage && (
                   <Pagination
                     currentPage={currentPage}

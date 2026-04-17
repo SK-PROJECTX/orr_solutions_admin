@@ -7,6 +7,7 @@ import RichTextEditor from '../../../../components/RichTextEditor';
 import { cleanContentObject } from '../../../utils/htmlCleaner';
 import SuccessModal from '../../../components/ui/SuccessModal';
 import ErrorModal from '../../../components/ui/ErrorModal';
+import { useLanguageStore } from '@/store/languageStore';
 
 interface PolicyItem {
   id: number;
@@ -32,6 +33,7 @@ export default function LegacyPolicy() {
   const [data, setData] = useState<LegalPolicyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const { t } = useLanguageStore();
   const cmsService = new CMSService();
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
   const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
@@ -104,15 +106,15 @@ export default function LegacyPolicy() {
       }
       setSuccessModal({
         isOpen: true,
-        title: 'Content Saved',
-        message: 'Your changes have been saved successfully!'
+        title: t('content_management.content_saved'),
+        message: t('content_management.success_msg')
       });
     } catch (error) {
       console.error('Failed to save:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
-        message: 'Failed to save content'
+        title: t('content_management.save_failed'),
+        message: t('content_management.save_failed')
       });
     } finally {
       setSaving(null);
@@ -158,13 +160,13 @@ export default function LegacyPolicy() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">Legal & Policy Content</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Manage Legal & Policy page content and policy items</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('content_management.legal_policy_title')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('content_management.legal_policy_subtitle')}</p>
           </div>
 
           {/* Page Header Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Page Header</h2>
+            <h2 className={titleClass}>{t('content_management.page_header')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('page-header', { 
@@ -177,10 +179,10 @@ export default function LegacyPolicy() {
               }); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Hero Title"
+                label={t('content_management.hero_section')}
                 value={data?.page?.hero_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'hero_title', value)}
-                placeholder="Enter hero title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
                 label="Hero Description"
@@ -190,22 +192,22 @@ export default function LegacyPolicy() {
                 rows={5}
               />
               <RichTextEditor
-                label="Meta Title (SEO)"
+                label={t('content_management.meta_seo')}
                 value={data?.page?.meta_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_title', value)}
-                placeholder="Enter meta title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Description (SEO)"
+                label={t('content_management.meta_desc_seo')}
                 value={data?.page?.meta_description || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_description', value)}
-                placeholder="Enter meta description"
+                placeholder={t('content_management.enter_description')}
                 rows={3}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'page-header'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'page-header' ? 'Saving...' : 'Save Page Header'}
+                  {saving === 'page-header' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -214,7 +216,7 @@ export default function LegacyPolicy() {
           {/* Policy Items */}
           {(data?.items || []).map((item: PolicyItem, index: number) => (
             <div key={item.id} className={sectionClass}>
-              <h2 className={titleClass}>Policy Item {index + 1} - {item.number}</h2>
+              <h2 className={titleClass}>{t('content_management.stage')} {index + 1} - {item.number}</h2>
               <form onSubmit={(e) => { 
                 e.preventDefault(); 
                 handleSave(`item-${item.id}`, item); 
@@ -248,13 +250,14 @@ export default function LegacyPolicy() {
                   value={item.description || ''}
                   onChange={(value) => handleRichTextChange(`item-${item.id}`, 'description', value)}
                   placeholder="Enter policy item description"
+                  placeholder={t('content_management.enter_description')}
                   rows={6}
                 />
 
                 <div className="flex gap-3 pt-4">
                   <button type="submit" disabled={saving === `item-${item.id}`} className={buttonClass}>
                     <Save size={18} />
-                    {saving === `item-${item.id}` ? 'Saving...' : `Save Policy Item ${index + 1}`}
+                    {saving === `item-${item.id}` ? t('content_management.saving') : `${t('content_management.save_stage')} ${index + 1}`}
                   </button>
                 </div>
               </form>

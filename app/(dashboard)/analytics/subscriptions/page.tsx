@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Users, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function SubscriptionsPage() {
+  const { t, language } = useLanguageStore();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,33 +50,33 @@ export default function SubscriptionsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Subscriptions</h1>
-            <p className="text-gray-400">Client subscriptions and plan management</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('sidebar.subscriptions')}</h1>
+            <p className="text-gray-400">{t('analytics.performance_overview')}</p>
           </div>
 
           {/* Analytics */}
           {data?.analytics && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Subscription Analytics</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.overview_analytics')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <Users className="text-blue-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Total Subscriptions</h3>
+                  <h3 className="text-lg font-medium text-white">{t('analytics.total_subscriptions')}</h3>
                   <p className="text-2xl font-bold text-blue-400">{data.analytics.total_subscriptions}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <TrendingUp className="text-green-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Active</h3>
+                  <h3 className="text-lg font-medium text-white">{t('analytics.active_clients')}</h3>
                   <p className="text-2xl font-bold text-green-400">{data.analytics.active_subscriptions}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <DollarSign className="text-purple-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Activation Rate</h3>
+                  <h3 className="text-lg font-medium text-white">{t('analytics.completion_rate')}</h3>
                   <p className="text-2xl font-bold text-purple-400">{data.analytics.activation_rate}%</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                   <Calendar className="text-orange-400 mb-2" size={24} />
-                  <h3 className="text-lg font-medium text-white">Churn Rate</h3>
+                  <h3 className="text-lg font-medium text-white">{t('analytics.bounce_rate')}</h3>
                   <p className="text-2xl font-bold text-orange-400">{data.analytics.churn_rate}%</p>
                 </div>
               </div>
@@ -84,22 +86,22 @@ export default function SubscriptionsPage() {
           {/* Plan Distribution */}
           {data?.plan_distribution && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Plan Distribution</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.clients_by_stage')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(data.plan_distribution).map(([plan, details]: [string, any]) => (
                   <div key={plan} className="bg-white/5 border border-white/10 rounded-xl p-6">
                     <h3 className="text-lg font-medium text-white mb-3 capitalize">{plan}</h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Subscribers</span>
+                        <span className="text-gray-400">{t('analytics.active_clients')}</span>
                         <span className="text-blue-400">{details.subscriber_count}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Monthly Revenue</span>
+                        <span className="text-gray-400">{t('dashboard.revenue')}</span>
                         <span className="text-green-400">${details.monthly_revenue}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Percentage</span>
+                        <span className="text-gray-400">{t('analytics.percentage')}</span>
                         <span className="text-purple-400">{details.percentage}%</span>
                       </div>
                     </div>
@@ -112,17 +114,17 @@ export default function SubscriptionsPage() {
           {/* Recent Subscriptions */}
           {data?.subscriptions && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Recent Subscriptions</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('dashboard.recent_activity')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-white/10">
-                        <th className="text-left text-white py-3">Client</th>
-                        <th className="text-left text-white py-3">Plan</th>
-                        <th className="text-left text-white py-3">Status</th>
-                        <th className="text-left text-white py-3">Last Payment</th>
-                        <th className="text-left text-white py-3">Amount</th>
+                        <th className="text-left text-white py-3">{t('consultations.author')}</th>
+                        <th className="text-left text-white py-3">{t('consultations.type')}</th>
+                        <th className="text-left text-white py-3">{t('consultations.status')}</th>
+                        <th className="text-left text-white py-3">{t('dashboard.table_date')}</th>
+                        <th className="text-left text-white py-3">{t('billing.amount')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -138,7 +140,7 @@ export default function SubscriptionsPage() {
                             </span>
                           </td>
                           <td className="text-gray-400 py-3">
-                            {sub.last_payment_date ? new Date(sub.last_payment_date).toLocaleDateString() : 'N/A'}
+                            {sub.last_payment_date ? new Date(sub.last_payment_date).toLocaleDateString() : t('analytics.not_available')}
                           </td>
                           <td className="text-green-400 py-3 font-bold">${sub.last_payment_amount}</td>
                         </tr>
@@ -153,7 +155,7 @@ export default function SubscriptionsPage() {
           {/* Upcoming Renewals */}
           {data?.upcoming_renewals && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Upcoming Renewals</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('dashboard.upcoming_consultations')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="space-y-3">
                   {data.upcoming_renewals.map((renewal: any) => (
@@ -164,7 +166,7 @@ export default function SubscriptionsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-blue-400 font-bold">${renewal.estimated_amount}</p>
-                        <p className="text-gray-400 text-sm">{renewal.days_until_renewal} days</p>
+                        <p className="text-gray-400 text-sm">{renewal.days_until_renewal} {t('analytics.days')}</p>
                       </div>
                     </div>
                   ))}

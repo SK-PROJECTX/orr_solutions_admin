@@ -5,13 +5,15 @@ import { useState, useEffect } from "react";
 import { billingAPI, BillingHistoryItem } from "@/app/services";
 import type { PaymentStats } from "@/app/services";
 import Pagination from "@/app/components/common/Pagination";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function BillingCreditOverviewPage() {
+  const { t } = useLanguageStore();
   const [stats, setStats] = useState<any[]>([
-    { label: "Total Revenue", value: "€0.00", icon: DollarSign, color: "text-green-400" },
-    { label: "Active Subscriptions", value: "0", icon: Users, color: "text-blue-400" },
-    { label: "Pending Payments", value: "€0.00", icon: CreditCard, color: "text-orange-400" },
-    { label: "Completed Transactions", value: "0", icon: TrendingUp, color: "text-purple-400" },
+    { label: t('billing.total_revenue'), value: "€0.00", icon: DollarSign, color: "text-green-400" },
+    { label: t('billing.active_subscriptions'), value: "0", icon: Users, color: "text-blue-400" },
+    { label: t('billing.pending_payments'), value: "€0.00", icon: CreditCard, color: "text-orange-400" },
+    { label: t('billing.completed_transactions'), value: "0", icon: TrendingUp, color: "text-purple-400" },
   ]);
   const [allTransactions, setAllTransactions] = useState<BillingHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,48 +29,48 @@ export default function BillingCreditOverviewPage() {
           billingAPI.getAllPaymentStats(),
           billingAPI.getAllPayments({})
         ]);
-        
+
         // Handle API response structure
         console.log('Stats Response:', statsResponse);
         console.log('Transactions Response:', transactionsResponse);
-        
+
         const statsData = (statsResponse as any)?.data || statsResponse;
         const transactionsData = (transactionsResponse as any)?.data || transactionsResponse;
-        
+
         console.log('Processed Stats Data:', statsData);
         console.log('Processed Transactions Data:', transactionsData);
-        
+
         setStats([
-          { label: "Total Revenue", value: `$${statsData.total_revenue || "0.00"}`, icon: DollarSign, color: "text-green-400" },
-          { label: "Active Subscriptions", value: statsData.active_subscriptions || "0", icon: Users, color: "text-blue-400" },
-          { label: "Pending Payments", value: `$${statsData.pending_amount || "0.00"}`, icon: CreditCard, color: "text-orange-400" },
-          { label: "Completed Transactions", value: statsData.completed_transactions || "0", icon: TrendingUp, color: "text-purple-400" },
+          { label: t('billing.total_revenue'), value: `€${statsData.total_revenue || "0.00"}`, icon: DollarSign, color: "text-green-400" },
+          { label: t('billing.active_subscriptions'), value: statsData.active_subscriptions || "0", icon: Users, color: "text-blue-400" },
+          { label: t('billing.pending_payments'), value: `€${statsData.pending_amount || "0.00"}`, icon: CreditCard, color: "text-orange-400" },
+          { label: t('billing.completed_transactions'), value: statsData.completed_transactions || "0", icon: TrendingUp, color: "text-purple-400" },
         ]);
-        
+
         // Ensure transactionsData is an array
         const transactions = Array.isArray(transactionsData) ? transactionsData : [];
         console.log('Final transactions array:', transactions);
         setAllTransactions(transactions);
       } catch (err) {
         console.error("Failed to fetch billing data:", err);
-        setError("Failed to load billing data");
+        setError(t('common.error') + ": " + t('billing.failed_load_data'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchBillingData();
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Billing & Credit Overview</h1>
-            <p className="text-gray-400">Financial summary and credit status</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('billing.title')}</h1>
+            <p className="text-gray-400">{t('billing.subtitle')}</p>
           </div>
 
           {error && (
@@ -99,14 +101,14 @@ export default function BillingCreditOverviewPage() {
               </div>
 
               <div className="mt-8 bg-white/5 border border-white/10 rounded-xl p-6">
-                <h2 className="text-xl font-semibold text-white mb-4">Recent Transactions</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">{t('billing.recent_transactions')}</h2>
                 {(() => {
                   const startIndex = (currentPage - 1) * itemsPerPage;
                   const endIndex = startIndex + itemsPerPage;
                   const paginatedTransactions = allTransactions.slice(startIndex, endIndex);
-                  
+
                   return allTransactions.length === 0 ? (
-                    <p className="text-gray-400">No recent transactions found</p>
+                    <p className="text-gray-400">{t('billing.no_transactions')}</p>
                   ) : (
                     <>
                       <div className="space-y-4 mb-6">
@@ -117,24 +119,25 @@ export default function BillingCreditOverviewPage() {
                                 <DollarSign className="w-5 h-5 text-primary" />
                               </div>
                               <div>
-                                <p className="text-white font-medium">{transaction.client_name || 'Unknown Client'}</p>
+                                <p className="text-white font-medium">{transaction.client_name || t('common.unknown_client')}</p>
                                 <p className="text-gray-400 text-sm">{transaction.reference_id}</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-white font-semibold">${transaction.amount}</p>
-                              <p className={`text-sm capitalize ${
-                                transaction.status === 'completed' ? 'text-green-400' :
-                                transaction.status === 'pending' ? 'text-yellow-400' :
-                                'text-red-400'
-                              }`}>
-                                {transaction.status}
+                              <p className="text-white font-semibold">€{transaction.amount}</p>
+                              <p className={`text-sm capitalize ${transaction.status === 'completed' ? 'text-green-400' :
+                                  transaction.status === 'pending' ? 'text-yellow-400' :
+                                    'text-red-400'
+                                }`}>
+                                {transaction.status === 'completed' ? t('dashboard.completed') : 
+                                 transaction.status === 'pending' ? t('dashboard.pending') : 
+                                 transaction.status === 'failed' ? t('dashboard.failed') : transaction.status}
                               </p>
                             </div>
                           </div>
                         ))}
                       </div>
-                      
+
                       <Pagination
                         currentPage={currentPage}
                         totalPages={Math.ceil(allTransactions.length / itemsPerPage)}

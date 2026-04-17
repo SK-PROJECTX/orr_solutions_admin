@@ -5,6 +5,8 @@ import { Save, Loader, AlertCircle, Edit } from "lucide-react";
 import { cmsAPI } from "@/app/services";
 import SuccessModal from "../../../components/ui/SuccessModal";
 import ErrorModal from "../../../components/ui/ErrorModal";
+import { useLanguageStore } from '@/store/languageStore';
+import { cleanContentObject } from "@/app/utils/htmlCleaner";
 
 interface OperationalSystemsContent {
   id: number;
@@ -32,6 +34,7 @@ interface OperationalSystemsContent {
 }
 
 export default function OperationalSystemsAdminPage() {
+  const { t } = useLanguageStore();
   const [content, setContent] = useState<OperationalSystemsContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,9 +51,10 @@ export default function OperationalSystemsAdminPage() {
     try {
       setLoading(true);
       const response = await cmsAPI.getOperationalSystemsContent();
-      setContent(response as any);
+      const cleanedData = cleanContentObject(response);
+      setContent(cleanedData as any);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch Operational Systems content");
+      setError(err.message || t('content_management.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -72,18 +76,18 @@ export default function OperationalSystemsAdminPage() {
       
       setSuccessModal({
         isOpen: true,
-        title: 'Content Saved',
-        message: 'Your changes have been saved successfully!'
+        title: t('content_management.content_saved'),
+        message: t('content_management.success_msg')
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
-        message: err.message || "Failed to save content"
+        title: t('content_management.save_failed'),
+        message: err.message || t('content_management.save_failed')
       });
-      setError(err.message || "Failed to save content");
+      setError(err.message || t('content_management.save_failed'));
     } finally {
       setSaving(false);
     }
@@ -107,8 +111,8 @@ export default function OperationalSystemsAdminPage() {
       <div className="min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={48} className="mx-auto mb-4 text-red-400" />
-          <h1 className="text-2xl font-bold mb-2">Content Not Found</h1>
-          <p className="text-gray-400">Unable to load Operational Systems content</p>
+          <h1 className="text-2xl font-bold mb-2">{t('content_management.load_failed')}</h1>
+          <p className="text-gray-400">{t('content_management.load_failed')}</p>
         </div>
       </div>
     );
@@ -122,16 +126,17 @@ export default function OperationalSystemsAdminPage() {
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Operational Systems & Infrastructure</h1>
-              <p className="text-gray-400">Edit page content and settings</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('content_management.operational_systems_title')}</h1>
+              <p className="text-gray-400">{t('content_management.operational_systems_subtitle')}</p>
             </div>
             <button
               onClick={handleSave}
               disabled={saving}
               className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg text-white text-sm font-medium transition-all duration-200 disabled:opacity-50"
             >
+            >
               {saving ? <Loader className="animate-spin" size={16} /> : <Save size={16} />}
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? t('content_management.saving') : t('content_management.save_changes')}
             </button>
           </div>
 
@@ -139,7 +144,7 @@ export default function OperationalSystemsAdminPage() {
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
               <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium mb-1">Error</p>
+                <p className="font-medium mb-1">{t('common.error')}</p>
                 <p>{error}</p>
               </div>
             </div>
@@ -148,7 +153,7 @@ export default function OperationalSystemsAdminPage() {
           {success && (
             <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 mb-6 flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-green-300">Content saved successfully!</p>
+              <p className="text-green-300">{t('content_management.success_msg')}</p>
             </div>
           )}
 
@@ -157,7 +162,7 @@ export default function OperationalSystemsAdminPage() {
             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                 <Edit size={20} />
-                Hero Section
+                {t('content_management.hero_section')}
               </h2>
               <div className="grid gap-4">
                 <div>
@@ -321,7 +326,7 @@ export default function OperationalSystemsAdminPage() {
 
             {/* CTA Section */}
             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">Call to Action Section</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('content_management.page_header')}</h2>
               <div className="grid gap-4">
                 <div>
                   <label className="text-sm text-gray-400 mb-2 block">CTA Title</label>

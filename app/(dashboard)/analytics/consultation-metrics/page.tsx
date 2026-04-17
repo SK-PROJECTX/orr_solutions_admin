@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { BarChart3, Calendar, TrendingUp, Clock, Users, CheckCircle, Star } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface ConsultationData {
   meeting_statistics: {
@@ -71,6 +72,7 @@ interface SchedulingData {
 }
 
 export default function ConsultationMetricsPage() {
+  const { t, language } = useLanguageStore();
   const [consultationData, setConsultationData] = useState<ConsultationData | null>(null);
   const [schedulingData, setSchedulingData] = useState<SchedulingData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,32 +131,32 @@ export default function ConsultationMetricsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Consultation Metrics</h1>
-            <p className="text-gray-400">Consultation performance and outcomes</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('analytics.consultation_metrics')}</h1>
+            <p className="text-gray-400">{t('analytics.performance_overview')}</p>
           </div>
 
           {/* Meeting Statistics */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Meeting Statistics</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.meeting_statistics')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Calendar className="text-blue-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Total Meetings</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.total_meetings')}</h3>
                 <p className="text-2xl font-bold text-blue-400">{consultationData?.meeting_statistics?.total_meetings || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <TrendingUp className="text-green-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">This Month</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.this_month')}</h3>
                 <p className="text-2xl font-bold text-green-400">{consultationData?.meeting_statistics?.meetings_this_month || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <CheckCircle className="text-purple-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Completed</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.completed')}</h3>
                 <p className="text-2xl font-bold text-purple-400">{consultationData?.meeting_statistics?.completed_meetings || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Clock className="text-orange-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Avg Duration</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.avg_duration')}</h3>
                 <p className="text-2xl font-bold text-orange-400">{consultationData?.meeting_statistics?.avg_meeting_duration || 0} min</p>
               </div>
             </div>
@@ -162,22 +164,22 @@ export default function ConsultationMetricsPage() {
 
           {/* Conversion Metrics */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Conversion Metrics</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.conversion_metrics')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Inquiry to Meeting</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.inquiry_to_meeting')}</h3>
                 <p className="text-2xl font-bold text-cyan-400">{consultationData?.conversion_metrics?.inquiry_to_meeting_rate || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Meeting to Engagement</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.meeting_to_engagement')}</h3>
                 <p className="text-2xl font-bold text-pink-400">{consultationData?.conversion_metrics?.meeting_to_engagement_rate || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Repeat Consultation</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.repeat_consultation')}</h3>
                 <p className="text-2xl font-bold text-yellow-400">{consultationData?.conversion_metrics?.repeat_consultation_rate || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-medium text-white mb-2">Escalation Rate</h3>
+                <h3 className="text-lg font-medium text-white mb-2">{t('analytics.escalation_rate')}</h3>
                 <p className="text-2xl font-bold text-red-400">{consultationData?.conversion_metrics?.escalation_to_consultation_rate || 0}%</p>
               </div>
             </div>
@@ -185,26 +187,26 @@ export default function ConsultationMetricsPage() {
 
           {/* Satisfaction Indicators */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Satisfaction Indicators</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.satisfaction_indicators')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Star className="text-yellow-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Feedback Score</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.feedback_score')}</h3>
                 <p className="text-2xl font-bold text-yellow-400">{consultationData?.satisfaction_indicators?.meeting_feedback_score || 0}/5</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Calendar className="text-blue-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Follow-up Requests</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.follow_up_requests')}</h3>
                 <p className="text-2xl font-bold text-blue-400">{consultationData?.satisfaction_indicators?.follow_up_meeting_requests || 0}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <Users className="text-green-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">Client Retention</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.client_retention')}</h3>
                 <p className="text-2xl font-bold text-green-400">{consultationData?.satisfaction_indicators?.client_retention_post_meeting || 0}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <TrendingUp className="text-red-400 mb-2" size={24} />
-                <h3 className="text-lg font-medium text-white">No-show Rate</h3>
+                <h3 className="text-lg font-medium text-white">{t('analytics.no_show_rate')}</h3>
                 <p className="text-2xl font-bold text-red-400">{consultationData?.satisfaction_indicators?.no_show_rate || 0}%</p>
               </div>
             </div>
@@ -213,17 +215,17 @@ export default function ConsultationMetricsPage() {
           {/* Consultant Performance */}
           {consultationData?.consultant_performance && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Consultant Performance</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.consultant_performance')}</h2>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-white/10">
-                        <th className="text-left text-white py-3">Consultant</th>
-                        <th className="text-left text-white py-3">Meetings</th>
-                        <th className="text-left text-white py-3">Completion Rate</th>
-                        <th className="text-left text-white py-3">Avg Rating</th>
-                        <th className="text-left text-white py-3">Satisfaction</th>
+                        <th className="text-left text-white py-3">{t('consultations.consultant')}</th>
+                        <th className="text-left text-white py-3">{t('analytics.meetings')}</th>
+                        <th className="text-left text-white py-3">{t('analytics.completion_rate')}</th>
+                        <th className="text-left text-white py-3">{t('analytics.avg_rating')}</th>
+                        <th className="text-left text-white py-3">{t('analytics.satisfaction')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -246,10 +248,10 @@ export default function ConsultationMetricsPage() {
           {/* Scheduling Analytics */}
           {schedulingData && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Scheduling Analytics</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.scheduling_analytics')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Peak Request Days</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.peak_request_days')}</h3>
                   <div className="space-y-2">
                     {schedulingData?.scheduling_patterns?.peak_request_days && Object.entries(schedulingData.scheduling_patterns.peak_request_days).map(([day, percentage]) => (
                       <div key={day} className="flex justify-between">
@@ -260,18 +262,18 @@ export default function ConsultationMetricsPage() {
                   </div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Capacity vs Demand</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.capacity_vs_demand')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Current Capacity</span>
+                      <span className="text-gray-400">{t('analytics.current_capacity')}</span>
                       <span className="text-green-400">{schedulingData?.availability_analysis?.capacity_vs_demand?.current_capacity || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Current Demand</span>
+                      <span className="text-gray-400">{t('analytics.current_demand')}</span>
                       <span className="text-blue-400">{schedulingData?.availability_analysis?.capacity_vs_demand?.current_demand || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Utilization Rate</span>
+                      <span className="text-gray-400">{t('analytics.utilization_rate')}</span>
                       <span className="text-purple-400">{schedulingData?.availability_analysis?.capacity_vs_demand?.utilization_rate || 0}%</span>
                     </div>
                   </div>
@@ -283,10 +285,10 @@ export default function ConsultationMetricsPage() {
           {/* Optimization Opportunities */}
           {schedulingData?.optimization_opportunities && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Optimization Opportunities</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">{t('analytics.optimization_opportunities')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Underutilized Slots</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.underutilized_slots')}</h3>
                   <div className="space-y-2">
                     {schedulingData?.optimization_opportunities?.underutilized_slots?.map((slot, index) => (
                       <div key={index} className="flex justify-between">
@@ -297,7 +299,7 @@ export default function ConsultationMetricsPage() {
                   </div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-medium text-white mb-4">Suggested Improvements</h3>
+                  <h3 className="text-lg font-medium text-white mb-4">{t('analytics.suggested_improvements')}</h3>
                   <div className="space-y-3">
                     {schedulingData?.optimization_opportunities?.suggested_capacity_adjustments?.map((suggestion, index) => (
                       <div key={index} className="">
