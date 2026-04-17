@@ -249,7 +249,6 @@ export default function LegacyPolicy() {
                   label="Description"
                   value={item.description || ''}
                   onChange={(value) => handleRichTextChange(`item-${item.id}`, 'description', value)}
-                  placeholder="Enter policy item description"
                   placeholder={t('content_management.enter_description')}
                   rows={6}
                 />

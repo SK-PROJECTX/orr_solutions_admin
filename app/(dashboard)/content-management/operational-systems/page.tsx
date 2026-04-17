@@ -51,7 +51,7 @@ export default function OperationalSystemsAdminPage() {
     try {
       setLoading(true);
       const response = await cmsAPI.getOperationalSystemsContent();
-      const cleanedData = cleanContentObject(response);
+      const cleanedData = cleanContentObject(response as Record<string, any>);
       setContent(cleanedData as any);
     } catch (err: any) {
       setError(err.message || t('content_management.load_failed'));
@@ -133,7 +133,6 @@ export default function OperationalSystemsAdminPage() {
               onClick={handleSave}
               disabled={saving}
               className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg text-white text-sm font-medium transition-all duration-200 disabled:opacity-50"
-            >
             >
               {saving ? <Loader className="animate-spin" size={16} /> : <Save size={16} />}
               {saving ? t('content_management.saving') : t('content_management.save_changes')}

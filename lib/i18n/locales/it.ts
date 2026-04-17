@@ -411,7 +411,7 @@ export const it = {
     status: "Stato",
     no_content: "Nessun contenuto disponibile"
   },
-  content_management: {
+  content_management_old: {
     page_title: "Gestione Contenuti",
     page_subtitle: "Gestisci tutte le sezioni di contenuto della homepage con la formattazione rich text",
     hero_section: "Sezione Hero",
@@ -655,14 +655,6 @@ export const it = {
     ai_chat_funnel: "Funnel Chat AI",
     meeting_funnel: "Funnel Appuntamenti",
     support_funnel: "Funnel Supporto",
-    ai_chat: "Chat AI",
-    meetings: "Appuntamenti",
-    tickets: "Ticket",
-    completed: "Completato",
-    conversion_label: "% conversione",
-    dropoff_analysis: "Analisi dell'Abbandono",
-    dropoff_rate: "abbandono",
-    users_label: "utenti",
     trial_rate: 'Tasso di Prova',
     retention_rate: 'Tasso di Mantenimento',
     request_rate: 'Tasso di Richiesta',
