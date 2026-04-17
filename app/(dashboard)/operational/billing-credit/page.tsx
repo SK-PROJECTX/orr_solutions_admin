@@ -125,13 +125,13 @@ export default function BillingCreditOverviewPage() {
                             </div>
                             <div className="text-right">
                               <p className="text-white font-semibold">€{transaction.amount}</p>
-                              <p className={`text-sm capitalize ${transaction.status === 'completed' ? 'text-green-400' :
-                                  transaction.status === 'pending' ? 'text-yellow-400' :
+                              <p className={`text-sm capitalize ${(transaction.status as string) === 'completed' ? 'text-green-400' :
+                                  (transaction.status as string) === 'pending' ? 'text-yellow-400' :
                                     'text-red-400'
                                 }`}>
-                                {transaction.status === 'completed' ? t('dashboard.completed') : 
-                                 transaction.status === 'pending' ? t('dashboard.pending') : 
-                                 transaction.status === 'failed' ? t('dashboard.failed') : transaction.status}
+                                {(transaction.status as string) === 'completed' ? t('dashboard.completed') : 
+                                 (transaction.status as string) === 'pending' ? t('dashboard.pending') : 
+                                 (transaction.status as string) === 'failed' ? t('dashboard.failed') : transaction.status}
                               </p>
                             </div>
                           </div>

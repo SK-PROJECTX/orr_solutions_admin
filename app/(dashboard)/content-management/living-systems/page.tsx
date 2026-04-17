@@ -51,7 +51,7 @@ export default function LivingSystemsAdminPage() {
     try {
       setLoading(true);
       const response = await cmsAPI.getLivingSystemsContent();
-      const cleanedData = cleanContentObject(response);
+      const cleanedData = cleanContentObject(response as Record<string, any>);
       setContent(cleanedData as any);
     } catch (err: any) {
       setError(err.message || t('content_management.load_failed'));
