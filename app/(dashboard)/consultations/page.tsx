@@ -4,8 +4,10 @@ import { Calendar, Users, FileText, Clock, CheckCircle, UserCheck, Loader } from
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { meetingAPI, contentAPI, settingsAPI } from "@/app/services";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function ConsultationsPage() {
+  const { t } = useLanguageStore();
   const [stats, setStats] = useState({
     scheduled: 0,
     completed: 0,
@@ -46,12 +48,12 @@ export default function ConsultationsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">All Consultations</h1>
-            <p className="text-gray-400">Manage consultation sessions</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('consultations.title')}</h1>
+            <p className="text-gray-400">{t('consultations.subtitle')}</p>
           </div>
 
           {loading ? (
@@ -65,22 +67,22 @@ export default function ConsultationsPage() {
                 <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/20 rounded-xl p-4 text-center">
                   <Clock className="w-8 h-8 text-green-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{stats.scheduled}</div>
-                  <div className="text-xs text-gray-400">Scheduled</div>
+                  <div className="text-xs text-gray-400">{t('consultations.scheduled')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-xl p-4 text-center">
                   <CheckCircle className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{stats.completed}</div>
-                  <div className="text-xs text-gray-400">Completed</div>
+                  <div className="text-xs text-gray-400">{t('consultations.completed')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 rounded-xl p-4 text-center">
                   <UserCheck className="w-8 h-8 text-purple-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{stats.consultants}</div>
-                  <div className="text-xs text-gray-400">Consultants</div>
+                  <div className="text-xs text-gray-400">{t('consultations.consultants')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 rounded-xl p-4 text-center">
                   <FileText className="w-8 h-8 text-orange-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{stats.reports}</div>
-                  <div className="text-xs text-gray-400">Reports</div>
+                  <div className="text-xs text-gray-400">{t('consultations.reports')}</div>
                 </div>
               </div>
 
@@ -92,11 +94,11 @@ export default function ConsultationsPage() {
                       <CheckCircle className="w-6 h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-white group-hover:text-blue-300 transition-colors">Past Consultations</h3>
-                      <p className="text-sm text-gray-400">{stats.completed} completed sessions</p>
+                      <h3 className="text-xl font-semibold text-white group-hover:text-blue-300 transition-colors">{t('consultations.past_title')}</h3>
+                      <p className="text-sm text-gray-400">{stats.completed} {t('consultations.completed_sessions')}</p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm">View completed consultation sessions and meeting notes</p>
+                  <p className="text-gray-400 text-sm">{t('consultations.past_desc')}</p>
                 </Link>
 
                 <Link href="/consultations/scheduled" className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-6 hover:border-green-500/50 transition-all duration-300">
@@ -105,11 +107,11 @@ export default function ConsultationsPage() {
                       <Clock className="w-6 h-6 text-green-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-white group-hover:text-green-300 transition-colors">Scheduled Consultations</h3>
-                      <p className="text-sm text-gray-400">{stats.scheduled} upcoming sessions</p>
+                      <h3 className="text-xl font-semibold text-white group-hover:text-green-300 transition-colors">{t('consultations.scheduled_title')}</h3>
+                      <p className="text-sm text-gray-400">{stats.scheduled} {t('consultations.upcoming_sessions')}</p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm">Manage upcoming consultation sessions and schedules</p>
+                  <p className="text-gray-400 text-sm">{t('consultations.scheduled_desc')}</p>
                 </Link>
 
                 <Link href="/consultations/consultants" className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-6 hover:border-purple-500/50 transition-all duration-300">
@@ -118,11 +120,11 @@ export default function ConsultationsPage() {
                       <UserCheck className="w-6 h-6 text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-white group-hover:text-purple-300 transition-colors">Consultants</h3>
-                      <p className="text-sm text-gray-400">{stats.consultants} available consultants</p>
+                      <h3 className="text-xl font-semibold text-white group-hover:text-purple-300 transition-colors">{t('consultations.consultants_title')}</h3>
+                      <p className="text-sm text-gray-400">{stats.consultants} {t('consultations.available_consultants')}</p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm">Manage consultant assignments and availability</p>
+                  <p className="text-gray-400 text-sm">{t('consultations.consultants_desc')}</p>
                 </Link>
 
                 <Link href="/consultations/reports" className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300">
@@ -131,11 +133,11 @@ export default function ConsultationsPage() {
                       <FileText className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-white group-hover:text-orange-300 transition-colors">Reports</h3>
-                      <p className="text-sm text-gray-400">{stats.reports} consultation reports</p>
+                      <h3 className="text-xl font-semibold text-white group-hover:text-orange-300 transition-colors">{t('consultations.reports_title')}</h3>
+                      <p className="text-sm text-gray-400">{stats.reports} {t('consultations.consultation_reports')}</p>
                     </div>
                   </div>
-                  <p className="text-gray-400 text-sm">View and manage consultation reports and documentation</p>
+                  <p className="text-gray-400 text-sm">{t('consultations.reports_desc')}</p>
                 </Link>
               </div>
             </>

@@ -6,6 +6,8 @@ import RichTextEditor from '../../../../components/RichTextEditor';
 import { getRichTextContent } from '../../../../lib/rich-text-utils';
 import SuccessModal from '../../../components/ui/SuccessModal';
 import ErrorModal from '../../../components/ui/ErrorModal';
+import { useLanguageStore } from '@/store/languageStore';
+import { cleanContentObject } from "@/app/utils/htmlCleaner";
 
 interface ServiceStage {
   id: number;
@@ -54,6 +56,7 @@ export default function Services() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const { t } = useLanguageStore();
   const cmsService = new CMSService();
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
   const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
@@ -70,7 +73,8 @@ export default function Services() {
             stages: result.stages?.length + ' stages' || '0 stages',
             pillars: result.pillars?.length + ' pillars' || '0 pillars'
           });
-          setData(result);
+          const cleanedData = cleanContentObject(result);
+          setData(cleanedData);
         }
       } catch (error) {
         console.error('❌ Error fetching Services data:', error);
@@ -153,7 +157,7 @@ export default function Services() {
     if (value && value.length > maxLength) {
       setErrorModal({
         isOpen: true,
-        title: 'Validation Error',
+        title: t('content_management.validation_error_title'),
         message: `${fieldName} exceeds maximum length of ${maxLength} characters. Current length: ${value.length}`
       });
       return false;
@@ -187,8 +191,8 @@ export default function Services() {
       }
       setSuccessModal({
         isOpen: true,
-        title: 'Content Saved',
-        message: 'Your changes have been saved successfully!'
+        title: t('content_management.content_saved'),
+        message: t('content_management.success_msg')
       });
       const result = await cmsService.getServicesPageContent();
       setData(result);
@@ -196,8 +200,8 @@ export default function Services() {
       console.error('Failed to save:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
-        message: 'Failed to save content'
+        title: t('content_management.save_failed'),
+        message: t('content_management.save_failed')
       });
     } finally {
       setSaving(null);
@@ -246,8 +250,8 @@ export default function Services() {
       await cmsService.updateServicesPageContent({ page: { business_gp_image: imageUrl } });
       setSuccessModal({
         isOpen: true,
-        title: 'Image Uploaded',
-        message: 'Image uploaded successfully!'
+        title: t('content_management.image_uploaded'),
+        message: t('content_management.image_success_msg')
       });
       const result = await cmsService.getServicesPageContent();
       setData(result);
@@ -255,8 +259,8 @@ export default function Services() {
       console.error('Failed to upload image:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Upload Failed',
-        message: 'Failed to upload image'
+        title: t('content_management.save_failed'),
+        message: t('content_management.save_failed')
       });
     } finally {
       setUploading(null);
@@ -284,13 +288,13 @@ export default function Services() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">Services Content</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Manage Services page content, stages, and pillars</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('content_management.services_title')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('content_management.services_subtitle')}</p>
           </div>
 
           {/* Page Header Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Page Header</h2>
+            <h2 className={titleClass}>{t('content_management.page_header')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('page-header', { 
@@ -303,10 +307,10 @@ export default function Services() {
               }); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Hero Title"
+                label={t('content_management.hero_section')}
                 value={data?.page?.hero_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'hero_title', value)}
-                placeholder="Enter hero title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
                 label="Hero Subtitle"
@@ -316,22 +320,22 @@ export default function Services() {
                 rows={4}
               />
               <RichTextEditor
-                label="Meta Title (SEO)"
+                label={t('content_management.meta_seo')}
                 value={data?.page?.meta_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_title', value)}
-                placeholder="Enter meta title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Description (SEO)"
+                label={t('content_management.meta_desc_seo')}
                 value={data?.page?.meta_description || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_description', value)}
-                placeholder="Enter meta description"
+                placeholder={t('content_management.enter_description')}
                 rows={3}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'page-header'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'page-header' ? 'Saving...' : 'Save Page Header'}
+                  {saving === 'page-header' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -340,7 +344,7 @@ export default function Services() {
           {/* Service Stages */}
           {(data?.stages || []).map((stage: ServiceStage) => (
             <div key={stage.id} className={sectionClass}>
-              <h2 className={titleClass}>Stage {stage.stage_number} - {getRichTextContent(stage.title)}</h2>
+              <h2 className={titleClass}>{t('content_management.stage')} {stage.stage_number} - {getRichTextContent(stage.title)}</h2>
               <form onSubmit={(e) => { 
                 e.preventDefault(); 
                 handleSave(`stage-${stage.id}`, stage); 
@@ -441,7 +445,7 @@ export default function Services() {
                     className={buttonClass}
                   >
                     <Save size={18} />
-                    {saving === `stage-${stage.id}` ? 'Saving...' : `Save Stage ${stage.stage_number}`}
+                    {saving === `stage-${stage.id}` ? t('content_management.saving') : `${t('content_management.save_stage')} ${stage.stage_number}`}
                   </button>
                 </div>
               </form>
@@ -468,7 +472,7 @@ export default function Services() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'pillars-title'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'pillars-title' ? 'Saving...' : 'Save Pillars Title'}
+                  {saving === 'pillars-title' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -477,7 +481,7 @@ export default function Services() {
           {/* Service Pillars */}
           {(data?.pillars || []).map((pillar: ServicePillar, index: number) => (
             <div key={pillar.id} className={sectionClass}>
-              <h2 className={titleClass}>Pillar {index + 1} - {getRichTextContent(pillar.title)}</h2>
+              <h2 className={titleClass}>{t('content_management.pillar')} {index + 1} - {getRichTextContent(pillar.title)}</h2>
               <form onSubmit={(e) => { 
                 e.preventDefault(); 
                 handleSave(`pillar-${pillar.id}`, pillar); 
@@ -541,7 +545,7 @@ export default function Services() {
                     className={buttonClass}
                   >
                     <Save size={18} />
-                    {saving === `pillar-${pillar.id}` ? 'Saving...' : `Save Pillar ${index + 1}`}
+                    {saving === `pillar-${pillar.id}` ? t('content_management.saving') : `${t('content_management.save_pillar')} ${index + 1}`}
                   </button>
                 </div>
               </form>
@@ -594,12 +598,12 @@ export default function Services() {
                     {uploading === 'business-gp-image' ? (
                       <>
                         <Loader size={16} className="animate-spin" />
-                        Uploading...
+                        {t('content_management.uploading')}
                       </>
                     ) : (
                       <>
                         <Upload size={16} />
-                        Upload Image
+                        {t('content_management.upload_image')}
                       </>
                     )}
                   </label>
@@ -645,7 +649,7 @@ export default function Services() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'business-gp'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'business-gp' ? 'Saving...' : 'Save Business GP Section'}
+                  {saving === 'business-gp' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>

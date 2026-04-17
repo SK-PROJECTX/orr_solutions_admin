@@ -6,6 +6,7 @@ import { clientAPI } from "@/app/services";
 import type { ClientListItem, Client } from "@/app/services/types";
 import ClientDetailsModal from "@/app/components/client/ClientDetailsModal";
 import Pagination from "@/app/components/common/Pagination";
+import { useLanguageStore } from "@/store/languageStore";
 
 const stageColors: Record<string, string> = {
   discover: "bg-blue-500/30 text-blue-300 border-blue-500/30",
@@ -23,6 +24,7 @@ const pillarColors: Record<string, string> = {
 };
 
 export default function ClientProfilesPage() {
+  const { t } = useLanguageStore();
   const [allClients, setAllClients] = useState<ClientListItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,10 +52,10 @@ export default function ClientProfilesPage() {
       console.log('Fetching all clients');
       const response = await clientAPI.listClients({}) as any;
       console.log('API response:', response);
-      
+
       const clientsData = Array.isArray(response) ? response : (response.results || response.data || []);
       console.log('Processed clients:', clientsData);
-      
+
       setAllClients(clientsData);
     } catch (err: any) {
       console.error("Failed to fetch clients:", err);
@@ -79,20 +81,21 @@ export default function ClientProfilesPage() {
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "Never";
+    if (!dateString) return t('consultations.no_content');
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const { language } = useLanguageStore.getState();
+    return date.toLocaleDateString(language === 'en' ? "en-US" : "it-IT", { month: "short", day: "numeric", year: "numeric" });
   };
 
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Client Profiles</h1>
-            <p className="text-gray-400">Detailed view of all client profiles</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('clients.profiles_title')}</h1>
+            <p className="text-gray-400">{t('clients.profiles_subtitle')}</p>
           </div>
 
           {/* Search */}
@@ -103,7 +106,7 @@ export default function ClientProfilesPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search clients..."
+                placeholder={t('tickets.search_placeholder')}
                 className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200"
               />
             </div>
@@ -122,12 +125,12 @@ export default function ClientProfilesPage() {
                 (client.role && client.role.toLowerCase().includes(query))
               );
             });
-            
+
             // Paginate filtered clients
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedClients = filteredClients.slice(startIndex, endIndex);
-            
+
             return loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader className="animate-spin" size={32} />
@@ -135,19 +138,19 @@ export default function ClientProfilesPage() {
             ) : filteredClients.length === 0 ? (
               <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
                 <Users size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No clients found</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">{t('clients.no_clients_found')}</h3>
                 <p className="text-gray-400">
-                  {searchQuery ? "Try adjusting your search query" : "No client profiles available"}
+                  {searchQuery ? t('clients.adjust_search') : t('clients.no_profiles_available')}
                 </p>
               </div>
             ) : (
               <>
                 <div className="mb-6">
                   <p className="text-sm text-gray-400">
-                    Showing {paginatedClients.length} of {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''}
+                    {t('consultations.showing_meetings')} {paginatedClients.length} {t('consultations.of')} {filteredClients.length} {t('sidebar.all_clients')}
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {paginatedClients.map((client) => (
                     <div
@@ -161,7 +164,7 @@ export default function ClientProfilesPage() {
                           <p className="text-sm text-gray-400 mb-1">{client.email}</p>
                           <p className="text-sm text-gray-400">{client.company}</p>
                           {client.role && (
-                            <p className="text-xs text-black mt-1">{client.role}</p>
+                            <p className="text-xs text-black mt-1">{t(`common.${client.role.toLowerCase()}` as any) || client.role}</p>
                           )}
                         </div>
                         <User className="text-gray-400" size={24} />
@@ -169,34 +172,30 @@ export default function ClientProfilesPage() {
 
                       <div className="flex items-center gap-2 mb-4">
                         <span className={`text-xs px-2 py-1 rounded border ${stageColors[client.stage || ''] || "bg-gray-500/30 text-gray-300 border-gray-500/30"}`}>
-                          {client.stage ? client.stage.charAt(0).toUpperCase() + client.stage.slice(1) : 'Unknown'}
+                          {client.stage ? t(`clients.stages.${client.stage.toLowerCase()}` as any) || client.stage : t('consultations.no_content')}
                         </span>
                         <span className={`text-xs ${pillarColors[client.primary_pillar || ''] || "text-gray-400"}`}>
-                          {client.primary_pillar === "strategic" ? "Strategic" : 
-                           client.primary_pillar === "operational" ? "Operational" : 
-                           client.primary_pillar === "financial" ? "Financial" : 
-                           client.primary_pillar === "cultural" ? "Cultural" : "Unknown"}
+                          {client.primary_pillar ? t(`clients.pillars.${client.primary_pillar.toLowerCase()}` as any) || client.primary_pillar : t('consultations.no_content')}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs text-black">
                         <div className="flex items-center gap-1">
                           <Calendar size={12} />
-                          <span>Joined: {formatDate(client.created_at)}</span>
+                          <span>{t('clients.joined')}: {formatDate(client.created_at)}</span>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          client.is_portal_active 
-                            ? "bg-green-500/20 text-green-300" 
+                        <span className={`px-2 py-1 rounded text-xs ${client.is_portal_active
+                            ? "bg-green-500/20 text-green-300"
                             : "bg-gray-500/20 text-gray-400"
-                        }`}>
-                          {client.is_portal_active ? "Active" : "Inactive"}
+                          }`}>
+                          {client.is_portal_active ? t('common.active') : t('common.inactive')}
                         </span>
                       </div>
 
                       {client.assigned_admin_name && (
                         <div className="mt-3 pt-3 border-t border-white/10">
                           <p className="text-xs text-black">
-                            Admin: <span className="text-gray-400">{client.assigned_admin_name}</span>
+                            {t('tickets.assigned_to')}: <span className="text-gray-400">{client.assigned_admin_name}</span>
                           </p>
                         </div>
                       )}
@@ -204,13 +203,13 @@ export default function ClientProfilesPage() {
                       <div className="mt-4 flex items-center justify-center">
                         <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                           <Eye size={14} />
-                          View Profile
+                          {t('clients.view_profile')}
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 {filteredClients.length > itemsPerPage && (
                   <Pagination
                     currentPage={currentPage}

@@ -6,6 +6,7 @@ import RichTextEditor from '../../../../../components/RichTextEditor';
 import { cleanContentObject } from '../../../../utils/htmlCleaner';
 import SuccessModal from '../../../../components/ui/SuccessModal';
 import ErrorModal from '../../../../components/ui/ErrorModal';
+import { useLanguageStore } from "@/store/languageStore";
 
 interface StrategicAdvisoryContent {
   hero_title: string;
@@ -58,6 +59,7 @@ interface StrategicAdvisoryContent {
 }
 
 export default function StrategyAdvisoryPage() {
+  const { t, language } = useLanguageStore();
   const [content, setContent] = useState<StrategicAdvisoryContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -76,14 +78,14 @@ export default function StrategyAdvisoryPage() {
         const cleanedContent = cleanContentObject(data.data);
         setContent(cleanedContent);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : t('common.error'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchContent();
-  }, []);
+  }, [t]);
 
   const handleSave = async (section: string) => {
     setSaving(section);
@@ -99,16 +101,16 @@ export default function StrategyAdvisoryPage() {
       if (response.ok) {
         setSuccessModal({
           isOpen: true,
-          title: 'Content Saved',
-          message: 'Your changes have been saved successfully!'
+          title: t('content_management.success_save_title'),
+          message: t('content_management.success_save_msg')
         });
       }
     } catch (err) {
       console.error('Failed to update content:', err);
       setErrorModal({
         isOpen: true,
-        title: 'Save Failed',
-        message: 'Failed to save content'
+        title: t('content_management.error_save_title'),
+        message: t('content_management.error_save_msg')
       });
     } finally {
       setSaving(null);
@@ -136,7 +138,7 @@ export default function StrategyAdvisoryPage() {
     return (
       <div className="min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Content</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{t('common.error')}</h1>
           <p className="text-gray-400">{error}</p>
         </div>
       </div>
@@ -156,41 +158,41 @@ export default function StrategyAdvisoryPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">Strategy Advisory Compliant Content</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Manage Strategy Advisory Compliant page content</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('content_management.strategy_advisory_title')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('content_management.strategy_advisory_subtitle')}</p>
           </div>
 
           {/* Hero Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Hero Section</h2>
+            <h2 className={titleClass}>{t('content_management.hero_section')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('hero'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Hero Title"
+                label={t('content_management.hero_title')}
                 value={content.hero_title || ''}
                 onChange={(value) => handleRichTextChange('hero_title', value)}
-                placeholder="Enter hero title"
+                placeholder={t('content_management.hero_title')}
               />
               <RichTextEditor
-                label="Hero Subtitle"
+                label={t('content_management.hero_subtitle')}
                 value={content.hero_subtitle || ''}
                 onChange={(value) => handleRichTextChange('hero_subtitle', value)}
-                placeholder="Enter hero subtitle"
+                placeholder={t('content_management.hero_subtitle')}
                 rows={3}
               />
               <RichTextEditor
-                label="Hero Description"
+                label={t('content_management.description')}
                 value={content.hero_description || ''}
                 onChange={(value) => handleRichTextChange('hero_description', value)}
-                placeholder="Enter hero description"
+                placeholder={t('content_management.description')}
                 rows={4}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'hero'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'hero' ? 'Saving...' : 'Save Hero Section'}
+                  {saving === 'hero' ? t('content_management.saving') : t('content_management.save_hero')}
                 </button>
               </div>
             </form>
@@ -198,70 +200,70 @@ export default function StrategyAdvisoryPage() {
 
           {/* Services Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>What We Offer Section</h2>
+            <h2 className={titleClass}>{t('content_management.what_we_offer')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('services'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Services Title"
+                label={t('content_management.section_title')}
                 value={content.services_title || ''}
                 onChange={(value) => handleRichTextChange('services_title', value)}
-                placeholder="Enter services title"
+                placeholder={t('content_management.section_title')}
               />
               
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">Service 1</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.card', { num: 1 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Service 1 Title"
+                    label={t('content_management.card_title', { num: 1 })}
                     value={content.service_1_title || ''}
                     onChange={(value) => handleRichTextChange('service_1_title', value)}
-                    placeholder="Enter service 1 title"
+                    placeholder={t('content_management.card_title', { num: 1 })}
                   />
                   <RichTextEditor
-                    label="Service 1 Description"
+                    label={t('content_management.card_description', { num: 1 })}
                     value={content.service_1_description || ''}
                     onChange={(value) => handleRichTextChange('service_1_description', value)}
-                    placeholder="Enter service 1 description"
+                    placeholder={t('content_management.card_description', { num: 1 })}
                     rows={3}
                   />
                 </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">Service 2</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.card', { num: 2 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Service 2 Title"
+                    label={t('content_management.card_title', { num: 2 })}
                     value={content.service_2_title || ''}
                     onChange={(value) => handleRichTextChange('service_2_title', value)}
-                    placeholder="Enter service 2 title"
+                    placeholder={t('content_management.card_title', { num: 2 })}
                   />
                   <RichTextEditor
-                    label="Service 2 Description"
+                    label={t('content_management.card_description', { num: 2 })}
                     value={content.service_2_description || ''}
                     onChange={(value) => handleRichTextChange('service_2_description', value)}
-                    placeholder="Enter service 2 description"
+                    placeholder={t('content_management.card_description', { num: 2 })}
                     rows={3}
                   />
                 </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">Service 3</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.card', { num: 3 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Service 3 Title"
+                    label={t('content_management.card_title', { num: 3 })}
                     value={content.service_3_title || ''}
                     onChange={(value) => handleRichTextChange('service_3_title', value)}
-                    placeholder="Enter service 3 title"
+                    placeholder={t('content_management.card_title', { num: 3 })}
                   />
                   <RichTextEditor
-                    label="Service 3 Description"
+                    label={t('content_management.card_description', { num: 3 })}
                     value={content.service_3_description || ''}
                     onChange={(value) => handleRichTextChange('service_3_description', value)}
-                    placeholder="Enter service 3 description"
+                    placeholder={t('content_management.card_description', { num: 3 })}
                     rows={3}
                   />
                 </div>
@@ -270,7 +272,7 @@ export default function StrategyAdvisoryPage() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'services'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'services' ? 'Saving...' : 'Save Services Section'}
+                  {saving === 'services' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>
@@ -278,77 +280,77 @@ export default function StrategyAdvisoryPage() {
 
           {/* Process Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>How We Work Section</h2>
+            <h2 className={titleClass}>{t('content_management.how_we_work')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('process'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Process Title"
+                label={t('content_management.section_title')}
                 value={content.process_title || ''}
                 onChange={(value) => handleRichTextChange('process_title', value)}
-                placeholder="Enter process title"
+                placeholder={t('content_management.section_title')}
               />
               <RichTextEditor
-                label="Process Description"
+                label={t('content_management.description')}
                 value={content.process_description || ''}
                 onChange={(value) => handleRichTextChange('process_description', value)}
-                placeholder="Enter process description"
+                placeholder={t('content_management.description')}
                 rows={3}
               />
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_1_title || 'Step 1'}</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_1_title || t('content_management.process_step', { num: 1 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Step 1 Title"
+                    label={t('content_management.card_title', { num: 1 })}
                     value={content.process_step_1_title || ''}
                     onChange={(value) => handleRichTextChange('process_step_1_title', value)}
-                    placeholder="Enter step 1 title"
+                    placeholder={t('content_management.card_title', { num: 1 })}
                   />
                   <RichTextEditor
-                    label="Step 1 Content"
+                    label={t('content_management.description')}
                     value={content.process_step_1 || ''}
                     onChange={(value) => handleRichTextChange('process_step_1', value)}
-                    placeholder="Enter step 1 content"
+                    placeholder={t('content_management.description')}
                     rows={3}
                   />
                 </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_2_title || 'Step 2'}</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_2_title || t('content_management.process_step', { num: 2 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Step 2 Title"
+                    label={t('content_management.card_title', { num: 2 })}
                     value={content.process_step_2_title || ''}
                     onChange={(value) => handleRichTextChange('process_step_2_title', value)}
-                    placeholder="Enter step 2 title"
+                    placeholder={t('content_management.card_title', { num: 2 })}
                   />
                   <RichTextEditor
-                    label="Step 2 Content"
+                    label={t('content_management.description')}
                     value={content.process_step_2 || ''}
                     onChange={(value) => handleRichTextChange('process_step_2', value)}
-                    placeholder="Enter step 2 content"
+                    placeholder={t('content_management.description')}
                     rows={3}
                   />
                 </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_3_title || 'Step 3'}</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{content.process_step_3_title || t('content_management.process_step', { num: 3 })}</h3>
                 <div className="flex flex-col gap-4">
                   <RichTextEditor
-                    label="Step 3 Title"
+                    label={t('content_management.card_title', { num: 3 })}
                     value={content.process_step_3_title || ''}
                     onChange={(value) => handleRichTextChange('process_step_3_title', value)}
-                    placeholder="Enter step 3 title"
+                    placeholder={t('content_management.card_title', { num: 3 })}
                   />
                   <RichTextEditor
-                    label="Step 3 Content"
+                    label={t('content_management.description')}
                     value={content.process_step_3 || ''}
                     onChange={(value) => handleRichTextChange('process_step_3', value)}
-                    placeholder="Enter step 3 content"
+                    placeholder={t('content_management.description')}
                     rows={3}
                   />
                 </div>
@@ -357,7 +359,7 @@ export default function StrategyAdvisoryPage() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'process'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'process' ? 'Saving...' : 'Save Process Section'}
+                  {saving === 'process' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>
@@ -365,40 +367,40 @@ export default function StrategyAdvisoryPage() {
 
           {/* Network Advantage Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Network Advantage Section</h2>
+            <h2 className={titleClass}>{t('content_management.network_advantage_section')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('network'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Network Title"
+                label={t('content_management.network_title')}
                 value={content.network_title || ''}
                 onChange={(value) => handleRichTextChange('network_title', value)}
-                placeholder="Enter network title"
+                placeholder={t('content_management.network_title')}
               />
               <RichTextEditor
-                label="Network Description"
+                label={t('content_management.network_description')}
                 value={content.network_description || ''}
                 onChange={(value) => handleRichTextChange('network_description', value)}
-                placeholder="Enter network description"
+                placeholder={t('content_management.network_description')}
                 rows={3}
               />
 
               {[1, 2, 3, 4, 5].map((num) => (
                 <div key={num} className="border-t border-white/10 pt-4 mt-2">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Network Card {num}</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.network_card', { num })}</h3>
                   <div className="flex flex-col gap-4">
                     <RichTextEditor
-                      label={`Card ${num} Title`}
+                      label={t('content_management.card_title', { num })}
                       value={content[`network_card_${num}_title` as keyof StrategicAdvisoryContent] || ''}
                       onChange={(value) => handleRichTextChange(`network_card_${num}_title`, value)}
-                      placeholder={`Enter card ${num} title`}
+                      placeholder={t('content_management.card_title', { num })}
                     />
                     <RichTextEditor
-                      label={`Card ${num} Description`}
+                      label={t('content_management.card_description', { num })}
                       value={content[`network_card_${num}_description` as keyof StrategicAdvisoryContent] || ''}
                       onChange={(value) => handleRichTextChange(`network_card_${num}_description`, value)}
-                      placeholder={`Enter card ${num} description`}
+                      placeholder={t('content_management.card_description', { num })}
                       rows={3}
                     />
                   </div>
@@ -408,7 +410,7 @@ export default function StrategyAdvisoryPage() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'network'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'network' ? 'Saving...' : 'Save Network Section'}
+                  {saving === 'network' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>
@@ -416,56 +418,56 @@ export default function StrategyAdvisoryPage() {
 
           {/* Digital Solutions Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Digital Solutions Section</h2>
+            <h2 className={titleClass}>{t('content_management.digital_solutions_section')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('digital'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Digital Title"
+                label={t('content_management.digital_title')}
                 value={content.digital_title || ''}
                 onChange={(value) => handleRichTextChange('digital_title', value)}
-                placeholder="Enter digital title"
+                placeholder={t('content_management.digital_title')}
               />
               <RichTextEditor
-                label="Digital Subtitle"
+                label={t('content_management.digital_subtitle')}
                 value={content.digital_subtitle || ''}
                 onChange={(value) => handleRichTextChange('digital_subtitle', value)}
-                placeholder="Enter digital subtitle"
+                placeholder={t('content_management.digital_subtitle')}
               />
               <RichTextEditor
-                label="Digital Description"
+                label={t('content_management.digital_description')}
                 value={content.digital_description || ''}
                 onChange={(value) => handleRichTextChange('digital_description', value)}
-                placeholder="Enter digital description"
+                placeholder={t('content_management.digital_description')}
                 rows={3}
               />
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">Who Is This For</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.who_is_this_for')}</h3>
                 <div className="flex flex-col gap-4">
                   {[1, 2, 3].map((num) => (
                     <RichTextEditor
                       key={num}
-                      label={`Who ${num}`}
+                      label={t('content_management.who_num', { num })}
                       value={content[`digital_who_${num}` as keyof StrategicAdvisoryContent] || ''}
                       onChange={(value) => handleRichTextChange(`digital_who_${num}`, value)}
-                      placeholder={`Enter who ${num}`}
+                      placeholder={t('content_management.who_num', { num })}
                     />
                   ))}
                 </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold mb-4 text-white">Features</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.features')}</h3>
                 <div className="flex flex-col gap-4">
                   {[1, 2, 3].map((num) => (
                     <RichTextEditor
                       key={num}
-                      label={`Feature ${num}`}
+                      label={t('content_management.feature_num', { num })}
                       value={content[`digital_feature_${num}` as keyof StrategicAdvisoryContent] || ''}
                       onChange={(value) => handleRichTextChange(`digital_feature_${num}`, value)}
-                      placeholder={`Enter feature ${num}`}
+                      placeholder={t('content_management.feature_num', { num })}
                     />
                   ))}
                 </div>
@@ -474,7 +476,7 @@ export default function StrategyAdvisoryPage() {
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'digital'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'digital' ? 'Saving...' : 'Save Digital Section'}
+                  {saving === 'digital' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>
@@ -482,7 +484,7 @@ export default function StrategyAdvisoryPage() {
 
           {/* Case Example Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Case Example Section</h2>
+            <h2 className={titleClass}>{t('content_management.case_example_section')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('case'); 
@@ -490,7 +492,7 @@ export default function StrategyAdvisoryPage() {
               
               {/* Image URL Section */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <label className={labelClass}>Case Example Image URL</label>
+                <label className={labelClass}>{t('content_management.case_image_url')}</label>
                 {content.case_image_url && (
                   <div className="mb-4">
                     <img src={content.case_image_url} alt={content.case_image_alt} className="w-full max-w-md h-48 object-cover rounded-lg" />
@@ -500,46 +502,46 @@ export default function StrategyAdvisoryPage() {
                   type="text" 
                   value={content.case_image_url || ''} 
                   onChange={(e) => setContent((prev: any) => ({ ...prev, case_image_url: e.target.value }))}
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="URL"
                   className={inputClass} 
                 />
               </div>
 
               <RichTextEditor
-                label="Image Alt Text"
+                label={t('content_management.case_image_alt')}
                 value={content.case_image_alt || ''}
                 onChange={(value) => handleRichTextChange('case_image_alt', value)}
-                placeholder="Enter image alt text"
+                placeholder={t('content_management.case_image_alt')}
               />
 
               <RichTextEditor
-                label="Challenge"
+                label={t('content_management.case_challenge')}
                 value={content.case_challenge || ''}
                 onChange={(value) => handleRichTextChange('case_challenge', value)}
-                placeholder="Enter case challenge"
+                placeholder={t('content_management.case_challenge')}
                 rows={4}
               />
 
               <RichTextEditor
-                label="Solution"
+                label={t('content_management.case_solution')}
                 value={content.case_solution || ''}
                 onChange={(value) => handleRichTextChange('case_solution', value)}
-                placeholder="Enter case solution"
+                placeholder={t('content_management.case_solution')}
                 rows={4}
               />
 
               <RichTextEditor
-                label="Result"
+                label={t('content_management.case_result')}
                 value={content.case_result || ''}
                 onChange={(value) => handleRichTextChange('case_result', value)}
-                placeholder="Enter case result"
+                placeholder={t('content_management.case_result')}
                 rows={4}
               />
 
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'case'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'case' ? 'Saving...' : 'Save Case Example Section'}
+                  {saving === 'case' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>
@@ -547,34 +549,34 @@ export default function StrategyAdvisoryPage() {
 
           {/* CTA Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Call to Action Section</h2>
+            <h2 className={titleClass}>{t('content_management.orr_role_section')}</h2>
             <form onSubmit={(e) => { 
               e.preventDefault(); 
               handleSave('cta'); 
             }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="CTA Title"
+                label={t('content_management.hero_title')}
                 value={content.cta_title || ''}
                 onChange={(value) => handleRichTextChange('cta_title', value)}
-                placeholder="Enter CTA title"
+                placeholder={t('content_management.hero_title')}
               />
               <RichTextEditor
-                label="CTA Description"
+                label={t('content_management.description')}
                 value={content.cta_description || ''}
                 onChange={(value) => handleRichTextChange('cta_description', value)}
-                placeholder="Enter CTA description"
+                placeholder={t('content_management.description')}
                 rows={3}
               />
               <RichTextEditor
-                label="CTA Button Text"
+                label={t('content_management.button_text')}
                 value={content.cta_button_text || ''}
                 onChange={(value) => handleRichTextChange('cta_button_text', value)}
-                placeholder="Enter CTA button text"
+                placeholder={t('content_management.button_text')}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'cta'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'cta' ? 'Saving...' : 'Save CTA Section'}
+                  {saving === 'cta' ? t('content_management.saving') : t('content_management.save')}
                 </button>
               </div>
             </form>

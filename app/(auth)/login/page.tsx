@@ -6,8 +6,11 @@ import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../../lib/hooks/auth";
 import { authAPI } from "../../services/api";
+import { useLanguageStore } from "@/store/languageStore";
+import LanguageToggle from "../../components/ui/LanguageToggle";
 
 export default function Page() {
+  const { t } = useLanguageStore();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -42,11 +45,11 @@ export default function Page() {
         login(response.accessToken, response.user);
         router.push("/");
       } else {
-        setError(response.message || "Login failed - Invalid response format");
+        setError(response.message || t('auth.error_invalid_format'));
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || "Login failed");
+      setError(err.message || t('auth.error_login'));
     } finally {
       setLoading(false);
     }
@@ -86,7 +89,6 @@ export default function Page() {
               alt="ORR Solutions"
               className="w-32 h-32 mt-5 ml-10" />
           </div>
-
         </div>
 
 
@@ -101,21 +103,22 @@ export default function Page() {
         {/* Right side - Form */}
       <div className="flex-1 flex items-center justify-center px-6 md:px-16 py-12">
         <div className="max-w-3xl w-full">
-          {/* Top right sign-in */}
-           <div className="flex md:hidden flex-col items-center justify-center mb-8">
-              <img
-                src="/images/logo.svg"
-                alt="ORR solutions"
-                className="w-16 h-16 mb-4"
-              />
-            </div>
+          {/* Mobile logo + language toggle row */}
+          <div className="flex items-center justify-between mb-8 md:justify-end md:mb-6">
+            <img
+              src="/images/logo.svg"
+              alt="ORR solutions"
+              className="w-12 h-12 md:hidden"
+            />
+            <LanguageToggle />
+          </div>
          
 
           <h2 className="text-2xl font-extrabold mb-2 md:text-start text-center text-[#FFFFFF]">
-            Welcome <span className="text-[#61FD51]">Back</span>
+            {t('auth.welcome_back').split(' ').slice(0, -1).join(' ')} <span className="text-[#61FD51]">{t('auth.welcome_back').split(' ').slice(-1)[0]}</span>
           </h2>
           <p className="text-sm font-medium mb-10 text-[#FFFFFF]  md:text-start text-center">
-            Sign in to your dashboard
+            {t('auth.sign_in_desc')}
           </p>
 
           <form className="space-y-7" onSubmit={handleSubmit}>
@@ -124,7 +127,7 @@ export default function Page() {
             )}
             <input
               type="text"
-              placeholder="Email"
+              placeholder={t('auth.email')}
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
               className="w-full border-b-1 border-gray-300 px-6 py-5 focus:outline-none text-white"
@@ -133,7 +136,7 @@ export default function Page() {
           <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 className="w-full border-b-1 border-gray-300 px-6 py-5 focus:outline-none text-white bg-transparent"
@@ -157,7 +160,7 @@ export default function Page() {
                   onChange={(e) => setRemember(e.target.checked)}
                   className="form-checkbox h-4 w-4 text-[#61FD51] bg-transparent border-gray-300 rounded focus:ring-0 mr-2"
                 />
-                <span className="ml-2">Remember me</span>
+                <span className="ml-2">{t('auth.remember_me')}</span>
               </label>
 
             
@@ -166,7 +169,7 @@ export default function Page() {
               type="submit"
               className="w-full bg-[#13BE77] py-5 rounded-lg cursor-pointer mt-4 transition disabled:opacity-50"
             >
-              {loading ? "Signing In..." : "Login"}
+              {loading ? t('auth.signing_in') : t('auth.login')}
             </button>
 
           </form>

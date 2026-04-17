@@ -1,12 +1,14 @@
 "use client";
 
 import LockedFeature from "@/app/components/admin/LockedFeature";
+import { useLanguageStore } from '@/store/languageStore';
 
 export default function TemplatesPage() {
+  const { t } = useLanguageStore();
   return (
     <LockedFeature 
-      title="Templates" 
-      description="Reports, Contracts, and Data Structure templates will be available soon"
+      title={t('content_management.templates_title')} 
+      description={t('content_management.templates_subtitle')}
       fullPage={true}
     />
   );

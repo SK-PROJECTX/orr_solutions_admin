@@ -6,8 +6,10 @@ import RichTextEditor from '../../../../components/RichTextEditor';
 import { cleanContentObject, cleanHtmlContent } from '../../../utils/htmlCleaner';
 import SuccessModal from '../../../components/ui/SuccessModal';
 import ErrorModal from '../../../components/ui/ErrorModal';
+import { useLanguageStore } from '@/store/languageStore';
 
 export default function HowWeOperatePage() {
+  const { t, language } = useLanguageStore();
   const [content, setContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -46,8 +48,8 @@ export default function HowWeOperatePage() {
       console.error('Failed to fetch content:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Load Failed',
-        message: `Failed to load content: ${error instanceof Error ? error.message : 'Unknown error'}`
+        title: t('content_management.load_failed'),
+        message: `${t('content_management.load_failed')}: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     } finally {
       setLoading(false);
@@ -67,8 +69,8 @@ export default function HowWeOperatePage() {
       if (response.ok) {
         setSuccessModal({
           isOpen: true,
-          title: 'Content Saved',
-          message: 'Your changes have been saved successfully!'
+          title: t('content_management.content_saved'),
+          message: t('content_management.success_msg')
         });
       } else {
         // Get the error details from the response
@@ -94,7 +96,7 @@ export default function HowWeOperatePage() {
         
         setErrorModal({
           isOpen: true,
-          title: 'Save Failed',
+          title: t('content_management.save_failed'),
           message: errorMessage
         });
       }
@@ -102,8 +104,8 @@ export default function HowWeOperatePage() {
       console.error('Network/fetch error:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Network Error',
-        message: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        title: t('content_management.network_error'),
+        message: `${t('content_management.network_error')}: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     } finally {
       setSaving(null);
@@ -154,8 +156,8 @@ export default function HowWeOperatePage() {
       if (response.ok) {
         setSuccessModal({
           isOpen: true,
-          title: 'Image Uploaded',
-          message: 'Image uploaded successfully!'
+          title: t('content_management.image_uploaded'),
+          message: t('content_management.image_success_msg')
         });
         
         // Update only the specific step's image URL without refetching all data
@@ -168,8 +170,8 @@ export default function HowWeOperatePage() {
       console.error('Failed to upload image:', error);
       setErrorModal({
         isOpen: true,
-        title: 'Upload Failed',
-        message: 'Failed to upload image'
+        title: t('content_management.save_failed'),
+        message: t('content_management.save_failed')
       });
     } finally {
       setUploading(null);
@@ -197,37 +199,37 @@ export default function HowWeOperatePage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 flex flex-col gap-6 md:gap-8 border border-white/10 shadow-2xl">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white">How We Operate Content</h1>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">Manage How We Operate page content and process steps</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">{t('content_management.how_we_operate_title')}</h1>
+            <p className="text-gray-400 text-xs md:text-sm mt-2">{t('content_management.how_we_operate_subtitle')}</p>
           </div>
 
           {/* Page Header Section */}
           <div className={sectionClass}>
-            <h2 className={titleClass}>Page Header</h2>
+            <h2 className={titleClass}>{t('content_management.page_header')}</h2>
             <form onSubmit={(e) => { e.preventDefault(); handleSave('page', { page: { hero_title: content?.page?.hero_title, meta_title: content?.page?.meta_title, meta_description: content?.page?.meta_description } }); }} className="flex flex-col gap-4">
               <RichTextEditor
-                label="Hero Title"
+                label={t('content_management.hero_section')}
                 value={content?.page?.hero_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'hero_title', value)}
-                placeholder="Enter hero title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Title (SEO)"
+                label={t('content_management.meta_seo')}
                 value={content?.page?.meta_title || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_title', value)}
-                placeholder="Enter meta title"
+                placeholder={t('content_management.enter_title')}
               />
               <RichTextEditor
-                label="Meta Description (SEO)"
+                label={t('content_management.meta_desc_seo')}
                 value={content?.page?.meta_description || ''}
                 onChange={(value) => handleRichTextChange('page', 'meta_description', value)}
-                placeholder="Enter meta description"
+                placeholder={t('content_management.enter_description')}
                 rows={3}
               />
               <div className="flex gap-3 pt-4">
                 <button type="submit" disabled={saving === 'page'} className={buttonClass}>
                   <Save size={18} />
-                  {saving === 'page' ? 'Saving...' : 'Save Page Header'}
+                  {saving === 'page' ? t('content_management.saving') : t('content_management.save_section')}
                 </button>
               </div>
             </form>
@@ -236,7 +238,7 @@ export default function HowWeOperatePage() {
           {/* Process Steps */}
           {(content?.steps || []).map((step: any, index: number) => (
             <div key={step.id} className={sectionClass}>
-              <h2 className={titleClass}>Step {cleanHtmlContent(step.step_number)} - {cleanHtmlContent(step.title)}</h2>
+              <h2 className={titleClass}>{t('content_management.step')} {cleanHtmlContent(step.step_number)} - {cleanHtmlContent(step.title)}</h2>
               <form onSubmit={(e) => { 
                 e.preventDefault(); 
                 handleSave(`step-${step.id}`, { 
@@ -269,7 +271,7 @@ export default function HowWeOperatePage() {
                 
                 {/* Image Upload Section */}
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                  <label className={labelClass}>Step Image</label>
+                  <label className={labelClass}>{t('content_management.step')} {t('content_management.image_label') || 'Image'}</label>
                   {step.image_url && (
                     <div className="mb-4">
                       <img src={step.image_url} alt={step.title} className="w-full max-w-md h-48 object-cover rounded-lg" />
@@ -293,12 +295,12 @@ export default function HowWeOperatePage() {
                       {uploading === `step-${step.id}` ? (
                         <>
                           <Loader size={16} className="animate-spin" />
-                          Uploading...
+                          {t('content_management.uploading')}
                         </>
                       ) : (
                         <>
                           <Upload size={16} />
-                          Upload Image
+                          {t('content_management.upload_image')}
                         </>
                       )}
                     </label>
@@ -318,45 +320,45 @@ export default function HowWeOperatePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <RichTextEditor
-                    label="Step Number"
+                    label={t('content_management.step_number')}
                     value={step.step_number || ''}
                     onChange={(value) => handleRichTextChange(`step-${step.id}`, 'step_number', value)}
-                    placeholder="Enter step number"
+                    placeholder={t('content_management.enter_title')}
                   />
                   <RichTextEditor
-                    label="Title"
+                    label={t('content_management.title_label')}
                     value={step.title || ''}
                     onChange={(value) => handleRichTextChange(`step-${step.id}`, 'title', value)}
-                    placeholder="Enter step title"
+                    placeholder={t('content_management.enter_title')}
                   />
                 </div>
 
                 <RichTextEditor
-                  label="Subtitle"
+                  label={t('content_management.subtitle_label')}
                   value={step.subtitle || ''}
                   onChange={(value) => handleRichTextChange(`step-${step.id}`, 'subtitle', value)}
-                  placeholder="Enter step subtitle"
+                  placeholder={t('content_management.enter_title')}
                 />
 
                 <RichTextEditor
-                  label="Description"
+                  label={t('content_management.description_label')}
                   value={step.description || ''}
                   onChange={(value) => handleRichTextChange(`step-${step.id}`, 'description', value)}
-                  placeholder="Enter step description"
+                  placeholder={t('content_management.enter_description')}
                   rows={3}
                 />
 
                 {/* Bullets */}
                 <div className="border-t border-white/10 pt-4">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Bullet Points</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.bullet_points')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                       <RichTextEditor
                         key={num}
-                        label={`Bullet ${num}`}
+                        label={`${t('content_management.bullet_points')} ${num}`}
                         value={step[`bullet${num}`] || ''}
                         onChange={(value) => handleRichTextChange(`step-${step.id}`, `bullet${num}`, value)}
-                        placeholder={`Enter bullet point ${num}`}
+                        placeholder={`${t('content_management.enter_description')} ${num}`}
                       />
                     ))}
                   </div>
@@ -364,21 +366,21 @@ export default function HowWeOperatePage() {
 
                 {/* Additional Descriptions */}
                 <div className="border-t border-white/10 pt-4">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Additional Content</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.additional_content')}</h3>
                   <div className="flex flex-col gap-4">
                     <RichTextEditor
-                      label="Word Break"
+                      label={t('content_management.word_break')}
                       value={step.wordbreak || ''}
                       onChange={(value) => handleRichTextChange(`step-${step.id}`, 'wordbreak', value)}
-                      placeholder="Enter word break text"
+                      placeholder={t('content_management.enter_title')}
                     />
                     {[1, 2, 3, 4].map((num) => (
                       <RichTextEditor
                         key={num}
-                        label={`Description ${num}`}
+                        label={`${t('content_management.description_label')} ${num}`}
                         value={step[`description${num}`] || ''}
                         onChange={(value) => handleRichTextChange(`step-${step.id}`, `description${num}`, value)}
-                        placeholder={`Enter description ${num}`}
+                        placeholder={`${t('content_management.enter_description')} ${num}`}
                         rows={3}
                       />
                     ))}
@@ -387,25 +389,25 @@ export default function HowWeOperatePage() {
 
                 {/* Buttons */}
                 <div className="border-t border-white/10 pt-4">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Button Text</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">{t('content_management.button_label')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <RichTextEditor
-                      label="Button 1"
+                      label={`${t('content_management.button_label')} 1`}
                       value={step.button_text || ''}
                       onChange={(value) => handleRichTextChange(`step-${step.id}`, 'button_text', value)}
-                      placeholder="Enter button 1 text"
+                      placeholder={t('content_management.enter_title')}
                     />
                     <RichTextEditor
-                      label="Button 2"
+                      label={`${t('content_management.button_label')} 2`}
                       value={step.button_text2 || ''}
                       onChange={(value) => handleRichTextChange(`step-${step.id}`, 'button_text2', value)}
-                      placeholder="Enter button 2 text"
+                      placeholder={t('content_management.enter_title')}
                     />
                     <RichTextEditor
-                      label="Button 3"
+                      label={`${t('content_management.button_label')} 3`}
                       value={step.button_text3 || ''}
                       onChange={(value) => handleRichTextChange(`step-${step.id}`, 'button_text3', value)}
-                      placeholder="Enter button 3 text"
+                      placeholder={t('content_management.enter_title')}
                     />
                   </div>
                 </div>
@@ -413,7 +415,7 @@ export default function HowWeOperatePage() {
                 <div className="flex gap-3 pt-4">
                   <button type="submit" disabled={saving === `step-${step.id}`} className={buttonClass}>
                     <Save size={18} />
-                    {saving === `step-${step.id}` ? 'Saving...' : `Save Step ${cleanHtmlContent(step.step_number)}`}
+                    {saving === `step-${step.id}` ? t('content_management.saving') : `${t('content_management.save_step')} ${cleanHtmlContent(step.step_number)}`}
                   </button>
                 </div>
               </form>

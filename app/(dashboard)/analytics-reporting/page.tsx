@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, Download, Search, Loader } from "lucide-react";
 import { analyticsAPI } from "@/app/services";
+import { useLanguageStore } from "@/store/languageStore";
 
 interface AnalyticsOverview {
   total_visitors: number;
@@ -24,6 +25,7 @@ interface AnalyticsOverview {
 }
 
 export default function AnalyticsReportingPage() {
+  const { t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<"overview" | "traffic" | "content">("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState<AnalyticsOverview | null>(null);
@@ -42,7 +44,7 @@ export default function AnalyticsReportingPage() {
       setData(response);
     } catch (err: any) {
       console.warn("Analytics data fetch failed:", err);
-      setError(err.message || "Failed to load analytics data");
+      setError(err.message || t('analytics.error_fetch'));
       // Set mock/empty data structure to prevent crashes
       setData({
         total_visitors: 0,
@@ -62,16 +64,16 @@ export default function AnalyticsReportingPage() {
   const handleExport = async () => {
     try {
       await analyticsAPI.exportData("pdf");
-      alert("Report exported successfully");
+      alert(t('analytics.success_export'));
     } catch (err: any) {
-      alert("Failed to export report: " + err.message);
+      alert(t('analytics.error_export') + ": " + err.message);
     }
   };
 
   const tabs = [
-    { id: "overview" as const, label: "Overview" },
-    { id: "traffic" as const, label: "Traffic" },
-    { id: "content" as const, label: "Content" },
+    { id: "overview" as const, label: t('analytics.tabs.overview') },
+    { id: "traffic" as const, label: t('analytics.tabs.traffic') },
+    { id: "content" as const, label: t('analytics.tabs.content') },
   ];
 
   if (loading) {
@@ -96,13 +98,13 @@ export default function AnalyticsReportingPage() {
               <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <p className="text-red-400 text-sm">{error} - Showing empty data</p>
+                  <p className="text-red-400 text-sm">{error} - {t('analytics.showing_empty')}</p>
                 </div>
                 <button 
                   onClick={fetchAnalytics}
                   className="bg-red-500/30 hover:bg-red-500/40 text-red-300 px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
                 >
-                  Retry
+                  {t('analytics.retry')}
                 </button>
               </div>
             )}
@@ -111,15 +113,15 @@ export default function AnalyticsReportingPage() {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl md:text-4xl font-bold text-white">Dashboard</h1>
-                  <p className="text-gray-400 text-xs md:text-sm mt-2">Overview of your website&apos;s performance</p>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white">{t('analytics.dashboard')}</h1>
+                  <p className="text-gray-400 text-xs md:text-sm mt-2">{t('analytics.performance_overview')}</p>
                 </div>
                 <button 
                   onClick={handleExport}
                   className="bg-primary hover:bg-primary/80 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1 md:gap-2 text-xs md:text-sm justify-center w-full md:w-auto"
                 >
                   <Download size={16} className="md:w-[18px] md:h-[18px]" />
-                  Export Report
+                  {t('analytics.export_report')}
                 </button>
               </div>
 
@@ -128,7 +130,7 @@ export default function AnalyticsReportingPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black" size={18} />
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder={t('analytics.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-white/10 border border-white/20 pl-10 pr-4 py-2 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all duration-200 text-sm"
@@ -158,11 +160,11 @@ export default function AnalyticsReportingPage() {
               <div className="flex flex-col gap-6">
                 {/* Performance Summary */}
                 <div>
-                  <h2 className="text-xl md:text-2xl font-semibold text-white mb-4">Performance Summary</h2>
+                  <h2 className="text-xl md:text-2xl font-semibold text-white mb-4">{t('analytics.performance_summary')}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-primary/20 shadow-lg hover:shadow-xl transition-shadow duration-200">
                       <div className="flex flex-col gap-2">
-                        <p className="text-gray-400 text-xs md:text-sm font-medium">Total Visitors</p>
+                        <p className="text-gray-400 text-xs md:text-sm font-medium">{t('analytics.total_visitors')}</p>
                         <div className="flex items-end justify-between">
                           <p className="text-3xl md:text-4xl font-bold text-white">{(data?.total_visitors || 0).toLocaleString()}</p>
                           <div className="flex items-center gap-1 text-green-400 text-sm">
@@ -175,7 +177,7 @@ export default function AnalyticsReportingPage() {
 
                     <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-blue-500/20 shadow-lg hover:shadow-xl transition-shadow duration-200">
                       <div className="flex flex-col gap-2">
-                        <p className="text-gray-400 text-xs md:text-sm font-medium">Page Views</p>
+                        <p className="text-gray-400 text-xs md:text-sm font-medium">{t('analytics.page_views')}</p>
                         <div className="flex items-end justify-between">
                           <p className="text-3xl md:text-4xl font-bold text-white">{(data?.page_views || 0).toLocaleString()}</p>
                           <div className="flex items-center gap-1 text-green-400 text-sm">
@@ -188,7 +190,7 @@ export default function AnalyticsReportingPage() {
 
                     <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-purple-500/20 shadow-lg hover:shadow-xl transition-shadow duration-200">
                       <div className="flex flex-col gap-2">
-                        <p className="text-gray-400 text-xs md:text-sm font-medium">Average Session Duration</p>
+                        <p className="text-gray-400 text-xs md:text-sm font-medium">{t('analytics.avg_session_duration')}</p>
                         <div className="flex items-end justify-between">
                           <p className="text-3xl md:text-4xl font-bold text-white">{data?.avg_session_duration || "00:00:00"}</p>
                           <div className="flex items-center gap-1 text-green-400 text-sm">
@@ -206,7 +208,7 @@ export default function AnalyticsReportingPage() {
             {/* Traffic Tab Content */}
             {activeTab === "traffic" && (
               <div className="flex flex-col gap-6">
-                <h2 className="text-xl md:text-2xl font-semibold text-white">Traffic Sources</h2>
+                <h2 className="text-xl md:text-2xl font-semibold text-white">{t('analytics.traffic_sources')}</h2>
                 <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg p-4 md:p-6">
                   <div className="space-y-4">
                     {(data?.traffic_sources || []).map((source) => (
@@ -234,15 +236,15 @@ export default function AnalyticsReportingPage() {
             {/* Content Tab */}
             {activeTab === "content" && (
               <div className="flex flex-col gap-6">
-                <h2 className="text-xl md:text-2xl font-semibold text-white">Top Pages</h2>
+                <h2 className="text-xl md:text-2xl font-semibold text-white">{t('analytics.top_pages')}</h2>
                 <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[640px]">
                       <thead className="bg-white/10 border-b border-white/10">
                         <tr>
-                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">Page Title</th>
-                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">Views</th>
-                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">Avg. Time on Page</th>
+                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">{t('analytics.table_headers.page_title')}</th>
+                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">{t('analytics.table_headers.views')}</th>
+                          <th className="text-left p-3 md:p-4 text-xs md:text-sm font-semibold text-gray-300">{t('analytics.table_headers.avg_time')}</th>
                         </tr>
                       </thead>
                       <tbody>

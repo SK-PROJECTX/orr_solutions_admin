@@ -19,13 +19,13 @@ export default function ClientMessagesPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/?source=manual_request`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         const ticketsData = Array.isArray(data) ? data : (data.results || data.data || []);
@@ -45,7 +45,7 @@ export default function ClientMessagesPage() {
   const sendAutoReply = async (ticketId: string, replyType: string = "initial") => {
     try {
       setSendingReply(ticketId);
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/${ticketId}/auto-reply/`, {
         method: 'POST',
         headers: {
@@ -57,7 +57,7 @@ export default function ClientMessagesPage() {
           timeframe: "24 hours"
         })
       });
-      
+
       if (response.ok) {
         // Refresh tickets to show updated status
         await fetchClientTickets();
@@ -75,7 +75,7 @@ export default function ClientMessagesPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
@@ -131,16 +131,15 @@ export default function ClientMessagesPage() {
                       Created: {new Date(ticket.created_at).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        ticket.status === 'processing' ? 'bg-yellow-500/20 text-yellow-300' :
-                        ticket.status === 'resolved' ? 'bg-green-500/20 text-green-300' :
-                        'bg-gray-500/20 text-gray-300'
-                      }`}>
+                      <span className={`text-xs px-2 py-1 rounded ${ticket.status === 'processing' ? 'bg-yellow-500/20 text-yellow-300' :
+                          ticket.status === 'resolved' ? 'bg-green-500/20 text-green-300' :
+                            'bg-gray-500/20 text-gray-300'
+                        }`}>
                         {ticket.status.replace('_', ' ').toUpperCase()}
                       </span>
-                      
+
                       {ticket.messages_count === 0 && (
-                        <button 
+                        <button
                           onClick={() => sendAutoReply(ticket.id.toString(), "initial")}
                           disabled={sendingReply === ticket.id.toString()}
                           className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
@@ -153,7 +152,7 @@ export default function ClientMessagesPage() {
                           Send Auto-Reply
                         </button>
                       )}
-                      
+
                       <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                         <Send size={14} />
                         Reply

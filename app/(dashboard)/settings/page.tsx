@@ -1,11 +1,12 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Loader, Save } from "lucide-react";
 import { settingsAPI } from "@/app/services";
 import type { AdminRoleData, AdminUser } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
-function page() {
+function SettingsPage() {
+  const { t, language } = useLanguageStore();
   const [roles, setRoles] = useState<AdminRoleData[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [systemSettings, setSystemSettings] = useState<Record<string, any>>({});
@@ -30,24 +31,24 @@ function page() {
         setSystemSettings(systemData as Record<string, any>);
       } catch (err) {
         console.error("Failed to fetch settings:", err);
-        setError("Failed to load settings");
+        setError(t('settings.error_save'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, []);
+  }, [language, t]);
 
   const handleSystemSettingsSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await settingsAPI.updateSystemSettings(systemSettings);
-      setSuccessMessage("System settings saved successfully");
+      setSuccessMessage(t('settings.success_save'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error("Failed to save settings:", err);
-      setError("Failed to save settings");
+      setError(t('settings.error_save'));
     }
   };
 
@@ -55,7 +56,7 @@ function page() {
     try {
       setActionLoading(userId);
       await settingsAPI.performUserAction(userId, action as any);
-      setSuccessMessage(`User ${action} action completed`);
+      setSuccessMessage(t('settings.user_action_complete', { action: t(`settings.${action}`) }));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       // Refresh user list
@@ -63,7 +64,7 @@ function page() {
       setUsers(Array.isArray(usersData) ? usersData : ((usersData as any).results || []));
     } catch (err) {
       console.error(`Failed to ${action} user:`, err);
-      setError(`Failed to peform action on user`);
+      setError(t('settings.error_user_action'));
     } finally {
       setActionLoading(null);
     }
@@ -82,75 +83,75 @@ function page() {
       <div className="min-h-screen text-white relative overflow-hidden star">
         <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
 
-        <div className="relative z-10 p-8">
-          <div className="bg-card backdrop-blur-sm rounded-2xl p-6 flex flex-col gap-8">
+        <div className="relative z-10 p-4 md:p-8">
+          <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col gap-8">
             <div>
-              <h1 className="text-4xl font-bold text-white">Settings</h1>
+              <h1 className="text-2xl md:text-4xl font-bold text-white">{t('settings.title')}</h1>
               {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
               {successMessage && <p className="text-green-400 text-sm mt-2">{successMessage}</p>}
             </div>
 
             <form onSubmit={handleSystemSettingsSave} className="flex flex-col gap-6">
-              <h2 className="text-2xl font-semibold text-white">General</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-white">{t('settings.general')}</h2>
               <div className="flex flex-col gap-2">
-                <label htmlFor="siteTitle" className="text-white">Site Title</label>
+                <label htmlFor="siteTitle" className="text-white text-sm md:text-base">{t('settings.site_title')}</label>
                 <input
                   id="siteTitle"
                   type="text"
                   value={systemSettings.site_title || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, site_title: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="siteDescription" className="text-white">Site Description</label>
+                <label htmlFor="siteDescription" className="text-white text-sm md:text-base">{t('settings.site_description')}</label>
                 <textarea
                   id="siteDescription"
                   value={systemSettings.site_description || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, site_description: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base h-24"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="siteLanguage" className="text-white">Site Language</label>
+                <label htmlFor="siteLanguage" className="text-white text-sm md:text-base">{t('settings.site_language')}</label>
                 <input
                   id="siteLanguage"
                   type="text"
                   value={systemSettings.site_language || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, site_language: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
 
-              <h2 className="text-2xl font-semibold text-white">
-                Admin Users
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                {t('settings.admin_users')}
               </h2>
               <div className="overflow-x-auto border border-white/10 rounded-2xl">
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="border-b border-white/10 bg-white/5">
                     <tr>
-                      <th className="text-left p-4 text-primary font-semibold">Name</th>
-                      <th className="text-left p-4 text-primary font-semibold">Email</th>
-                      <th className="text-left p-4 text-primary font-semibold">Role</th>
-                      <th className="text-left p-4 text-primary font-semibold">Status</th>
-                      <th className="text-left p-4 text-primary font-semibold">Actions</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.name')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.email')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.role')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.status')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((user: AdminUser) => (
                       <tr key={user.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-4 px-4">
-                          <span className="text-white font-medium">{user.full_name}</span>
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <span className="text-white font-medium text-sm md:text-base">{user.full_name}</span>
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className="text-gray-300 text-sm">{user.email}</span>
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className="text-gray-400 text-sm">{user.role_name || user.role}</span>
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className={`text-xs px-2 py-1 rounded font-medium ${user.is_active ? "bg-green-500/30 text-green-300" : "bg-red-500/30 text-red-300"}`}>
-                            {user.is_active ? "Active" : "Inactive"}
+                            {user.is_active ? t('common.active') : t('common.inactive')}
                           </span>
                         </td>
                         <td className="py-4 px-4 flex gap-2">
@@ -158,17 +159,17 @@ function page() {
                             type="button"
                             onClick={() => handleUserAction(user.id, user.is_active ? "deactivate" : "activate")}
                             disabled={actionLoading === user.id}
-                            className={`text-xs px-3 py-1 rounded border ${user.is_active ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'} transition-colors disabled:opacity-50`}
+                            className={`text-xs px-3 py-1 rounded border ${user.is_active ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'} transition-colors disabled:opacity-50 whitespace-nowrap`}
                           >
-                            {user.is_active ? "Deactivate" : "Activate"}
+                            {user.is_active ? t('settings.deactivate') : t('settings.activate')}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleUserAction(user.id, "reset_password")}
                             disabled={actionLoading === user.id}
-                            className="text-xs px-3 py-1 rounded border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-colors disabled:opacity-50"
+                            className="text-xs px-3 py-1 rounded border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-colors disabled:opacity-50 whitespace-nowrap"
                           >
-                            Reset Password
+                            {t('settings.reset_password')}
                           </button>
                         </td>
                       </tr>
@@ -177,28 +178,28 @@ function page() {
                 </table>
               </div>
 
-              <h2 className="text-2xl font-semibold text-white">
-                User Roles & Permissions
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                {t('settings.roles_permissions')}
               </h2>
               <div className="overflow-x-auto border border-white/10 rounded-2xl">
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="border-b border-white/10 bg-white/5">
                     <tr>
-                      <th className="text-left p-4 text-primary font-semibold">Role</th>
-                      <th className="text-left p-4 text-primary font-semibold">Description</th>
-                      <th className="text-left p-4 text-primary font-semibold">Users</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.role')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.description')}</th>
+                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.users')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {roles.map((role: AdminRoleData) => (
                       <tr key={role.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-4 px-4">
-                          <span className="text-white font-medium">{role.name}</span>
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <span className="text-white font-medium text-sm md:text-base">{role.name}</span>
                         </td>
                         <td className="py-4 px-4">
                           <span className="text-gray-300 text-sm">{role.description}</span>
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className="text-gray-400 text-sm">{role.users_count || 0}</span>
                         </td>
                       </tr>
@@ -207,51 +208,51 @@ function page() {
                 </table>
               </div>
 
-              <h2 className="text-2xl font-semibold text-white">
-                Branding
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                {t('settings.branding')}
               </h2>
               <div className="flex flex-col gap-2">
-                <label htmlFor="logo" className="text-white">Logo URL</label>
+                <label htmlFor="logo" className="text-white text-sm md:text-base">{t('settings.logo_url')}</label>
                 <input
                   id="logo"
                   type="text"
                   value={systemSettings.logo_url || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, logo_url: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="favicon" className="text-white">Favicon URL</label>
+                <label htmlFor="favicon" className="text-white text-sm md:text-base">{t('settings.favicon_url')}</label>
                 <input
                   id="favicon"
                   type="text"
                   value={systemSettings.favicon_url || ""}
                   onChange={(e) => setSystemSettings({ ...systemSettings, favicon_url: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
 
-              <h2 className="text-2xl font-semibold text-white">
-                Meeting Settings
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                {t('settings.meeting_settings')}
               </h2>
               <div className="flex flex-col gap-2">
-                <label htmlFor="defaultMeetingLength" className="text-white">Default Meeting Length (minutes)</label>
+                <label htmlFor="defaultMeetingLength" className="text-white text-sm md:text-base">{t('settings.default_length')}</label>
                 <input
                   id="defaultMeetingLength"
                   type="number"
                   value={systemSettings.default_meeting_length || 60}
                   onChange={(e) => setSystemSettings({ ...systemSettings, default_meeting_length: parseInt(e.target.value) })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
                 />
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+                  className="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <Save size={18} />
-                  Save Settings
+                  {t('settings.save_settings')}
                 </button>
               </div>
             </form>
@@ -262,4 +263,4 @@ function page() {
   );
 }
 
-export default page;
+export default SettingsPage;

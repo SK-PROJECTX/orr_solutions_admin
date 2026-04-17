@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { CheckCircle, User, Calendar, Clock, Edit, XCircle, Loader, AlertCircle, MapPin, ExternalLink } from "lucide-react";
 import { meetingAPI, authAPI } from "@/app/services";
 import type { Meeting } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function ConfirmedMeetingsPage() {
+  const { t } = useLanguageStore();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function ConfirmedMeetingsPage() {
       await fetchConfirmedMeetings(userId);
     } catch (err: any) {
       console.error("Failed to fetch current user:", err);
-      setError("Failed to load user information");
+      setError(t('schedule_meetings.error_user'));
       setLoading(false);
     }
   };
@@ -39,7 +41,7 @@ export default function ConfirmedMeetingsPage() {
       setMeetings(meetingsData);
     } catch (err: any) {
       console.error("Failed to fetch confirmed meetings:", err);
-      setError(err.message || "Failed to load confirmed meetings");
+      setError(err.message || t('schedule_meetings.error_confirmed'));
     } finally {
       setLoading(false);
     }
@@ -58,11 +60,12 @@ export default function ConfirmedMeetingsPage() {
     }
   };
 
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return "Not specified";
+   const formatDateTime = (dateString: string) => {
+    if (!dateString) return t('schedule_meetings.no_specified');
     try {
       const date = new Date(dateString);
-      return date.toLocaleString("en-US", {
+      const { language } = useLanguageStore.getState();
+      return date.toLocaleString(language === 'en' ? "en-US" : "it-IT", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -70,18 +73,12 @@ export default function ConfirmedMeetingsPage() {
         minute: "2-digit"
       });
     } catch {
-      return "Invalid date";
+      return t('schedule_meetings.invalid_date');
     }
   };
 
   const getMeetingTypeDisplay = (type: string) => {
-    const typeMap: Record<string, string> = {
-      discovery: "Discovery Meeting",
-      consultation: "Consultation",
-      follow_up: "Follow-up Meeting",
-      review: "Review Meeting"
-    };
-    return typeMap[type] || type;
+    return t(`schedule_meetings.types.${type}` as any) || type;
   };
 
   const isUpcoming = (dateString: string) => {
@@ -116,15 +113,15 @@ export default function ConfirmedMeetingsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Confirmed Meetings</h1>
-            <p className="text-gray-400">Manage your confirmed meetings and track upcoming sessions</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('schedule_meetings.confirmed_title')}</h1>
+            <p className="text-gray-400">{t('schedule_meetings.confirmed_subtitle')}</p>
           </div>
 
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
               <AlertCircle size={20} className="flex-shrink-0 mt-0.5 text-red-400" />
               <div className="flex-1">
-                <p className="font-medium mb-1 text-red-300">Error</p>
+                <p className="font-medium mb-1 text-red-300">{t('common.error')}</p>
                 <p className="text-red-200">{error}</p>
               </div>
             </div>
@@ -133,8 +130,8 @@ export default function ConfirmedMeetingsPage() {
           {meetings.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
               <CheckCircle size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Confirmed Meetings</h3>
-              <p className="text-gray-400">There are no confirmed meetings at the moment.</p>
+              <h3 className="text-xl font-semibold text-white mb-2">{t('schedule_meetings.no_confirmed')}</h3>
+              <p className="text-gray-400">{t('schedule_meetings.no_confirmed_desc')}</p>
             </div>
           ) : (
             <div className="grid gap-6">
@@ -170,12 +167,12 @@ export default function ConfirmedMeetingsPage() {
                               </h3>
                               {upcoming && (
                                 <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full font-medium">
-                                  Upcoming
+                                  {t('schedule_meetings.upcoming')}
                                 </span>
                               )}
                               {past && (
                                 <span className="bg-gray-500/20 text-gray-400 text-xs px-2 py-1 rounded-full font-medium">
-                                  Past
+                                  {t('schedule_meetings.past')}
                                 </span>
                               )}
                             </div>
@@ -187,36 +184,36 @@ export default function ConfirmedMeetingsPage() {
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
                               <Calendar size={16} />
-                              <span>Confirmed: {formatDateTime(meetingDateTime)}</span>
+                              <span>{t('meetings.confirmed')}: {formatDateTime(meetingDateTime)}</span>
                               <span className="text-black">•</span>
                               <Clock size={16} />
-                              <span>{meeting.duration_minutes} minutes</span>
+                              <span>{meeting.duration_minutes} {t('meetings.minutes')}</span>
                             </div>
                             {meeting.host_name && (
                               <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
                                 <User size={16} />
-                                <span>Host: {meeting.host_name}</span>
+                                <span>{t('meetings.host')}: {meeting.host_name}</span>
                               </div>
                             )}
                             {meeting.agenda && (
                               <div className="bg-white/5 rounded-lg p-3 mb-3">
                                 <p className="text-sm text-gray-300">
-                                  <span className="font-medium text-white">Agenda:</span> {meeting.agenda}
+                                  <span className="font-medium text-white">{t('schedule_meetings.agenda')}:</span> {meeting.agenda}
                                 </p>
                               </div>
                             )}
-                            {meeting.meeting_link && (
+                             {meeting.meeting_link && (
                               <div className="bg-blue-500/10 rounded-lg p-3 mb-3 border border-blue-500/20">
                                 <div className="flex items-center gap-2">
                                   <MapPin size={16} className="text-blue-400" />
-                                  <span className="font-medium text-blue-300">Meeting Link:</span>
+                                  <span className="font-medium text-blue-300">{t('schedule_meetings.meeting_link')}:</span>
                                   <a 
                                     href={meeting.meeting_link} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
                                   >
-                                    Join Meeting
+                                    {t('schedule_meetings.join_meeting')}
                                     <ExternalLink size={14} />
                                   </a>
                                 </div>
@@ -225,7 +222,7 @@ export default function ConfirmedMeetingsPage() {
                             {meeting.internal_notes && (
                               <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
                                 <p className="text-sm text-purple-200">
-                                  <span className="font-medium">Internal Notes:</span> {meeting.internal_notes}
+                                  <span className="font-medium">{t('schedule_meetings.internal_notes')}:</span> {meeting.internal_notes}
                                 </p>
                               </div>
                             )}
@@ -249,7 +246,7 @@ export default function ConfirmedMeetingsPage() {
                               className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 rounded-lg text-white text-sm font-medium transition-all duration-200"
                             >
                               <Edit size={16} />
-                              Reschedule
+                              {t('schedule_meetings.reschedule')}
                             </button>
                             <button
                               onClick={() => {
@@ -260,7 +257,7 @@ export default function ConfirmedMeetingsPage() {
                               className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 rounded-lg text-white text-sm font-medium transition-all duration-200"
                             >
                               <XCircle size={16} />
-                              Cancel
+                              {t('schedule_meetings.cancel')}
                             </button>
                           </>
                         )}
@@ -278,7 +275,7 @@ export default function ConfirmedMeetingsPage() {
                             ) : (
                               <CheckCircle size={16} />
                             )}
-                            Mark Complete
+                            {t('schedule_meetings.mark_complete')}
                           </button>
                         )}
                       </div>

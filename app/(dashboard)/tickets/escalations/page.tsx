@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { AlertTriangle, Clock, User, Loader, Eye } from "lucide-react";
 import { ticketAPI } from "@/app/services";
 import type { TicketListItem } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function EscalationsPage() {
+  const { t } = useLanguageStore();
   const [tickets, setTickets] = useState<TicketListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,8 +60,8 @@ export default function EscalationsPage() {
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Escalations</h1>
-            <p className="text-gray-400">AI-escalated tickets requiring immediate attention</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('tickets.escalations_title')}</h1>
+            <p className="text-gray-400">{t('tickets.escalations_subtitle')}</p>
           </div>
 
           {loading ? (
@@ -69,8 +71,8 @@ export default function EscalationsPage() {
           ) : tickets.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
               <AlertTriangle size={48} className="mx-auto text-orange-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Escalations</h3>
-              <p className="text-gray-400">No AI-escalated tickets found</p>
+              <h3 className="text-xl font-semibold text-white mb-2">{t('tickets.no_escalations')}</h3>
+              <p className="text-gray-400">{t('tickets.no_escalations_desc')}</p>
               {error && (
                 <p className="text-red-400 text-sm mt-2">{error}</p>
               )}
@@ -85,19 +87,19 @@ export default function EscalationsPage() {
                         <AlertTriangle className="text-red-400" size={20} />
                         <h3 className="text-lg font-semibold text-white">{ticket.ticket_id}</h3>
                         <span className="text-xs px-2 py-1 rounded border bg-purple-500/20 text-purple-300 border-purple-500/30">
-                          🤖 AI ESCALATED
+                          🤖 {t('tickets.ai_escalated')}
                         </span>
                         <span className={`text-xs px-2 py-1 rounded border ${ticket.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                            ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
-                              'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                          ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                            'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
                           }`}>
-                          {ticket.priority.toUpperCase()}
+                          {t(`tickets.priority_labels.${ticket.priority}`).toUpperCase()}
                         </span>
                       </div>
                       <p className="text-sm text-gray-300 mb-2">{ticket.subject}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>Client: {ticket.client_name}</span>
-                        <span>Company: {ticket.client_company}</span>
+                        <span>{t('tickets.client')}: {ticket.client_name}</span>
+                        <span>{t('clients.labels.username')}: {ticket.client_company}</span>
                       </div>
                     </div>
                     <Clock className="text-orange-400" size={24} />
@@ -105,12 +107,12 @@ export default function EscalationsPage() {
 
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Assigned To</label>
-                      <p className="text-sm text-white">{ticket.assigned_to_name || 'Unassigned'}</p>
+                      <label className="text-xs text-gray-400 mb-1 block">{t('tickets.assigned_to')}</label>
+                      <p className="text-sm text-white">{ticket.assigned_to_name || t('tickets.unassigned')}</p>
                     </div>
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Status</label>
-                      <p className="text-sm text-white">{ticket.status.replace('_', ' ').toUpperCase()}</p>
+                      <label className="text-xs text-gray-400 mb-1 block">{t('tickets.status')}</label>
+                      <p className="text-sm text-white">{t(`tickets.status.${ticket.status}`).toUpperCase()}</p>
                     </div>
                   </div>
 
@@ -119,10 +121,10 @@ export default function EscalationsPage() {
                       Escalated: {new Date(ticket.created_at).toLocaleString()}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-red-400">⚡ Requires immediate attention</span>
+                      <span className="text-xs text-red-400">⚡ {t('tickets.requires_attention')}</span>
                       <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                         <Eye size={14} />
-                        View Details
+                        {t('common.view')}
                       </button>
                     </div>
                   </div>

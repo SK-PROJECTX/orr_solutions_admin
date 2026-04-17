@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Users, MessageCircle, User, Loader, Eye } from "lucide-react";
 import { ticketAPI } from "@/app/services";
 import type { TicketListItem } from "@/app/services/types";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function InternalCommsPage() {
+  const { t } = useLanguageStore();
   const [myTickets, setMyTickets] = useState<TicketListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,13 +20,13 @@ export default function InternalCommsPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/my-tickets/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         const ticketsData = Array.isArray(data) ? data : (data.results || data.data || []);
@@ -44,12 +46,12 @@ export default function InternalCommsPage() {
   return (
     <div className="min-h-screen text-white relative overflow-hidden star">
       <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-      
+
       <div className="relative z-10 p-4 md:p-8">
         <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-8 border border-white/10">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">My Assigned Tickets</h1>
-            <p className="text-gray-400">Tickets assigned to you for resolution</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('tickets.assigned_tickets')}</h1>
+            <p className="text-gray-400">{t('tickets.assigned_tickets_subtitle')}</p>
           </div>
 
           {loading ? (
@@ -59,8 +61,8 @@ export default function InternalCommsPage() {
           ) : myTickets.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
               <Users size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Assigned Tickets</h3>
-              <p className="text-gray-400">You have no tickets assigned to you</p>
+              <h3 className="text-xl font-semibold text-white mb-2">{t('tickets.no_assigned_tickets')}</h3>
+              <p className="text-gray-400">{t('tickets.no_assigned_tickets_desc')}</p>
               {error && (
                 <p className="text-red-400 text-sm mt-2">{error}</p>
               )}
@@ -74,19 +76,18 @@ export default function InternalCommsPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <User className="text-primary" size={20} />
                         <h3 className="text-lg font-semibold text-white">{ticket.ticket_id}</h3>
-                        <span className={`text-xs px-2 py-1 rounded border ${
-                          ticket.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                          ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
-                          ticket.priority === 'normal' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
-                          'bg-gray-500/20 text-gray-300 border-gray-500/30'
-                        }`}>
-                          {ticket.priority.toUpperCase()}
+                        <span className={`text-xs px-2 py-1 rounded border ${ticket.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                            ticket.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                              ticket.priority === 'normal' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                                'bg-gray-500/20 text-gray-300 border-gray-500/30'
+                          }`}>
+                          {t(`tickets.priority_labels.${ticket.priority}`).toUpperCase()}
                         </span>
                       </div>
                       <p className="text-sm text-gray-300 mb-2">{ticket.subject}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>Client: {ticket.client_name}</span>
-                        <span>Company: {ticket.client_company}</span>
+                        <span>{t('tickets.client')}: {ticket.client_name}</span>
+                        <span>{t('clients.labels.username')}: {ticket.client_company}</span>
                       </div>
                     </div>
                     <MessageCircle className="text-blue-400" size={24} />
@@ -95,12 +96,11 @@ export default function InternalCommsPage() {
                   <div className="grid md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="text-xs text-gray-400 mb-1 block">Status</label>
-                      <p className={`text-sm font-medium ${
-                        ticket.status === 'processing' ? 'text-yellow-400' :
-                        ticket.status === 'resolved' ? 'text-green-400' :
-                        'text-gray-400'
-                      }`}>
-                        {ticket.status.replace('_', ' ').toUpperCase()}
+                      <p className={`text-sm font-medium ${ticket.status === 'processing' ? 'text-yellow-400' :
+                          ticket.status === 'resolved' ? 'text-green-400' :
+                            'text-gray-400'
+                        }`}>
+                        {t(`tickets.status.${ticket.status}`).toUpperCase()}
                       </p>
                     </div>
                     <div>
@@ -108,23 +108,23 @@ export default function InternalCommsPage() {
                       <p className="text-sm text-white">{ticket.messages_count}</p>
                     </div>
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Source</label>
+                      <label className="text-xs text-gray-400 mb-1 block">{t('tickets.source')}</label>
                       <p className="text-sm text-white">
-                        {ticket.source === 'client_inquiry' ? '🤖 Client Inquiry' : '👤 Manual Request'}
+                        {ticket.source === 'client_inquiry' ? `🤖 ${t('tickets.sources.client_inquiry')}` : `👤 ${t('tickets.sources.manual_request')}`}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <div className="text-xs text-black">
-                      Created: {new Date(ticket.created_at).toLocaleDateString()}
+                      {t('tickets.created')}: {new Date(ticket.created_at).toLocaleDateString()}
                       {ticket.updated_at && (
-                        <span className="ml-4">Updated: {new Date(ticket.updated_at).toLocaleDateString()}</span>
+                        <span className="ml-4">{t('consultations.updated')}: {new Date(ticket.updated_at).toLocaleDateString()}</span>
                       )}
                     </div>
                     <button className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
                       <Eye size={14} />
-                      View & Respond
+                      {t('common.view_respond')}
                     </button>
                   </div>
                 </div>
