@@ -4,6 +4,27 @@ import { useState, useEffect } from "react";
 import { CreditCard, DollarSign, TrendingUp, Users, Calendar, AlertCircle, CheckCircle, Clock, Download } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 
+interface BillingStats {
+  total_revenue?: number;
+  pending_amount?: number;
+  completed_transactions?: number;
+  active_subscriptions?: number;
+  monthly_revenue?: number[];
+}
+
+interface BillingHistory {
+  reference_id: string;
+  client_name: string;
+  client_email: string;
+  amount: string;
+  currency: string;
+  status: string;
+  transaction_date: string;
+  plan: string;
+  invoice_pdf?: string;
+  hosted_invoice_url?: string;
+}
+
 export default function PaymentsBillingPage() {
   const { t, language } = useLanguageStore();
   const [billingStats, setBillingStats] = useState<BillingStats | null>(null);

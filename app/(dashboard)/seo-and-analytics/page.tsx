@@ -119,6 +119,11 @@ export default function AnalyticsPage() {
               <div className="bg-gradient-to-br from-red-500/20 to-red-500/5 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-red-500/20 shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="bg-red-500/30 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <ArrowUp className="w-5 h-5 md:w-6 md:h-6 text-red-400" />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <p className="font-bold text-2xl md:text-3xl text-white truncate">12,540</p>
+                    <div className="flex items-center justify-between mt-1">
                       <p className="text-gray-400 text-xs md:text-sm">{t('analytics.followers')}</p>
                       <p className="text-primary text-xs md:text-sm font-semibold">+16.4%</p>
                     </div>
