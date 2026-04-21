@@ -222,6 +222,40 @@ export const SIDEBAR_PERMISSIONS: Record<string, NavPermission> = {
         label: 'Payment Disputes',
         permissions: ['can_view_billing'],
       },
+      financialManagement: {
+        label: 'Financial Management',
+        permissions: ['can_view_billing'],
+      },
+    },
+  },
+  paymentManagement: {
+    label: 'Payment Management',
+    permissions: ['can_view_billing'],
+    children: {
+      financialHub: {
+        label: 'Financial Hub',
+        permissions: ['can_view_billing'],
+      },
+      walletCredits: {
+        label: 'Wallet & Credits',
+        permissions: ['can_view_billing'],
+      },
+      invoicing: {
+        label: 'Invoicing',
+        permissions: ['can_view_billing'],
+      },
+      subscriptions: {
+        label: 'Subscriptions',
+        permissions: ['can_view_billing'],
+      },
+      proRata: {
+        label: 'Pro-rata Approvals',
+        permissions: ['can_view_billing'],
+      },
+      disputes: {
+        label: 'Payment Disputes',
+        permissions: ['can_view_billing'],
+      },
     },
   },
 };
@@ -279,6 +313,13 @@ export const ROUTE_PERMISSIONS: Record<string, Permission[]> = {
   '/analytics/subscriptions': ['can_view_billing'],
   '/analytics/invoicing': ['can_view_billing'],
   '/analytics/payment-disputes': ['can_view_billing'],
+  '/financial-management': ['can_view_billing'],
+  '/payment-management/hub': ['can_view_billing'],
+  '/payment-management/wallet': ['can_view_billing'],
+  '/payment-management/invoicing': ['can_view_billing'],
+  '/payment-management/subscriptions': ['can_view_billing'],
+  '/payment-management/pro-rata': ['can_view_billing'],
+  '/payment-management/disputes': ['can_view_billing'],
   
   // Other routes
   '/settings': ['can_manage_settings'],
