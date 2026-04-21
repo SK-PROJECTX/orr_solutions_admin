@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Settings,
   UserCheck,
+  Wallet,
   X
 } from "lucide-react";
 import Link from "next/link";
@@ -27,6 +28,7 @@ type OpenState = {
   tickets: boolean;
   content: boolean;
   analytics: boolean;
+  payments: boolean;
 };
 
 type NavItem = {
@@ -51,6 +53,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     tickets: false,
     content: false,
     analytics: false,
+    payments: true,
   });
   const [subOpen, setSubOpen] = useState<{ [key: string]: boolean }>({});
 
@@ -225,12 +228,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 { label: t('sidebar.consultation_metrics'), href: "/analytics/consultation-metrics" },
                 { label: t('sidebar.workspace_usage'), href: "/analytics/workspace-usage" },
                 { label: t('sidebar.funnel_reports'), href: "/analytics/funnel-reports" },
-                { label: t('sidebar.payments_billing'), href: "/analytics/payments-billing" },
-                { label: t('sidebar.wallet_logs'), href: "/analytics/wallet-logs" },
-                { label: t('sidebar.pro_rata'), href: "/analytics/pro-rata-approvals" },
-                { label: t('sidebar.subscriptions'), href: "/analytics/subscriptions" },
-                { label: t('sidebar.invoicing'), href: "/analytics/invoicing" },
-                { label: t('sidebar.payment_disputes'), href: "/analytics/payment-disputes" }
+              ]}
+              pathname={pathname}
+              subOpen={subOpen}
+              toggleSub={toggleSub}
+              onLinkClick={onClose}
+            />
+
+            {/* Payment Management */}
+            <SidebarGroup
+              label={t('sidebar.payment_management')}
+              icon={Wallet}
+              open={open.payments}
+              onClick={() => toggle("payments")}
+              items={[
+                { label: t('sidebar.payments_billings'), href: "/payment-management/subscriptions" },
+                { label: t('sidebar.wallet_logs'), href: "/payment-management/wallet" },
+                { label: t('sidebar.financial_management'), href: "/payment-management/hub" },
+                { label: t('sidebar.pro_rata_approval'), href: "/payment-management/pro-rata" },
+                { label: t('sidebar.invoicing'), href: "/payment-management/invoicing" },
+                { label: t('sidebar.payment_disputes'), href: "/payment-management/disputes" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
