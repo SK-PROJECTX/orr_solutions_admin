@@ -273,7 +273,8 @@ export default function PaymentsBillingPage() {
               <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                 <div className="grid grid-cols-12 gap-2 h-32">
                   {billingStats.monthly_revenue && billingStats.monthly_revenue.map((revenue, index) => {
-                    const maxRevenue = Math.max(...(billingStats.monthly_revenue || []));
+                    const revArray = billingStats.monthly_revenue || [];
+                    const maxRevenue = Math.max(...revArray, 0);
                     const height = maxRevenue > 0 ? ((revenue || 0) / maxRevenue) * 100 : 0;
                     return (
                       <div key={index} className="flex flex-col items-center justify-end">
