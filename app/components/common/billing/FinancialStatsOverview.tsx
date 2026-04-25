@@ -6,49 +6,42 @@ import { DollarSign, FileText, AlertCircle, Wallet, TrendingUp, TrendingDown } f
 import { useInvoiceStore } from '@/store/invoiceStore';
 import { useWalletStore } from '@/store/walletStore';
 
+import { useLanguageStore } from '@/store/languageStore';
+
 export default function FinancialStatsOverview() {
-  const { invoices } = useInvoiceStore();
+  const { t } = useLanguageStore();
+  const { statistics } = useInvoiceStore();
   const { wallets } = useWalletStore();
-
-  const totalOutstanding = invoices
-    .filter(inv => inv.status === 'issued' || inv.status === 'pending' || inv.status === 'overdue')
-    .reduce((sum, inv) => sum + inv.totalAmount, 0);
-
-  const totalPaid = invoices
-    .filter(inv => inv.status === 'paid')
-    .reduce((sum, inv) => sum + inv.totalAmount, 0);
-
-  const overdueCount = invoices.filter(inv => inv.status === 'overdue').length;
-  
+ 
   const aggregateWalletBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
 
   const stats = [
     {
-      label: 'Total Paid Invoices',
-      value: `$${totalPaid.toLocaleString()}`,
+      label: t('hub.stats.total_paid'),
+      value: `$${statistics.totalPaid.toLocaleString()}`,
       icon: <DollarSign className="text-emerald-400" size={24} />,
       trend: '+12.5%',
       trendUp: true,
       color: 'emerald'
     },
     {
-      label: 'Total Outstanding',
-      value: `$${totalOutstanding.toLocaleString()}`,
+      label: t('hub.stats.total_outstanding'),
+      value: `$${statistics.totalOutstanding.toLocaleString()}`,
       icon: <FileText className="text-blue-400" size={24} />,
       trend: '-2.4%',
       trendUp: false,
       color: 'blue'
     },
     {
-      label: 'Overdue Invoices',
-      value: overdueCount.toString(),
+      label: t('hub.stats.overdue_invoices'),
+      value: statistics.overdueCount.toString(),
       icon: <AlertCircle className="text-rose-400" size={24} />,
       trend: '+1 this week',
       trendUp: false,
       color: 'rose'
     },
     {
-      label: 'Total Wallet Balances',
+      label: t('hub.stats.total_wallet'),
       value: `$${aggregateWalletBalance.toLocaleString()}`,
       icon: <Wallet className="text-purple-400" size={24} />,
       trend: '+5.2%',
@@ -88,7 +81,7 @@ export default function FinancialStatsOverview() {
           
           <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Real-time Data</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{t('hub.stats.real_time')}</span>
           </div>
         </motion.div>
       ))}

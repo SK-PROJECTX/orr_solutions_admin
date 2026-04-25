@@ -7,8 +7,21 @@ import { useLanguageStore } from '@/store/languageStore';
 import InvoiceManager from '@/app/components/common/billing/InvoiceManager';
 import ActionModals from '@/app/components/common/billing/ActionModals';
 
+import { useInvoiceStore } from '@/store/invoiceStore';
+
 export default function InvoicingManagementPage() {
   const { t } = useLanguageStore();
+  const { fetchInvoices } = useInvoiceStore();
+  
+  React.useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
+
+  // Handle Generate New via ActionModals state if needed, 
+  // or just rely on ActionModals being present.
+  // In ActionModals.tsx, the buttons are fixed at the bottom right.
+  // We can also trigger the modal from here if we expose the setter.
+  // For now, let's just localize the UI.
 
   return (
     <div className="min-h-screen pb-24 text-white relative">
@@ -21,19 +34,19 @@ export default function InvoicingManagementPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
               <FileText size={14} />
-              Billing Orchestration
+              {t('invoicing.orchestration')}
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase italic">
-              Invoice <span className="text-primary italic">Management</span>
+               {t('invoicing.title')} <span className="text-primary italic">{t('invoicing.management')}</span>
             </h1>
             <p className="text-slate-400 max-w-xl text-sm font-medium">
-              Unified control for invoice generation, status tracking, and automated reminder sequences.
+               {t('invoicing.subtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
              <button className="flex items-center gap-2 px-6 py-2.5 bg-primary text-slate-900 rounded-xl text-xs font-bold shadow-lg shadow-primary/10 hover:bg-lemon transition-all">
-               <Plus size={16} /> Generate New
+               <Plus size={16} /> {t('invoicing.generate_new_btn')}
              </button>
           </div>
         </div>

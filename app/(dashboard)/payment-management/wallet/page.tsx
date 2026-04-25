@@ -5,7 +5,29 @@ import { ShieldCheck, Download, History, Wallet as WalletIcon } from 'lucide-rea
 import WalletManager from '@/app/components/common/billing/WalletManager';
 import ActionModals from '@/app/components/common/billing/ActionModals';
 
+import { useLanguageStore } from '@/store/languageStore';
+import { useWalletStore } from '@/store/walletStore';
+
 export default function WalletCreditsPage() {
+  const { t } = useLanguageStore();
+  const { fetchData, isLoading } = useWalletStore();
+
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-white relative">
+        <div className="absolute inset-0 bg-[#0d223c] -z-10" />
+        <div className="p-8 animate-pulse space-y-8">
+           <div className="h-12 bg-white/5 rounded-2xl w-1/3" />
+           <div className="h-[500px] bg-white/5 rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-24 text-white relative">
       <div className="fixed inset-0 bg-[#0d223c] -z-10">
@@ -17,13 +39,13 @@ export default function WalletCreditsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
               <WalletIcon size={14} />
-              Controlled Financial Interactions
+              {t('wallet.oversight')}
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase italic">
-              Wallet <span className="text-primary">&</span> Credits
+              {t('wallet.title').split('&')[0]} <span className="text-primary">&</span> {t('wallet.title').split('&')[1]}
             </h1>
             <p className="text-slate-400 max-w-xl text-sm font-medium">
-              Advanced oversight of user wallet activities, automated settlements, and document vault activation events.
+              {t('wallet.subtitle')}
             </p>
           </div>
         </div>

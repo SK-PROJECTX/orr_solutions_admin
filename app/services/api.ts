@@ -66,12 +66,16 @@ async function apiCall<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${BASE_URL}${endpoint}`;
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
+  const token = typeof window !== 'undefined' ? (
+    localStorage.getItem('access_token') || 
+    localStorage.getItem('accessToken') || 
+    localStorage.getItem('auth-token')
+  ) : null;
   const method = options.method || 'GET';
   
   const headers = {
     "Content-Type": "application/json",
-    ...(token && { "Authorization": `Bearer ${token}` }),
+    ...(token && token !== 'undefined' && { "Authorization": `Bearer ${token}` }),
     ...options.headers,
   };
 
@@ -116,7 +120,9 @@ async function apiCall<T>(
         case 401:
           console.warn('🔐 Unauthorized access - token may be expired or invalid');
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_data');
             localStorage.removeItem('auth-storage');
             if (!window.location.pathname.includes('/login')) {
               window.location.href = '/login';
@@ -456,7 +462,7 @@ export const clientAPI = {
 
   uploadDocument: (clientId: number, formData: FormData) => {
     console.log(`[API] Uploading document for client ${clientId}`);
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     return fetch(`${BASE_URL}/admin-portal/v1/clients/${clientId}/documents/`, {
       method: "POST",
       headers: {
@@ -542,7 +548,7 @@ export const contentAPI = {
   createContent: (data: FormData | Record<string, any>) => {
     console.log('[API] Creating content:', data instanceof FormData ? 'FormData with file' : data);
     if (data instanceof FormData) {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
       return fetch(`${BASE_URL}/admin-portal/v1/content/`, {
         method: "POST",
         headers: {
@@ -1384,7 +1390,7 @@ export const cmsAPI = {
 
   uploadImage: (formData: FormData) => {
     console.log('[API] Uploading image to CMS');
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     return fetch(`${BASE_URL}/admin-portal/v1/cms/upload-image/`, {
       method: "POST",
       headers: {

@@ -21,14 +21,24 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       login: (token: string, user: AdminUser) => {
-        localStorage.setItem('auth-token', token);
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('accessToken', token); // For backward compatibility
+        localStorage.setItem('auth-token', token); // For very old code
+        localStorage.setItem('user_data', JSON.stringify(user));
         set({ user, token, isAuthenticated: true, isLoading: false });
       },
       logout: () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('accessToken');
         localStorage.removeItem('auth-token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_data');
         set({ user: null, token: null, isAuthenticated: false, isLoading: false });
       },
-      setUser: (user: AdminUser) => set({ user, isAuthenticated: true }),
+      setUser: (user: AdminUser) => {
+        localStorage.setItem('user_data', JSON.stringify(user));
+        set({ user, isAuthenticated: true });
+      },
       setLoading: (loading: boolean) => set({ isLoading: loading }),
     }),
     {
@@ -37,7 +47,9 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         // Ensure token is synced with localStorage after rehydration
         if (state?.token) {
-          const storedToken = localStorage.getItem('auth-token');
+          const storedToken = localStorage.getItem('access_token') || 
+                            localStorage.getItem('accessToken') || 
+                            localStorage.getItem('auth-token');
           if (storedToken && storedToken === state.token) {
             state.isAuthenticated = true;
           } else if (storedToken) {

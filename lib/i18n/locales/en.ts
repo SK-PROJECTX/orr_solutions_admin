@@ -97,6 +97,7 @@ export const en = {
     pro_rata_approval: "Pro-rata Approval",
     invoicing: "Invoicing",
     payment_disputes: "Payment Disputes",
+    all_items: "All Items",
     logout: "Logout",
     admin: "Admin"
   },
@@ -716,6 +717,26 @@ export const en = {
     subtitle: "Create, manage, and track system-wide billing and documentation",
     create_new: "Create New Invoice",
     all_invoices: "All Invoices",
+    payment_mgmt: {
+      paid: "Paid",
+      pending: "Pending",
+      issued: "Issued",
+      overdue: "Overdue",
+      refunded: "Refunded",
+      credit: "Credit",
+      debit: "Debit",
+      refund: "Refund",
+      table: {
+        invoice: "Invoice",
+        client: "Client",
+        amount: "Amount",
+        status: "Status",
+        due_date: "Due Date",
+        actions: "Actions",
+        no_invoices: "No invoices found",
+        search_placeholder: "Search by client or invoice #..."
+      }
+    },
     draft: "Draft",
     issued: "Issued",
     pending: "Pending",
@@ -1104,6 +1125,181 @@ export const en = {
       unclear_next_steps: "Unclear next steps",
       discovery_issues: "Feature discovery issues",
       lack_value: "Lack of immediate value"
+    }
+  },
+  subscriptions: {
+    lifecycle: "Subscription Lifecycle",
+    title: "Subscriptions & Billing",
+    subtitle: "Monitor recurring revenue, plan distribution, and upcoming renewals across the client base.",
+    export_csv: "Export CSV",
+    total_active: "Total active",
+    revenue_mrr: "Revenue MRR",
+    activation: "Activation",
+    churn_rate: "Churn Rate",
+    plan_distribution: "Plan Distribution",
+    active_seats: "Active Seats",
+    monthly_yield: "Monthly Yield",
+    recent_activity: "Recent Subscription Activity",
+    client: "Client",
+    current_plan: "Current Plan",
+    status: "Status",
+    yield: "Yield",
+    last_payment: "Last Payment",
+    active: "Active",
+    inactive: "Inactive",
+    expired: "Expired",
+    cancelled: "Cancelled",
+    paused: "Paused"
+  },
+  wallet: {
+    oversight: "Controlled Financial Interactions",
+    title: "Wallet & Credits",
+    subtitle: "Advanced oversight of user wallet activities, automated settlements, and document vault activation events.",
+    tabs: {
+      balances: "Balances",
+      ledger: "Ledger",
+      events: "Events"
+    },
+    filters: {
+      search_placeholder: "Search by user or description...",
+      export_audit: "Export Audit",
+      transaction_type: "Transaction Type",
+      date_range: "Date Range",
+      to: "to",
+      reset: "Reset Filters"
+    },
+    table: {
+      tx_id: "Transaction ID / Entity",
+      action_type: "Action Type",
+      impact: "Impact",
+      status_events: "Status & Events",
+      management: "Management",
+      adjust_balance: "Adjust Balance",
+      view_ledger: "View Ledger",
+      refund: "Refund",
+      vault_unlocked: "Vault Unlocked"
+    },
+    events: {
+      title: "System Event Log",
+      subtitle: "Real-time monitoring of automated triggers and security overrides.",
+      entity: "Entity",
+      ref: "Ref"
+    },
+    stats: {
+      showing: "Showing {count} results",
+      previous: "Previous",
+      next: "Next"
+    },
+    modals: {
+      new_invoice: "New Invoice",
+      wallet_op: "Wallet Operation",
+      generate_invoice: "Generate New Invoice",
+      adjust_balance: "Wallet Balance Adjustment",
+      client_name: "Client Name",
+      due_date: "Due Date",
+      line_items: "Line Items",
+      add_item: "Add Item",
+      description: "Description",
+      qty: "Qty",
+      price: "Price",
+      generate_and_issue: "Generate and Issue Invoice",
+      warning_adjustment: "Warning: Balance adjustments are recorded in the audit trail and are non-reversible without a counter-transaction.",
+      select_client: "Select Client",
+      adjustment_type: "Adjustment Type",
+      amount_usd: "Amount ($)",
+      reason: "Reason / Description",
+      authorize: "Authorize Adjustment",
+      credit: "Credit (+)",
+      debit: "Debit (-)"
+    }
+  },
+  payment_mgmt: {
+    paid: "Paid",
+    pending: "Pending",
+    issued: "Issued",
+    overdue: "Overdue",
+    table: {
+      search_placeholder: "Search by client or invoice #...",
+      invoice: "Invoice",
+      client: "Client",
+      amount: "Amount",
+      status: "Status",
+      due_date: "Due Date",
+      actions: "Actions",
+      no_invoices: "No invoices found"
+    }
+  },
+  hub: {
+    oversight: "Secure Financial Oversight",
+    title: "Financial",
+    hub: "Hub",
+    subtitle: "The primary command center for all Payment Management activities and system-wide financial health.",
+    export: "Export Report",
+    fy: "FY 2026",
+    global_status: "Global Financial Status",
+    settlements: "Settlements",
+    wallet_ops: "Wallet Operations",
+    audit_active: "Real-time Audit Trail Active",
+    stats: {
+      total_paid: "Total Paid Invoices",
+      total_outstanding: "Total Outstanding",
+      overdue_invoices: "Overdue Invoices",
+      total_wallet: "Total Wallet Balances",
+      real_time: "Real-time Data"
+    },
+    automation: {
+      active: "Automation Active",
+      last_reminder: "Last reminder sent 2 hours ago to 3 overdue clients",
+      view_logs: "View Automation Logs"
+    }
+  },
+  pro_rata: {
+    precision_control: "Billing Precision Control",
+    title: "Pro-rata",
+    approvals: "Approvals",
+    subtitle: "Review and authorize mid-cycle plan adjustments and usage-based billing overrides.",
+    queue_cleared: "Queue Cleared",
+    no_pending: "No pending pro-rata adjustments require attention.",
+    approve: "Approve Adjustment",
+    reject: "Reject",
+    justification: "Justification",
+    adjustment_total: "Adjustment Total",
+    requires_auth: "Requires Level 2 Auth",
+    from: "From",
+    to: "To"
+  },
+  invoicing: {
+    orchestration: "Billing Orchestration",
+    title: "Invoice",
+    management: "Management",
+    subtitle: "Unified control for invoice generation, status tracking, and automated reminder sequences.",
+    generate_new_btn: "Generate New"
+  },
+  disputes: {
+    risk_mitigation: "Risk Mitigation & Chargebacks",
+    title: "Payment",
+    disputes: "Disputes",
+    subtitle: "Monitor and respond to external financial disputes, chargebacks, and high-risk transaction alerts.",
+    all: "All",
+    needs_response: "Needs Response",
+    under_review: "Under Review",
+    resolved: "Resolved",
+    reference_placeholder: "Reference ID...",
+    table: {
+      dispute_entity: "Dispute / Entity",
+      reason: "Reason",
+      amount: "Amount",
+      status: "Status",
+      deadline: "Deadline",
+      actions: "Actions",
+      evidence: "Evidence",
+      final_deadline: "Final Deadline",
+      no_disputes: "No disputes found matching this criteria"
+    },
+    webhooks: {
+      title: "External Dispute Webhooks",
+      desc: "The system is currently listening to Stripe/PayPal dispute notifications. These records are updated automatically upon status transitions.",
+      history_btn: "Dispute History"
     }
   }
 };

@@ -123,7 +123,7 @@ export default function MessagesPage() {
     try {
       if (isInitial) setLoading(true);
 
-      const token = localStorage.getItem("auth-token");
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
         console.error("No authentication token found");
@@ -229,7 +229,7 @@ export default function MessagesPage() {
         return;
       }
 
-      const token = localStorage.getItem("auth-token");
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
         console.error("No authentication token found for messages");
@@ -288,7 +288,7 @@ export default function MessagesPage() {
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedChat) {
       try {
-        const token = localStorage.getItem("auth-token");
+        const token = localStorage.getItem("access_token");
 
         if (!token) {
           console.error("No authentication token found for sending message");

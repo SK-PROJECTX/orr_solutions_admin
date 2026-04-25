@@ -95,7 +95,7 @@ export default function Contact() {
     setSaving(section);
     try {
       // Check if we have an auth token
-      const token = localStorage.getItem('auth-token');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
       if (!token) {
         console.error('❌ No auth token found');
         setErrorModal({

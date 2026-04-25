@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions';
 
 export interface User {
   id: number;
@@ -34,9 +34,11 @@ export class AuthService {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('access_token');
+      const storedToken = localStorage.getItem('access_token');
+      this.token = (storedToken && storedToken !== 'undefined') ? storedToken : null;
+      
       const userData = localStorage.getItem('user_data');
-      if (userData) {
+      if (userData && userData !== 'undefined') {
         try {
           this.user = JSON.parse(userData);
         } catch (error) {
@@ -47,13 +49,13 @@ export class AuthService {
     }
   }
 
-  async login(username: string, password: string): Promise<AuthResponse> {
+  async login(email: string, password: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
@@ -63,17 +65,26 @@ export class AuthService {
     }
 
     const responseData = await response.json();
-    const data: AuthResponse = responseData.data || responseData;
-    this.token = data.access;
-    this.user = data.user;
+    const resultData = responseData.data || responseData;
+    
+    // Normalize token keys from backend (handles both camelCase and snake_case)
+    const access = resultData.access || resultData.accessToken;
+    const refresh = resultData.refresh || resultData.refreshToken;
+    
+    this.token = access;
+    this.user = resultData.user;
 
     if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', data.access);
-      localStorage.setItem('refresh_token', data.refresh);
-      localStorage.setItem('user_data', JSON.stringify(data.user));
+      if (access) localStorage.setItem('access_token', access);
+      if (refresh) localStorage.setItem('refresh_token', refresh);
+      if (this.user) localStorage.setItem('user_data', JSON.stringify(this.user));
     }
 
-    return data;
+    return { 
+      access: access || '', 
+      refresh: refresh || '', 
+      user: this.user as User 
+    };
   }
 
   logout(): void {
@@ -124,8 +135,15 @@ export class AuthService {
       headers['Content-Type'] = 'application/json';
     }
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    // Always get the freshest token from any available key
+    const currentToken = typeof window !== 'undefined' ? (
+      localStorage.getItem('access_token') || 
+      localStorage.getItem('accessToken') || 
+      localStorage.getItem('auth-token')
+    ) : this.token;
+    
+    if (currentToken && currentToken !== 'undefined') {
+      headers['Authorization'] = `Bearer ${currentToken}`;
     }
 
     return fetch(url, {
