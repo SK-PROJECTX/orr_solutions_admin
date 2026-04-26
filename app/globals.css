@@ -2,58 +2,58 @@
 
 :root {
   /* Default = dark navy (the app's primary design) */
-  --color-background: #0d223c;
-  --color-foreground: #ffffff;
-  --color-primary: #0EC277;
-  --color-secondary: #35536b;
-  --color-lemon: #13be77;
-  --color-green: #0ec277;
-  --color-card: #204460;
-  --color-card-light: #2D597D;
+  --color-background: 13, 34, 60;    /* #0d223c */
+  --color-foreground: 255, 255, 255; /* #ffffff */
+  --color-primary: 14, 194, 119;     /* #0EC277 */
+  --color-secondary: 53, 83, 107;    /* #35536b */
+  --color-lemon: 19, 190, 119;       /* #13be77 */
+  --color-green: 14, 194, 119;       /* #0ec277 */
+  --color-card: 32, 68, 96;          /* #204460 */
+  --color-card-light: 45, 89, 125;   /* #2D597D */
   --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
-  --color-border: rgba(30, 58, 75, 0.8);
-  --color-input-bg: #0A1F30;
-  --color-surface: #071626;
-  --color-surface-hover: #0E2441;
+  --color-border: 30, 58, 75;        /* rgba(30, 58, 75, 0.8) */
+  --color-input-bg: 10, 31, 48;      /* #0A1F30 */
+  --color-surface: 7, 22, 38;        /* #071626 */
+  --color-surface-hover: 14, 36, 65; /* #0E2441 */
 }
 
 .dark {
   /* Darker charcoal variant */
-  --color-background: #191919;
-  --color-foreground: #ffffff;
-  --color-primary: #0ec277;
-  --color-secondary: #393939;
-  --color-lemon: #13be77;
-  --color-green: #0ec277;
-  --color-card: #2c2c2c;
-  --color-card-light: #3a3a3a;
+  --color-background: 25, 25, 25;    /* #191919 */
+  --color-foreground: 255, 255, 255;
+  --color-primary: 14, 194, 119;
+  --color-secondary: 57, 57, 57;     /* #393939 */
+  --color-lemon: 19, 190, 119;
+  --color-green: 14, 194, 119;
+  --color-card: 44, 44, 44;          /* #2c2c2c */
+  --color-card-light: 58, 58, 58;    /* #3a3a3a */
   --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-input-bg: #262626;
-  --color-surface: #1a1a1a;
-  --color-surface-hover: #222222;
+  --color-border: 255, 255, 255;     /* rgba(255, 255, 255, 0.08) */
+  --color-input-bg: 38, 38, 38;      /* #262626 */
+  --color-surface: 26, 26, 26;       /* #1a1a1a */
+  --color-surface-hover: 34, 34, 34; /* #222222 */
 }
 
 .light {
   /* Light = original navy dark theme (the app's primary design) */
-  --color-background: #0d223c;
-  --color-foreground: #ffffff;
-  --color-primary: #0EC277;
-  --color-secondary: #35536b;
-  --color-lemon: #13be77;
-  --color-green: #0ec277;
-  --color-card: #204460;
-  --color-card-light: #2D597D;
+  --color-background: 13, 34, 60;
+  --color-foreground: 255, 255, 255;
+  --color-primary: 14, 194, 119;
+  --color-secondary: 53, 83, 107;
+  --color-lemon: 19, 190, 119;
+  --color-green: 14, 194, 119;
+  --color-card: 32, 68, 96;
+  --color-card-light: 45, 89, 125;
   --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
-  --color-border: rgba(30, 58, 75, 0.8);
-  --color-input-bg: #0A1F30;
-  --color-surface: #071626;
-  --color-surface-hover: #0E2441;
+  --color-border: 30, 58, 75;
+  --color-input-bg: 10, 31, 48;
+  --color-surface: 7, 22, 38;
+  --color-surface-hover: 14, 36, 65;
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -75,51 +75,53 @@ body {
 --------------------------------------------------------------------------- */
 
 .bg-background {
-  background-color: var(--color-background);
+  background-color: rgb(var(--color-background));
+  transition: background-color 0.3s ease;
 }
 
 .bg-card {
-  background-color: var(--color-card);
+  background-color: rgb(var(--color-card));
+  transition: background-color 0.3s ease;
 }
 
 .bg-card-light {
-  background-color: var(--color-card-light);
+  background-color: rgb(var(--color-card-light));
 }
 
 .bg-primary {
-  background-color: var(--color-primary);
+  background-color: rgb(var(--color-primary));
 }
 
 .border-primary {
-  border-color: var(--color-primary);
+  border-color: rgb(var(--color-primary));
 }
 
 .bg-secondary {
-  background-color: var(--color-secondary);
+  background-color: rgb(var(--color-secondary));
 }
 
 .bg-lemon {
-  background-color: var(--color-lemon);
+  background-color: rgb(var(--color-lemon));
 }
 
 .border-lemon {
-  border: var(--color-lemon);
+  border: 1px solid rgb(var(--color-lemon));
 }
 
 .border-secondary {
-  border: var(--color-secondary);
+  border: 1px solid rgb(var(--color-secondary));
 }
 
 .text-foreground {
-  color: var(--color-foreground);
+  color: rgb(var(--color-foreground));
 }
 
 .text-primary {
-  color: var(--color-primary);
+  color: rgb(var(--color-primary));
 }
 
 .text-secondary {
-  color: var(--color-secondary);
+  color: rgb(var(--color-secondary));
 }
 
 .bg-gradient-primary {
@@ -127,7 +129,7 @@ body {
 }
 
 .glass-panel {
-  background-color: var(--color-card);
+  background-color: rgb(var(--color-card));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -135,7 +137,7 @@ body {
 }
 
 .dark .glass-panel {
-  background-color: rgba(44, 44, 44, 0.4);
+  background-color: rgba(var(--color-card), 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 

@@ -93,7 +93,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               open={open.home}
               onClick={() => toggle("home")}
               items={[
-                { label: t('sidebar.dashboard'), href: "/" }
+                { label: t('sidebar.dashboard'), href: "/dashboard/" }
               ]}
               pathname={pathname}
               subOpen={subOpen}

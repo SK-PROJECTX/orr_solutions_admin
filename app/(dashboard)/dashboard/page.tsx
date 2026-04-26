@@ -158,7 +158,11 @@ function page() {
 
   return (
     <div className="max-h-screen overflow-y-auto text-white relative overflow-hidden star">
-      <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+      <div className="fixed inset-0 bg-background -z-10">
+        <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+      </div>
       <div className="relative z-10 p-4 md:p-8">
         {/* 3-PART OPENING SECTION */}
         <div className="space-y-6 mb-8">

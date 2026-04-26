@@ -54,7 +54,7 @@ export default function SubscriptionsManagementPage() {
   if (loading) {
     return (
       <div className="min-h-screen text-white relative">
-        <div className="absolute inset-0 bg-[#0d223c] -z-10" />
+        <div className="absolute inset-0 bg-background -z-10" />
         <div className="p-8 animate-pulse space-y-8">
            <div className="h-12 bg-white/5 rounded-2xl w-1/3" />
            <div className="grid grid-cols-4 gap-6">
@@ -67,8 +67,10 @@ export default function SubscriptionsManagementPage() {
 
   return (
     <div className="min-h-screen pb-24 text-white relative">
-      <div className="fixed inset-0 bg-[#0d223c] -z-10">
+      <div className="fixed inset-0 bg-background -z-10">
         <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-12">

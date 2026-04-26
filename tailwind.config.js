@@ -13,13 +13,13 @@ module.exports = {
     },
     extend: {
       colors: {
-        background: 'var(--color-background)',
-        foreground: 'var(--color-foreground)',
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
-        lemon: 'var(--color-lemon)',
-        green: 'var(--color-green)',
-        card: 'var(--color-card)',
+        background: 'rgb(var(--color-background))',
+        foreground: 'rgb(var(--color-foreground))',
+        primary: 'rgb(var(--color-primary))',
+        secondary: 'rgb(var(--color-secondary))',
+        lemon: 'rgb(var(--color-lemon))',
+        green: 'rgb(var(--color-green))',
+        card: 'rgb(var(--color-card))',
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',

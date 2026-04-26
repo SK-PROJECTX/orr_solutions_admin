@@ -21,7 +21,7 @@ export default function ProRataApprovalsPage() {
 
   return (
     <div className="min-h-screen pb-24 text-white relative">
-      <div className="fixed inset-0 bg-[#0d223c] -z-10">
+      <div className="fixed inset-0 bg-background -z-10">
         <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       </div>
