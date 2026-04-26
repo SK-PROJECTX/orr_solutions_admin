@@ -1,35 +1,62 @@
 @import "tailwindcss";
 
 :root {
+  /* Default = dark navy (the app's primary design) */
   --color-background: #0d223c;
-  --color-foreground: #121212;
-  --color-primary: #0ec277;
-  --color-secondary: #1d5e65;
-  --color-lemon: #5ef558;
+  --color-foreground: #ffffff;
+  --color-primary: #0EC277;
+  --color-secondary: #35536b;
+  --color-lemon: #13be77;
   --color-green: #0ec277;
   --color-card: #204460;
   --color-card-light: #2D597D;
   --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
+  --color-border: rgba(30, 58, 75, 0.8);
+  --color-input-bg: #0A1F30;
+  --color-surface: #071626;
+  --color-surface-hover: #0E2441;
 }
 
 .dark {
+  /* Darker charcoal variant */
   --color-background: #191919;
   --color-foreground: #ffffff;
   --color-primary: #0ec277;
-  --color-secondary: #1d5e65;
-  --color-lemon: #5ef558;
+  --color-secondary: #393939;
+  --color-lemon: #13be77;
   --color-green: #0ec277;
   --color-card: #2c2c2c;
+  --color-card-light: #3a3a3a;
   --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-input-bg: #262626;
+  --color-surface: #1a1a1a;
+  --color-surface-hover: #222222;
+}
 
+.light {
+  /* Light = original navy dark theme (the app's primary design) */
+  --color-background: #0d223c;
+  --color-foreground: #ffffff;
+  --color-primary: #0EC277;
+  --color-secondary: #35536b;
+  --color-lemon: #13be77;
+  --color-green: #0ec277;
+  --color-card: #204460;
+  --color-card-light: #2D597D;
+  --gradient-primary: linear-gradient(135deg, #28b026, #03f6ca);
+  --color-border: rgba(30, 58, 75, 0.8);
+  --color-input-bg: #0A1F30;
+  --color-surface: #071626;
+  --color-surface-hover: #0E2441;
 }
 
 body {
   background-color: var(--color-background);
- 
   color: var(--color-foreground);
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .star {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
     radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
@@ -47,19 +74,76 @@ body {
   debugging. They are lightweight and safe to keep alongside Tailwind.
 --------------------------------------------------------------------------- */
 
-.bg-background { background-color: var(--color-background); }
-.bg-card { background-color: var(--color-card); }
-.bg-card-light { background-color: var(--color-card-light); }
-.bg-primary { background-color: var(--color-primary); }
-.border-primary { border-color: var(--color-primary); }
-.bg-secondary { background-color: var(--color-secondary); }
-.bg-lemon { background-color: var(--color-lemon); }
+.bg-background {
+  background-color: var(--color-background);
+}
 
-.text-foreground { color: var(--color-foreground); }
-.text-primary { color: var(--color-primary); }
-.text-secondary { color: var(--color-secondary); }
+.bg-card {
+  background-color: var(--color-card);
+}
 
-.bg-gradient-primary { background-image: var(--gradient-primary); }
+.bg-card-light {
+  background-color: var(--color-card-light);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-lemon {
+  background-color: var(--color-lemon);
+}
+
+.border-lemon {
+  border: var(--color-lemon);
+}
+
+.border-secondary {
+  border: var(--color-secondary);
+}
+
+.text-foreground {
+  color: var(--color-foreground);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+.glass-panel {
+  background-color: var(--color-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dark .glass-panel {
+  background-color: rgba(44, 44, 44, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.light .glass-panel {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
 
 /* Glowing border effect matching SVG color */
 .glow-border {
@@ -85,15 +169,47 @@ body {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   width: 100%;
 }
 
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* GSAP Scroll-Split Effect */
+.scroll-section {
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .scroll-section {
+    margin-bottom: 6rem;
+  }
+}
+
+/* Fixed background for landing page */
+.fixed-background {
+  background-attachment: fixed;
+  background-size: 300px 300px, 400px 400px;
+  background-position: 0 0, 150px 150px;
+}
+
+@media (max-width: 640px) {
+  .fixed-background {
+    background-size: 200px 200px, 250px 250px;
+    background-position: 0 0, 100px 100px;
+  }
+}
+
 /* Custom Scrollbar Styles */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -102,7 +218,7 @@ html, body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-primary);
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -113,6 +229,3 @@ html, body {
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) var(--color-background);
 }
-
-
-

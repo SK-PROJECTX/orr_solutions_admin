@@ -66,17 +66,20 @@ async function apiCall<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${BASE_URL}${endpoint}`;
-  const token = typeof window !== 'undefined' ? (
+  // Exclude token for auth endpoints to prevent invalid token errors
+  const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+
+  const token = (!isAuthEndpoint && typeof window !== 'undefined') ? (
     localStorage.getItem('access_token') || 
     localStorage.getItem('accessToken') || 
     localStorage.getItem('auth-token')
   ) : null;
   const method = options.method || 'GET';
   
-  const headers = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token && token !== 'undefined' && { "Authorization": `Bearer ${token}` }),
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   // Log the API call

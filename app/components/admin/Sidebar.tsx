@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "../../../lib/hooks/auth";
 import { useLanguageStore } from "@/store/languageStore";
+import { ThemeToggle } from "../ThemeToggle";
 
 type OpenState = {
   home: boolean;
@@ -79,8 +80,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside className={`w-64 h-screen bg-card text-white flex flex-col justify-between p-4 flex-shrink-0 overflow-y-auto transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 fixed z-50`}>
         <div>
-          <div className="flex items-center px-2 mb-8">
+          <div className="flex items-center justify-between px-2 mb-8">
             <img src="/images/logo.svg" alt="ORR Solutions" className="w-fit h-auto" />
+            <ThemeToggle />
           </div>
 
           <nav className="space-y-1">
