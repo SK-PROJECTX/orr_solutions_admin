@@ -58,7 +58,8 @@ export default function ProtectedRoute({ children, requiredPermissions = [] }: P
 
       // No token anywhere, redirect to login
       if (!currentToken || currentToken === 'undefined') {
-        router.push('/login');
+        setIsChecking(false);
+        router.push('/');
         return;
       }
 
@@ -75,8 +76,9 @@ export default function ProtectedRoute({ children, requiredPermissions = [] }: P
         } catch (error: any) {
           console.error('Failed to fetch user:', error);
           // Token is invalid or expired, log out the user
+          setIsChecking(false);
           logout();
-          router.push('/login');
+          router.push('/');
           return;
         }
       }
@@ -92,21 +94,28 @@ export default function ProtectedRoute({ children, requiredPermissions = [] }: P
     if (!isChecking && user && requiredPermissions.length > 0) {
       if (!hasRequiredPermission) {
         console.warn('User lacks required permissions:', requiredPermissions);
-        router.push('/'); // Redirect to dashboard if no permission
+        router.push('/dashboard/'); // Redirect to dashboard if no permission
       }
     }
   }, [isChecking, user, hasRequiredPermission, requiredPermissions, router]);
 
   if (isChecking) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-primary font-medium animate-pulse text-sm">Verifying Access...</p>
+        </div>
       </div>
     );
   }
 
   if (!token || !user) {
-    return null; // Will redirect in useEffect
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   // Check permissions after loading
