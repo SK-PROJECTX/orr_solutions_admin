@@ -26,6 +26,31 @@ export default function SubscriptionsManagementPage() {
     fetchData();
   }, []);
 
+  const handleExportCSV = () => {
+    if (!data?.subscriptions) return;
+    
+    const headers = ["Client", "Plan", "Status", "Yield", "Last Payment"];
+    const rows = data.subscriptions.map((sub: any) => [
+      sub.client_name,
+      sub.plan_name,
+      sub.status,
+      sub.last_payment_amount,
+      sub.last_payment_date || 'N/A'
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map((e: any) => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `subscriptions_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen text-white relative">
@@ -51,19 +76,22 @@ export default function SubscriptionsManagementPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
               <Users size={14} />
-              Subscription Lifecycle
+              {t('subscriptions.lifecycle')}
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase italic">
-              Subscriptions <span className="text-primary italic">&</span> Billing
+              {t('subscriptions.title').split('&')[0]} <span className="text-primary italic">&</span> {t('subscriptions.title').split('&')[1]}
             </h1>
             <p className="text-slate-400 max-w-xl text-sm font-medium">
-              Monitor recurring revenue, plan distribution, and upcoming renewals across the client base.
+              {t('subscriptions.subtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
-             <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 rounded-xl text-xs font-bold text-slate-400 transition-all">
-               <Download size={14} /> Export CSV
+             <button 
+               onClick={handleExportCSV}
+               className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 rounded-xl text-xs font-bold text-slate-400 transition-all"
+             >
+               <Download size={14} /> {t('subscriptions.export_csv')}
              </button>
           </div>
         </div>
@@ -72,12 +100,12 @@ export default function SubscriptionsManagementPage() {
         {data?.analytics && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              {[
-               { label: 'Total active', value: data.analytics.total_subscriptions, icon: Users, color: 'text-blue-400' },
-               { label: 'Revenue MRR', value: `$${data.analytics.active_subscriptions || 0}`, icon: TrendingUp, color: 'text-emerald-400' },
-               { label: 'Activation', value: `${data.analytics.activation_rate}%`, icon: ShieldCheck, color: 'text-purple-400' },
-               { label: 'Churn Rate', value: `${data.analytics.churn_rate}%`, icon: Calendar, color: 'text-rose-400' }
+               { label: t('subscriptions.total_active'), value: data.analytics.total_subscriptions, icon: Users, color: 'text-blue-400' },
+               { label: t('subscriptions.revenue_mrr'), value: `$${(data.analytics.total_mrr || 0).toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-400' },
+               { label: t('subscriptions.activation'), value: `${data.analytics.activation_rate}%`, icon: ShieldCheck, color: 'text-purple-400' },
+               { label: t('subscriptions.churn_rate'), value: `${data.analytics.churn_rate}%`, icon: Calendar, color: 'text-rose-400' }
              ].map((stat, i) => (
-               <div key={i} className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-3xl relative overflow-hidden group">
+                <div key={i} className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-3xl relative overflow-hidden group">
                   <div className="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
                      <stat.icon size={80} />
                   </div>
@@ -91,7 +119,7 @@ export default function SubscriptionsManagementPage() {
         {/* Plan Distribution */}
         <div className="space-y-4">
            <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 px-2">
-             <LayoutGrid size={16} /> Plan Distribution
+             <LayoutGrid size={16} /> {t('subscriptions.plan_distribution')}
            </h2>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {data?.plan_distribution && Object.entries(data.plan_distribution).map(([plan, details]: [string, any]) => (
@@ -102,11 +130,11 @@ export default function SubscriptionsManagementPage() {
                    </h3>
                    <div className="space-y-4">
                       <div className="flex justify-between items-end">
-                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Seats</span>
+                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('subscriptions.active_seats')}</span>
                          <span className="text-xl font-black text-white">{details.subscriber_count}</span>
                       </div>
                       <div className="flex justify-between items-end">
-                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Monthly Yield</span>
+                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('subscriptions.monthly_yield')}</span>
                          <span className="text-xl font-black text-emerald-400">${details.monthly_revenue.toLocaleString()}</span>
                       </div>
                    </div>
@@ -118,17 +146,17 @@ export default function SubscriptionsManagementPage() {
         {/* List Areas */}
         <div className="bg-card/20 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden">
            <div className="p-8 border-b border-white/5">
-              <h2 className="text-xl font-black text-white uppercase tracking-tight">Recent Subscription Activity</h2>
+              <h2 className="text-xl font-black text-white uppercase tracking-tight">{t('subscriptions.recent_activity')}</h2>
            </div>
            <div className="overflow-x-auto">
               <table className="w-full text-left">
                  <thead>
                     <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-white/5">
-                       <th className="py-6 px-8">Client</th>
-                       <th className="py-6 px-8">Current Plan</th>
-                       <th className="py-6 px-8">Status</th>
-                       <th className="py-6 px-8 text-right">Yield</th>
-                       <th className="py-6 px-8 text-right">Last Payment</th>
+                       <th className="py-6 px-8">{t('subscriptions.client')}</th>
+                       <th className="py-6 px-8">{t('subscriptions.current_plan')}</th>
+                       <th className="py-6 px-8">{t('subscriptions.status')}</th>
+                       <th className="py-6 px-8 text-right">{t('subscriptions.yield')}</th>
+                       <th className="py-6 px-8 text-right">{t('subscriptions.last_payment')}</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-white/5">

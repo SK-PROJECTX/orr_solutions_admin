@@ -50,6 +50,7 @@ export const it = {
     quick_actions: "Azioni Rapide",
     system_notifications: "Notifiche di Sistema",
     billing_credit: "Panoramica Fatturazione e Credito",
+    all_items: "Tutti gli Elementi",
     client_management: "Gestione Clienti",
     all_clients: "Tutti i Clienti",
     client_profiles: "Profili Clienti",
@@ -90,10 +91,11 @@ export const it = {
     consultation_metrics: "Metriche di Consulenza",
     workspace_usage: "Utilizzo Workspace",
     funnel_reports: "Report Funnel",
-    payments_billing: "Pagamenti e Fatturazione",
+    payment_management: "Gestione Pagamenti",
+    payments_billings: "Pagamenti e Fatturazione",
     wallet_logs: "Log Portafoglio",
-    pro_rata: "Approvazioni Pro-rata",
-    subscriptions: "Abbonamenti",
+    financial_management: "Gestione Finanziaria",
+    pro_rata_approval: "Approvazione Pro-rata",
     invoicing: "Fatturazione",
     payment_disputes: "Controversie di Pagamento",
     logout: "Esci",
@@ -712,11 +714,26 @@ export const it = {
     subtitle: "Crea, gestisci e traccia la fatturazione e la documentazione del sistema",
     create_new: "Crea Nuova Fattura",
     all_invoices: "Tutte le Fatture",
-    draft: "Bozza",
-    issued: "Emessa",
-    pending: "In attesa",
-    paid: "Pagata",
-    overdue: "Scaduta",
+    payment_mgmt: {
+      paid: "Pagato",
+      pending: "In attesa",
+      issued: "Emesso",
+      overdue: "Scaduto",
+      refunded: "Rimborsato",
+      credit: "Credito",
+      debit: "Debito",
+      refund: "Rimborso",
+      table: {
+        invoice: "Fattura",
+        client: "Cliente",
+        amount: "Importo",
+        status: "Stato",
+        due_date: "Data Scadenza",
+        actions: "Azioni",
+        no_invoices: "Nessuna fattura trovata",
+        search_placeholder: "Cerca per cliente o fattura #..."
+      }
+    },
     invoice_no: "Fattura #",
     client: "Cliente",
     amount: "Importo",
@@ -1031,6 +1048,9 @@ export const it = {
     pending_amount: "Importo in Sospeso",
     completed: "Completato",
     pending: "In Sospeso",
+    paid: "Pagata",
+    issued: "Emessa",
+    overdue: "Scaduta",
     empty: "Nessuna transazione trovata",
     filters: {
       all: "Tutti",
@@ -1044,7 +1064,13 @@ export const it = {
       from: "Da",
       type: "Tipo",
       amount: "Importo",
-      status: "Stato"
+      status: "Stato",
+      search_placeholder: "Cerca per cliente o n. fattura...",
+      invoice: "Fattura",
+      client: "Cliente",
+      due_date: "Scadenza",
+      actions: "Azioni",
+      no_invoices: "Nessuna fattura trovata"
     }
   },
   project_mgmt: {
@@ -1090,6 +1116,166 @@ export const it = {
       unclear_next_steps: "Passaggi successivi non chiari",
       discovery_issues: "Problemi di scoperta delle funzionalità",
       lack_value: "Mancanza di valore immediato"
+    }
+  },
+  subscriptions: {
+    lifecycle: "Ciclo di Vita Abbonamento",
+    title: "Abbonamenti e Fatturazione",
+    subtitle: "Monitora le entrate ricorrenti, la distribuzione dei piani e i prossimi rinnovi in tutta la base clienti.",
+    export_csv: "Esporta CSV",
+    total_active: "Totale attivi",
+    revenue_mrr: "MRR Entrate",
+    activation: "Attivazione",
+    churn_rate: "Tasso di Abbandono",
+    plan_distribution: "Distribuzione Piano",
+    active_seats: "Posti Attivi",
+    monthly_yield: "Rendimento Mensile",
+    recent_activity: "Attività Recente Abbonamenti",
+    client: "Cliente",
+    current_plan: "Piano Attuale",
+    status: "Stato",
+    yield: "Rendimento",
+    last_payment: "Ultimo Pagamento",
+    active: "Attivo",
+    inactive: "Inattivo",
+    expired: "Scaduto",
+    cancelled: "Annullato",
+    paused: "In pausa"
+  },
+  wallet: {
+    oversight: "Interazioni Finanziarie Controllate",
+    title: "Portafoglio e Crediti",
+    subtitle: "Supervisione avanzata delle attività del portafoglio utenti, regolamenti automatizzati ed eventi di attivazione del vault dei documenti.",
+    tabs: {
+      balances: "Saldi",
+      ledger: "Libro Mastro",
+      events: "Eventi"
+    },
+    filters: {
+      search_placeholder: "Cerca per utente o descrizione...",
+      export_audit: "Esporta Audit",
+      transaction_type: "Tipo di Transazione",
+      date_range: "Intervallo Date",
+      to: "a",
+      reset: "Reimposta Filtri"
+    },
+    table: {
+      tx_id: "ID Transazione / Entità",
+      action_type: "Tipo Azione",
+      impact: "Impatto",
+      status_events: "Stato ed Eventi",
+      management: "Gestione",
+      adjust_balance: "Modifica Saldo",
+      view_ledger: "Visualizza Libro Mastro",
+      refund: "Rimborso",
+      vault_unlocked: "Vault Sbloccato"
+    },
+    events: {
+      title: "Log Eventi di Sistema",
+      subtitle: "Monitoraggio in tempo reale dei trigger automatizzati e dei bypass di sicurezza.",
+      entity: "Entità",
+      ref: "Rif"
+    },
+    stats: {
+      showing: "Visualizzazione di {count} risultati",
+      previous: "Precedente",
+      next: "Successivo"
+    },
+    modals: {
+      new_invoice: "Nuova Fattura",
+      wallet_op: "Operazione Portafoglio",
+      generate_invoice: "Genera Nuova Fattura",
+      adjust_balance: "Rettifica Saldo Portafoglio",
+      client_name: "Nome Cliente",
+      due_date: "Data Scadenza",
+      line_items: "Voci di Riga",
+      add_item: "Aggiungi Voce",
+      description: "Descrizione",
+      qty: "Qtà",
+      price: "Prezzo",
+      generate_and_issue: "Genera ed Emetti Fattura",
+      warning_adjustment: "Avviso: Le rettifiche di saldo sono registrate nel log di audit e non sono reversibili senza una contro-transazione.",
+      select_client: "Seleziona Cliente",
+      adjustment_type: "Tipo di Rettifica",
+      amount_usd: "Importo ($)",
+      reason: "Causale / Descrizione",
+      authorize: "Autorizza Rettifica",
+      credit: "Credito (+)",
+      debit: "Debito (-)"
+    }
+  },
+
+  hub: {
+    oversight: "Supervisione Finanziaria Sicura",
+    title: "Hub",
+    hub: "Finanziario",
+    subtitle: "Il centro di comando primario per tutte le attività di gestione dei pagamenti e la salute finanziaria del sistema.",
+    export: "Esporta Report",
+    fy: "AF 2026",
+    global_status: "Stato Finanziario Globale",
+    settlements: "Regolamenti",
+    wallet_ops: "Operazioni Portafoglio",
+    audit_active: "Log di Audit in Tempo Reale Attivo",
+    stats: {
+      total_paid: "Totale Fatture Pagate",
+      total_outstanding: "Totale In Sospeso",
+      overdue_invoices: "Fatture Scadute",
+      total_wallet: "Saldi Totali Portafoglio",
+      real_time: "Dati in Tempo Reale"
+    },
+    automation: {
+      active: "Automazione Attiva",
+      last_reminder: "Ultimo sollecito inviato 2 ore fa a 3 clienti morosi",
+      view_logs: "Visualizza Log Automazione"
+    }
+  },
+  pro_rata: {
+    precision_control: "Controllo Precisione Fatturazione",
+    title: "Pro-rata",
+    approvals: "Approvazioni",
+    subtitle: "Revisiona e autorizza le rettifiche dei piani a metà ciclo e gli override della fatturazione basata sull'uso.",
+    queue_cleared: "Coda Completata",
+    no_pending: "Nessuna rettifica pro-rata in sospeso richiede attenzione.",
+    approve: "Approva Rettifica",
+    reject: "Rifiuta",
+    justification: "Giustificazione",
+    adjustment_total: "Totale Rettifica",
+    requires_auth: "Richiede Autenticazione Livello 2",
+    from: "Da",
+    to: "A"
+  },
+  invoicing: {
+    orchestration: "Orchestrazione Fatturazione",
+    title: "Gestione",
+    management: "Fatture",
+    subtitle: "Controllo unificato per la generazione di fatture, il monitoraggio dello stato e le sequenze di sollecito automatiche.",
+    generate_new_btn: "Genera Nuova"
+  },
+  disputes: {
+    risk_mitigation: "Mitigazione del Rischio e Chargeback",
+    title: "Contenziosi",
+    disputes: "Pagamenti",
+    subtitle: "Monitora e rispondi ai contenziosi finanziari esterni, chargeback e avvisi di transazioni ad alto rischio.",
+    all: "Tutti",
+    needs_response: "Richiede Risposta",
+    under_review: "In Revisione",
+    resolved: "Risolto",
+    reference_placeholder: "ID Riferimento...",
+    table: {
+      dispute_entity: "Contenzioso / Entità",
+      reason: "Motivo",
+      amount: "Importo",
+      status: "Stato",
+      deadline: "Scadenza",
+      actions: "Azioni",
+      evidence: "Prove",
+      final_deadline: "Scadenza Finale",
+      no_disputes: "Nessuna disputa trovata con questi criteri"
+    },
+    webhooks: {
+      title: "Webhook Contenziosi Esterni",
+      desc: "Il sistema è attualmente in ascolto delle notifiche di contenzioso Stripe/PayPal. Questi record vengono aggiornati automaticamente alle transizioni di stato.",
+      history_btn: "Cronologia Contenziosi"
     }
   }
 };

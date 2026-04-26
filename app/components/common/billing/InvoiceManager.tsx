@@ -3,12 +3,32 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MoreHorizontal, Eye, Edit2, CheckCircle, FileText, Download, Clock, AlertCircle } from 'lucide-react';
-import { useInvoiceStore, InvoiceStatus } from '@/store/invoiceStore';
+import { useInvoiceStore, InvoiceStatus, Invoice } from '@/store/invoiceStore';
+import InvoiceDocument from './InvoiceDocument';
+
+import { useLanguageStore } from '@/store/languageStore';
 
 export default function InvoiceManager() {
-  const { invoices } = useInvoiceStore();
+  const { t } = useLanguageStore();
+  const { invoices, settings } = useInvoiceStore();
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+
+  const handlePreview = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setPreviewModalOpen(true);
+  };
+
+  const handleDownload = (invoice: Invoice) => {
+    // We'll show the preview then trigger print
+    setSelectedInvoice(invoice);
+    setPreviewModalOpen(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
 
   const filteredInvoices = invoices.filter(inv => {
     const matchesStatus = filterStatus === 'all' || inv.status === filterStatus;
@@ -35,7 +55,7 @@ export default function InvoiceManager() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
           <input 
             type="text" 
-            placeholder="Search by client or invoice #..." 
+            placeholder={t('payment_mgmt.table.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
@@ -54,7 +74,7 @@ export default function InvoiceManager() {
                   : 'bg-white/5 text-slate-400 border-white/5 hover:bg-white/10'
               }`}
             >
-              {status}
+              {status === 'all' ? t('sidebar.all_items') || 'All' : t(`payment_mgmt.${status}`)}
             </button>
           ))}
         </div>
@@ -66,12 +86,12 @@ export default function InvoiceManager() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5 bg-white/5">
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Invoice</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Client</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Date</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('payment_mgmt.table.invoice')}</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('payment_mgmt.table.client')}</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('payment_mgmt.table.amount')}</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('payment_mgmt.table.status')}</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('payment_mgmt.table.due_date')}</th>
+                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">{t('payment_mgmt.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -106,7 +126,7 @@ export default function InvoiceManager() {
                     </td>
                     <td className="py-5 px-6">
                       <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(invoice.status)}`}>
-                        {invoice.status}
+                        {t(`payment_mgmt.${invoice.status}`)}
                       </span>
                     </td>
                     <td className="py-5 px-6">
@@ -117,10 +137,16 @@ export default function InvoiceManager() {
                     </td>
                     <td className="py-5 px-6">
                       <div className="flex justify-end gap-2">
-                        <button className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                        <button 
+                          onClick={() => handlePreview(invoice)}
+                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                        >
                           <Eye size={16} />
                         </button>
-                        <button className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                        <button 
+                          onClick={() => handleDownload(invoice)}
+                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                        >
                           <Download size={16} />
                         </button>
                         <button className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/20 transition-all">
@@ -137,7 +163,7 @@ export default function InvoiceManager() {
           {filteredInvoices.length === 0 && (
             <div className="py-20 flex flex-col items-center gap-4 text-slate-500">
               <AlertCircle size={48} className="opacity-20" />
-              <p className="font-bold tracking-widest uppercase text-xs">No invoices found</p>
+              <p className="font-bold tracking-widest uppercase text-xs">{t('payment_mgmt.table.no_invoices')}</p>
             </div>
           )}
         </div>
@@ -152,14 +178,46 @@ export default function InvoiceManager() {
              <CheckCircle className="text-emerald-500" size={20} />
            </div>
            <div>
-             <p className="text-xs font-bold text-white uppercase tracking-widest">Automation Active</p>
-             <p className="text-[10px] text-slate-500">Last reminder sent 2 hours ago to 3 overdue clients</p>
+             <p className="text-xs font-bold text-white uppercase tracking-widest">{t('hub.automation.active')}</p>
+             <p className="text-[10px] text-slate-500">{t('hub.automation.last_reminder')}</p>
            </div>
          </div>
          <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-lemon transition-colors">
-           View Automation Logs
+           {t('hub.automation.view_logs')}
          </button>
       </div>
+
+      <AnimatePresence>
+        {previewModalOpen && selectedInvoice && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPreviewModalOpen(false)}
+              className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-5xl bg-[#f8fafc] rounded-lg overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+              <div className="sticky top-0 right-0 z-10 flex justify-end p-4 pointer-events-none">
+                <button 
+                  onClick={() => setPreviewModalOpen(false)}
+                  className="p-2 bg-slate-900/10 hover:bg-slate-900/20 rounded-full text-slate-900 transition-colors pointer-events-auto backdrop-blur-sm"
+                >
+                  <MoreHorizontal className="rotate-45" size={24} />
+                </button>
+              </div>
+              <div className="print:m-0">
+                <InvoiceDocument invoice={selectedInvoice} settings={settings} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

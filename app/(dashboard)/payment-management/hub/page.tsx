@@ -9,9 +9,19 @@ import InvoiceManager from '@/app/components/common/billing/InvoiceManager';
 import WalletManager from '@/app/components/common/billing/WalletManager';
 import ActionModals from '@/app/components/common/billing/ActionModals';
 
+import { useInvoiceStore } from '@/store/invoiceStore';
+import { useWalletStore } from '@/store/walletStore';
+
 export default function FinancialHubPage() {
   const { t } = useLanguageStore();
+  const { fetchInvoices } = useInvoiceStore();
+  const { fetchData: fetchWallets } = useWalletStore();
   const [activeSection, setActiveSection] = useState<'invoices' | 'wallets'>('invoices');
+
+  React.useEffect(() => {
+    fetchInvoices();
+    fetchWallets();
+  }, [fetchInvoices, fetchWallets]);
 
   return (
     <div className="min-h-screen pb-24 text-white relative">
@@ -28,22 +38,22 @@ export default function FinancialHubPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
               <ShieldCheck size={14} />
-              Secure Financial Oversight
+              {t('hub.oversight')}
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
-              Financial <span className="text-primary italic">Hub</span>
+              {t('hub.title')} <span className="text-primary italic">{t('hub.hub')}</span>
             </h1>
             <p className="text-slate-400 max-w-xl text-sm font-medium">
-              The primary command center for all Payment Management activities and system-wide financial health.
+              {t('hub.subtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-slate-900 rounded-xl text-xs font-bold shadow-lg shadow-primary/10">
-               <Download size={14} /> Export Report
+               <Download size={14} /> {t('hub.export')}
              </button>
              <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 rounded-xl text-xs font-bold text-slate-400 transition-all">
-               <Calendar size={14} /> FY 2026
+               <Calendar size={14} /> {t('hub.fy')}
              </button>
           </div>
         </div>
@@ -52,7 +62,7 @@ export default function FinancialHubPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <LayoutGrid size={16} /> Global Financial Status
+              <LayoutGrid size={16} /> {t('hub.global_status')}
             </h2>
           </div>
           <FinancialStatsOverview />
@@ -69,7 +79,7 @@ export default function FinancialHubPage() {
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={18} /> Settlements
+                    <FileText size={18} /> {t('hub.settlements')}
                   </span>
                   {activeSection === 'invoices' && (
                     <motion.div layoutId="activeTabHub" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -82,7 +92,7 @@ export default function FinancialHubPage() {
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <Wallet size={18} /> Wallet Operations
+                    <Wallet size={18} /> {t('hub.wallet_ops')}
                   </span>
                   {activeSection === 'wallets' && (
                     <motion.div layoutId="activeTabHub" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -91,8 +101,8 @@ export default function FinancialHubPage() {
              </div>
              
              <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                <ShieldCheck size={12} className="text-emerald-500" />
-                Real-time Audit Trail Active
+                 <ShieldCheck size={12} className="text-emerald-500" />
+                 {t('hub.audit_active')}
              </div>
           </div>
 

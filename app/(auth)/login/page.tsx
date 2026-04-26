@@ -32,17 +32,12 @@ export default function Page() {
       const response: any = await authAPI.login(formData.email, formData.password);
       
       // Handle different response formats
-      if (response.success && response.data) {
-        // Format from common.auth_views.LoginView
-        login(response.data.accessToken, response.data.user);
-        router.push("/");
-      } else if (response.data && response.data.accessToken) {
-        // Alternative format
-        login(response.data.accessToken, response.data.user);
-        router.push("/");
-      } else if (response.accessToken) {
-        // Direct format
-        login(response.accessToken, response.user);
+      const data = response.data || response;
+      const token = data.access || data.accessToken || data.access_token || response.accessToken;
+      const user = data.user || response.user;
+
+      if (token && user) {
+        login(token, user);
         router.push("/");
       } else {
         setError(response.message || t('auth.error_invalid_format'));

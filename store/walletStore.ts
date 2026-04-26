@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { AuthService } from '@/lib/auth';
 
 export type TransactionType = 'credit' | 'debit' | 'refund';
+// ... (omitting types for brevity in TargetContent matching)
+// Wait, I need to match the original content exactly.
+// I'll just match the fetchData part.
+
 export type TransactionStatus = 'pending' | 'completed' | 'failed';
 
 export interface WalletTransaction {
@@ -129,45 +134,96 @@ export const useWalletStore = create<WalletState>()(
 
       fetchData: async () => {
         set({ isLoading: true });
-        await new Promise(resolve => setTimeout(resolve, 800));
-        set({ isLoading: false });
+        try {
+          const auth = AuthService.getInstance();
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions';
+          
+          // Fetch Wallets
+          const walletsRes = await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/wallets/`);
+          const walletsRaw = await walletsRes.json();
+          const walletsDataRaw = walletsRaw.data || walletsRaw || [];
+          
+          const mappedWallets = (Array.isArray(walletsDataRaw) ? walletsDataRaw : []).map((w: any) => {
+            let name = w.userName;
+            if (!name || name.toUpperCase() === 'N/A') {
+              name = w.userEmail.split('@')[0];
+            }
+            return {
+              ...w,
+              userName: name
+            };
+          });
+
+          // Fetch Transactions
+          const txRes = await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/transactions/`);
+          const txRaw = await txRes.json();
+          const txData = txRaw.data || txRaw || {};
+          
+          // Map backend fields to frontend store
+          const mappedTransactions = (txData.transactions || []).map((t: any) => ({
+            id: t.id?.toString() || Math.random().toString(),
+            userId: t.user || 0,
+            userName: t.client_name || 'Client',
+            type: t.amount < 0 ? 'debit' : 'credit', // Corrected logic: negative is debit, positive is credit
+            amount: Math.abs(parseFloat(t.amount)),
+            currency: t.currency || 'USD',
+            description: t.billing_title || 'Wallet Transaction',
+            status: ['paid', 'succeeded', 'complete', 'completed'].includes(t.status?.toLowerCase()) ? 'completed' : 'pending',
+            timestamp: t.transaction_date || t.created_at,
+            referenceId: t.reference_id
+          }));
+
+          // Fetch Audit Trail for System Events
+          const auditRes = await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/audit-trail/`);
+          const auditRaw = await auditRes.json();
+          const auditData = auditRaw.data || auditRaw || {};
+
+          // Map backend activities to system events
+          const mappedEvents = (auditData.recent_activities || []).map((ev: any) => ({
+            id: `ev_${ev.transaction_id}`,
+            type: ['paid', 'succeeded', 'complete', 'completed'].includes(ev.status?.toLowerCase()) ? 'auto_settlement' : 'manual_adjustment',
+            description: `Transaction ${ev.transaction_id} for ${ev.plan || 'Service'}`,
+            timestamp: ev.timestamp,
+            userId: ev.user_id || 0,
+            userName: ev.user,
+            referenceId: ev.transaction_id
+          }));
+
+          set({ 
+            wallets: mappedWallets, 
+            transactions: mappedTransactions,
+            systemEvents: mappedEvents,
+            isLoading: false 
+          });
+        } catch (error) {
+          console.error("Error fetching wallet data:", error);
+          set({ isLoading: false });
+        }
       },
 
       adjustBalance: async (userId, amount, type, description, referenceId) => {
-        const { wallets, transactions } = get();
-        const timestamp = new Date().toISOString();
-        const transactionId = `tx_${Math.random().toString(36).substr(2, 9)}`;
-        
-        const walletIndex = wallets.findIndex(w => w.userId === userId);
-        if (walletIndex === -1) return;
+        set({ isLoading: true });
+        try {
+          const auth = AuthService.getInstance();
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions';
+          
+          await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/adjust-balance/`, {
+            method: 'POST',
+            body: JSON.stringify({
+              user_id: userId,
+              amount: amount,
+              type: type,
+              description: description,
+              reference_id: referenceId
+            })
+          });
 
-        const updatedWallets = [...wallets];
-        const currentWallet = updatedWallets[walletIndex];
-        
-        if (type === 'credit') {
-          currentWallet.balance += amount;
-        } else {
-          currentWallet.balance -= amount;
+          // Refresh data to show the new balance and transaction
+          await get().fetchData();
+        } catch (error) {
+          console.error("Error adjusting balance:", error);
+          set({ isLoading: false });
         }
-        currentWallet.lastUpdated = timestamp;
-
-        const newTransaction: WalletTransaction = {
-          id: transactionId,
-          userId,
-          userName: currentWallet.userName,
-          type,
-          amount,
-          currency: currentWallet.currency,
-          description,
-          status: 'completed',
-          timestamp,
-          referenceId
-        };
-
-        set({
-          wallets: updatedWallets,
-          transactions: [newTransaction, ...transactions]
-        });
       },
 
       processRefund: async (transactionId) => {

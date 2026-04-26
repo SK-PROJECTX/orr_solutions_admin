@@ -23,7 +23,7 @@ export default function InternalCommsPage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/my-tickets/`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
       });
 

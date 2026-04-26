@@ -27,6 +27,19 @@ export default function ProtectedRoute({ children, requiredPermissions = [] }: P
     setHasHydrated(true);
   }, []);
 
+  // Migration script for old token keys
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const standardizedToken = localStorage.getItem('access_token');
+      const legacyToken = localStorage.getItem('accessToken') || localStorage.getItem('auth-token');
+      
+      if (!standardizedToken && legacyToken) {
+        console.log('Migrating legacy token to standardized key');
+        localStorage.setItem('access_token', legacyToken);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     // Don't check until hydration is complete
     if (!hasHydrated) return;
@@ -34,12 +47,17 @@ export default function ProtectedRoute({ children, requiredPermissions = [] }: P
     const checkAuth = async () => {
       setIsChecking(true);
 
-      // Check localStorage directly in case store hasn't rehydrated yet
-      const storedToken = localStorage.getItem('auth-token');
+      // Robust token retrieval checking multiple potential keys
+      const storedToken = typeof window !== 'undefined' ? (
+        localStorage.getItem('access_token') || 
+        localStorage.getItem('accessToken') || 
+        localStorage.getItem('auth-token')
+      ) : null;
+      
       const currentToken = token || storedToken;
 
       // No token anywhere, redirect to login
-      if (!currentToken) {
+      if (!currentToken || currentToken === 'undefined') {
         router.push('/login');
         return;
       }

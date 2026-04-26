@@ -30,7 +30,11 @@ export default function EditableImage({
   const { isAuthenticated } = useAuthStore();
   
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('auth-token');
+    const token = typeof window !== 'undefined' ? (
+      localStorage.getItem('access_token') || 
+      localStorage.getItem('accessToken') || 
+      localStorage.getItem('auth-token')
+    ) : null;
     return {
       ...(token && { 'Authorization': `Bearer ${token}` })
     };

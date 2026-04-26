@@ -23,7 +23,7 @@ export default function EscalationsPage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend.orr.solutions'}/admin-portal/v1/tickets/?is_escalated=true`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
       });
 

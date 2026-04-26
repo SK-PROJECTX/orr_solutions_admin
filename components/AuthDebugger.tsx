@@ -22,7 +22,7 @@ export default function AuthDebugger() {
 
   const testLogin = async () => {
     try {
-      const result = await auth.login('editor', 'editor123');
+      const result = await auth.login('admin@orr.solutions', 'admin123');
       setTestResults((prev: any) => ({ ...prev, login: 'Success' }));
       updateAuthInfo();
     } catch (error) {
