@@ -8,6 +8,7 @@ import { useAuthStore } from "../../../lib/hooks/auth";
 import { authAPI } from "../../services/api";
 import { useLanguageStore } from "@/store/languageStore";
 import LanguageToggle from "../../components/ui/LanguageToggle";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 export default function Page() {
   const { t } = useLanguageStore();
@@ -105,7 +106,10 @@ export default function Page() {
               alt="ORR solutions"
               className="w-12 h-12 md:hidden"
             />
-            <LanguageToggle />
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <LanguageToggle />
+            </div>
           </div>
          
 
