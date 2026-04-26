@@ -1066,6 +1066,9 @@ export const en = {
     pending_amount: "Pending Amount",
     completed: "Completed",
     pending: "Pending",
+    paid: "Paid",
+    issued: "Issued",
+    overdue: "Overdue",
     empty: "No transactions found",
     filters: {
       all: "All",
@@ -1079,7 +1082,13 @@ export const en = {
       from: "From",
       type: "Type",
       amount: "Amount",
-      status: "Status"
+      status: "Status",
+      search_placeholder: "Search by client or invoice #...",
+      invoice: "Invoice",
+      client: "Client",
+      due_date: "Due Date",
+      actions: "Actions",
+      no_invoices: "No invoices found"
     }
   },
   project_mgmt: {
@@ -1213,22 +1222,7 @@ export const en = {
       debit: "Debit (-)"
     }
   },
-  payment_mgmt: {
-    paid: "Paid",
-    pending: "Pending",
-    issued: "Issued",
-    overdue: "Overdue",
-    table: {
-      search_placeholder: "Search by client or invoice #...",
-      invoice: "Invoice",
-      client: "Client",
-      amount: "Amount",
-      status: "Status",
-      due_date: "Due Date",
-      actions: "Actions",
-      no_invoices: "No invoices found"
-    }
-  },
+
   hub: {
     oversight: "Secure Financial Oversight",
     title: "Financial",

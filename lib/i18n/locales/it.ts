@@ -50,6 +50,7 @@ export const it = {
     quick_actions: "Azioni Rapide",
     system_notifications: "Notifiche di Sistema",
     billing_credit: "Panoramica Fatturazione e Credito",
+    all_items: "Tutti gli Elementi",
     client_management: "Gestione Clienti",
     all_clients: "Tutti i Clienti",
     client_profiles: "Profili Clienti",
@@ -97,7 +98,6 @@ export const it = {
     pro_rata_approval: "Approvazione Pro-rata",
     invoicing: "Fatturazione",
     payment_disputes: "Controversie di Pagamento",
-    all_items: "Tutti gli Elementi",
     logout: "Esci",
     admin: "Amministratore"
   },
@@ -1048,6 +1048,9 @@ export const it = {
     pending_amount: "Importo in Sospeso",
     completed: "Completato",
     pending: "In Sospeso",
+    paid: "Pagata",
+    issued: "Emessa",
+    overdue: "Scaduta",
     empty: "Nessuna transazione trovata",
     filters: {
       all: "Tutti",
@@ -1061,7 +1064,13 @@ export const it = {
       from: "Da",
       type: "Tipo",
       amount: "Importo",
-      status: "Stato"
+      status: "Stato",
+      search_placeholder: "Cerca per cliente o n. fattura...",
+      invoice: "Fattura",
+      client: "Cliente",
+      due_date: "Scadenza",
+      actions: "Azioni",
+      no_invoices: "Nessuna fattura trovata"
     }
   },
   project_mgmt: {
@@ -1193,36 +1202,9 @@ export const it = {
       authorize: "Autorizza Rettifica",
       credit: "Credito (+)",
       debit: "Debito (-)"
-    },
-    tabs: {
-      balances: "Saldi",
-      ledger: "Libro Mastro",
-      events: "Eventi"
-    },
-    filters: {
-      search_placeholder: "Cerca per utente o descrizione...",
-      export_audit: "Esporta Audit"
     }
   },
-  payment_mgmt: {
-    paid: "Pagata",
-    pending: "In sospeso",
-    issued: "Emessa",
-    overdue: "Scaduta",
-    table: {
-      search_placeholder: "Cerca per cliente o n. fattura...",
-      invoice: "Fattura",
-      client: "Cliente",
-      amount: "Importo",
-      status: "Stato",
-      due_date: "Scadenza",
-      actions: "Azioni",
-      no_invoices: "Nessuna fattura trovata"
-    }
-  },
-  sidebar: {
-    all_items: "Tutti gli Elementi"
-  },
+
   hub: {
     oversight: "Supervisione Finanziaria Sicura",
     title: "Hub",
