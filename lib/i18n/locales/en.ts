@@ -98,6 +98,13 @@ export const en = {
     invoicing: "Invoicing",
     payment_disputes: "Payment Disputes",
     all_items: "All Items",
+    document_vault: "Document Vault",
+    vault_all: "All Documents",
+    vault_intake: "Upload & Intake Queue",
+    vault_access: "Access & Unlock Rules",
+    vault_internal: "Internal Documents (ORR)",
+    vault_versions: "Version Control & History",
+    vault_audit: "Audit & Activity Logs",
     logout: "Logout",
     admin: "Admin"
   },
@@ -339,6 +346,8 @@ export const en = {
     schedule_meeting_desc: "Book a new client meeting",
     send_message: "Send Message",
     send_message_desc: "Create a new ticket or message",
+    upload_document: "Upload Document",
+    upload_document_desc: "Add a new document to the vault",
     notifications: "System Notifications",
     notifications_subtitle: "Important system alerts and updates",
     no_notifications: "No notifications",
@@ -967,7 +976,7 @@ export const en = {
     welcome_back: "Welcome Back",
     tagline: "Listen. Solve. Optimise.",
     company_name: "ORR Solutions",
-    sign_in_desc: "Sign in to your dashboard",
+    sign_in_desc: "Sign in to the Admin Dashboard",
     email: "Email",
     password: "Password",
     remember_me: "Remember me",
@@ -1294,6 +1303,38 @@ export const en = {
       title: "External Dispute Webhooks",
       desc: "The system is currently listening to Stripe/PayPal dispute notifications. These records are updated automatically upon status transitions.",
       history_btn: "Dispute History"
+    }
+  },
+  vault: {
+    infrastructure: "Vault Infrastructure",
+    title: "Document",
+    vault: "Vault",
+    subtitle: "Enterprise-grade document lifecycle management, access control, and historical versioning.",
+    upload_new: "Upload New Document",
+    search_placeholder: "Search by title, client or project...",
+    all_visibility: "All Visibility",
+    client_facing: "Client-Facing",
+    internal_only: "Internal (ORR-Only)",
+    all_categories: "All Categories",
+    storage_status: "Storage Status",
+    table: {
+      doc_info: "Document / Info",
+      client_structure: "Client / Structure",
+      status_security: "Status / Security",
+      visibility: "Visibility",
+      actions: "Actions",
+      no_docs: "No Documents Found Matching Criteria"
+    },
+    scans: {
+      passed: "Passed",
+      failed: "Failed",
+      scanning: "Scanning..."
+    },
+    access: {
+      immediate: "Immediate",
+      locked: "Locked",
+      payment_linked: "Payment Linked",
+      invoice_linked: "Invoice Linked"
     }
   }
 };
