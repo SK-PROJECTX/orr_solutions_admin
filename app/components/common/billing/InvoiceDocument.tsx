@@ -1,5 +1,6 @@
 import React from 'react';
 import { Invoice, InvoiceSettings } from '@/store/invoiceStore';
+import { useLanguageStore } from '@/store/languageStore';
 
 interface InvoiceDocumentProps {
   invoice: Invoice;
@@ -7,6 +8,7 @@ interface InvoiceDocumentProps {
 }
 
 export default function InvoiceDocument({ invoice, settings }: InvoiceDocumentProps) {
+  const { formatCurrency } = useLanguageStore();
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -88,8 +90,8 @@ export default function InvoiceDocument({ invoice, settings }: InvoiceDocumentPr
               <tr key={item.id} className="group transition-colors">
                 <td className="py-6 px-4 text-slate-700 font-medium">{item.description}</td>
                 <td className="py-6 px-4 text-slate-500 text-center">{item.quantity}</td>
-                <td className="py-6 px-4 text-slate-500 text-right">${item.price.toLocaleString()}</td>
-                <td className="py-6 px-4 text-slate-900 font-bold text-right">${item.total.toLocaleString()}</td>
+                <td className="py-6 px-4 text-slate-500 text-right">{formatCurrency(item.price)}</td>
+                <td className="py-6 px-4 text-slate-900 font-bold text-right">{formatCurrency(item.total)}</td>
               </tr>
             ))}
           </tbody>
@@ -101,15 +103,15 @@ export default function InvoiceDocument({ invoice, settings }: InvoiceDocumentPr
         <div className="w-full max-w-xs space-y-3">
           <div className="flex justify-between text-sm text-slate-500">
             <span>Subtotal</span>
-            <span className="font-bold">${invoice.subtotal.toLocaleString()}</span>
+            <span className="font-bold">{formatCurrency(invoice.subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm text-slate-500">
             <span>Tax ({invoice.taxRate}%)</span>
-            <span className="font-bold">${invoice.taxAmount.toLocaleString()}</span>
+            <span className="font-bold">{formatCurrency(invoice.taxAmount)}</span>
           </div>
           <div className="pt-4 border-t-2 border-slate-900 flex justify-between items-center">
             <span className="text-xs font-black uppercase tracking-widest">Amount Due</span>
-            <span className="text-3xl font-black text-slate-900">${invoice.totalAmount.toLocaleString()}</span>
+            <span className="text-3xl font-black text-slate-900">{formatCurrency(invoice.totalAmount)}</span>
           </div>
         </div>
       </div>

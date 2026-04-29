@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, UserPlus, Calendar, Mail } from "lucide-react";
+import { Zap, UserPlus, Calendar, Mail, FilePlus } from "lucide-react";
 import AddClientModal from "@/app/components/quick-actions/AddClientModal";
 import ScheduleMeetingModal from "@/app/components/quick-actions/ScheduleMeetingModal";
 import SendMessageModal from "@/app/components/quick-actions/SendMessageModal";
+import UploadDocumentModal from "@/app/(dashboard)/document-vault/UploadDocumentModal";
 import { useLanguageStore } from "@/store/languageStore";
 
 export default function QuickActionsPage() {
@@ -32,6 +33,13 @@ export default function QuickActionsPage() {
       label: t('operational.send_message'),
       description: t('operational.send_message_desc'),
       color: "bg-orange-500"
+    },
+    {
+      id: "upload-document",
+      icon: FilePlus,
+      label: t('operational.upload_document'),
+      description: t('operational.upload_document_desc'),
+      color: "bg-emerald-500"
     },
   ];
 
@@ -86,6 +94,10 @@ export default function QuickActionsPage() {
       />
       <SendMessageModal
         isOpen={activeModal === "send-message"}
+        onClose={closeModal}
+      />
+      <UploadDocumentModal
+        isOpen={activeModal === "upload-document"}
         onClose={closeModal}
       />
     </div>

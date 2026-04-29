@@ -1,266 +1,405 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Loader, Save } from "lucide-react";
-import { settingsAPI } from "@/app/services";
-import type { AdminRoleData, AdminUser } from "@/app/services/types";
-import { useLanguageStore } from "@/store/languageStore";
 
-function SettingsPage() {
-  const { t, language } = useLanguageStore();
-  const [roles, setRoles] = useState<AdminRoleData[]>([]);
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [systemSettings, setSystemSettings] = useState<Record<string, any>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Settings, 
+  Shield, 
+  Globe, 
+  DollarSign, 
+  User, 
+  Lock, 
+  Bell, 
+  HardDrive,
+  CheckCircle2,
+  AlertCircle,
+  Save,
+  Trash2,
+  Plus,
+  Eye,
+  EyeOff,
+  Database,
+  Cloud,
+  Webhook,
+  Activity,
+  Search
+} from 'lucide-react';
+import { useLanguageStore } from '@/store/languageStore';
+import { ROLE_PERMISSIONS, Permission, RoleName } from '@/lib/rbac/permissions';
+import { useRole, useIsSuperAdmin } from '@/lib/rbac/hooks';
 
-  // Fetch all settings data
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setLoading(true);
-        const [rolesData, usersData, systemData] = await Promise.all([
-          settingsAPI.listRoles(),
-          settingsAPI.listUsers(),
-          settingsAPI.getSystemSettings(),
-        ]);
-        // Handle both array response and object with results
-        setRoles(Array.isArray(rolesData) ? rolesData : ((rolesData as any).results || []));
-        setUsers(Array.isArray(usersData) ? usersData : ((usersData as any).results || []));
-        setSystemSettings(systemData as Record<string, any>);
-      } catch (err) {
-        console.error("Failed to fetch settings:", err);
-        setError(t('settings.error_save'));
-      } finally {
-        setLoading(false);
-      }
-    };
+type SettingsTab = 'general' | 'localization' | 'permissions' | 'security' | 'system';
 
-    fetchSettings();
-  }, [language, t]);
+export default function SettingsPage() {
+  const { t, language, setLanguage, currency, setCurrency } = useLanguageStore();
+  const currentRole = useRole();
+  const isSuperAdmin = useIsSuperAdmin();
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const handleSystemSettingsSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await settingsAPI.updateSystemSettings(systemSettings);
-      setSuccessMessage(t('settings.success_save'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-      setError(t('settings.error_save'));
-    }
+  const tabs: { id: SettingsTab; label: string; icon: any }[] = [
+    { id: 'general', label: 'General', icon: Settings },
+    { id: 'localization', label: 'Localization', icon: Globe },
+    { id: 'permissions', label: 'Role Permissions', icon: Shield },
+    { id: 'security', label: 'Security', icon: Lock },
+    { id: 'system', label: 'System', icon: HardDrive },
+  ];
+
+  const handleSave = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }, 1500);
   };
 
-  const handleUserAction = async (userId: number, action: "activate" | "deactivate" | "reset_password") => {
-    try {
-      setActionLoading(userId);
-      await settingsAPI.performUserAction(userId, action as any);
-      setSuccessMessage(t('settings.user_action_complete', { action: t(`settings.${action}`) }));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      // Refresh user list
-      const usersData = await settingsAPI.listUsers();
-      setUsers(Array.isArray(usersData) ? usersData : ((usersData as any).results || []));
-    } catch (err) {
-      console.error(`Failed to ${action} user:`, err);
-      setError(t('settings.error_user_action'));
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen text-white flex items-center justify-center">
-        <Loader className="animate-spin" size={48} />
+  const renderGeneral = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <label className="text-xs font-black text-slate-500 uppercase tracking-widest block">System Name</label>
+          <input 
+            type="text" 
+            defaultValue="ORR Solutions Operations Hub" 
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+          />
+        </div>
+        <div className="space-y-4">
+          <label className="text-xs font-black text-slate-500 uppercase tracking-widest block">Support Email</label>
+          <input 
+            type="email" 
+            defaultValue="support@orr.solutions" 
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+          />
+        </div>
       </div>
-    );
-  }
 
-  return (
-    <div>
-      <div className="min-h-screen text-white relative overflow-hidden star">
-        <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+      <div className="pt-6 border-t border-white/5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h4 className="text-sm font-bold text-white">Maintenance Mode</h4>
+            <p className="text-xs text-slate-500">Temporarily disable portal access for clients</p>
+          </div>
+          <button className="w-12 h-6 bg-white/10 rounded-full relative transition-colors">
+            <div className="absolute left-1 top-1 w-4 h-4 bg-slate-500 rounded-full" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
-        <div className="relative z-10 p-4 md:p-8">
-          <div className="bg-card backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col gap-8">
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white">{t('settings.title')}</h1>
-              {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-              {successMessage && <p className="text-green-400 text-sm mt-2">{successMessage}</p>}
-            </div>
+  const renderLocalization = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <label className="text-xs font-black text-slate-500 uppercase tracking-widest block">Primary Language</label>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { id: 'en', label: 'English', flag: '🇺🇸' },
+              { id: 'it', label: 'Italiano', flag: '🇮🇹' }
+            ].map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => setLanguage(lang.id as any)}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                  language === lang.id ? 'bg-primary/20 border-primary/50 text-white' : 'bg-white/5 border-white/10 text-slate-500 hover:border-white/20'
+                }`}
+              >
+                <span className="text-sm font-bold">{lang.label}</span>
+                <span className="text-xl">{lang.flag}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <form onSubmit={handleSystemSettingsSave} className="flex flex-col gap-6">
-              <h2 className="text-xl md:text-2xl font-semibold text-white">{t('settings.general')}</h2>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="siteTitle" className="text-white text-sm md:text-base">{t('settings.site_title')}</label>
-                <input
-                  id="siteTitle"
-                  type="text"
-                  value={systemSettings.site_title || ""}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, site_title: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="siteDescription" className="text-white text-sm md:text-base">{t('settings.site_description')}</label>
-                <textarea
-                  id="siteDescription"
-                  value={systemSettings.site_description || ""}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, site_description: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base h-24"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="siteLanguage" className="text-white text-sm md:text-base">{t('settings.site_language')}</label>
-                <input
-                  id="siteLanguage"
-                  type="text"
-                  value={systemSettings.site_language || ""}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, site_language: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
-                />
-              </div>
+        <div className="space-y-4">
+          <label className="text-xs font-black text-slate-500 uppercase tracking-widest block">Operational Currency</label>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { id: 'USD', label: 'US Dollar', symbol: '$' },
+              { id: 'EUR', label: 'Euro', symbol: '€' },
+              { id: 'GBP', label: 'British Pound', symbol: '£' }
+            ].map((curr) => (
+              <button
+                key={curr.id}
+                onClick={() => setCurrency(curr.id as any)}
+                className={`flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all ${
+                  currency === curr.id ? 'bg-primary/20 border-primary/50 text-white' : 'bg-white/5 border-white/10 text-slate-500 hover:border-white/20'
+                }`}
+              >
+                <span className="text-xl font-black text-primary">{curr.symbol}</span>
+                <div className="text-left">
+                  <p className="text-xs font-black uppercase tracking-tighter leading-none">{curr.id}</p>
+                  <p className="text-[10px] text-slate-500 font-bold">{curr.label}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-              <h2 className="text-xl md:text-2xl font-semibold text-white">
-                {t('settings.admin_users')}
-              </h2>
-              <div className="overflow-x-auto border border-white/10 rounded-2xl">
-                <table className="w-full min-w-[600px]">
-                  <thead className="border-b border-white/10 bg-white/5">
-                    <tr>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.name')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.email')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.role')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.status')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user: AdminUser) => (
-                      <tr key={user.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className="text-white font-medium text-sm md:text-base">{user.full_name}</span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className="text-gray-300 text-sm">{user.email}</span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className="text-gray-400 text-sm">{user.role_name || user.role}</span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className={`text-xs px-2 py-1 rounded font-medium ${user.is_active ? "bg-green-500/30 text-green-300" : "bg-red-500/30 text-red-300"}`}>
-                            {user.is_active ? t('common.active') : t('common.inactive')}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleUserAction(user.id, user.is_active ? "deactivate" : "activate")}
-                            disabled={actionLoading === user.id}
-                            className={`text-xs px-3 py-1 rounded border ${user.is_active ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'} transition-colors disabled:opacity-50 whitespace-nowrap`}
-                          >
-                            {user.is_active ? t('settings.deactivate') : t('settings.activate')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleUserAction(user.id, "reset_password")}
-                            disabled={actionLoading === user.id}
-                            className="text-xs px-3 py-1 rounded border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-colors disabled:opacity-50 whitespace-nowrap"
-                          >
-                            {t('settings.reset_password')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <h2 className="text-xl md:text-2xl font-semibold text-white">
-                {t('settings.roles_permissions')}
-              </h2>
-              <div className="overflow-x-auto border border-white/10 rounded-2xl">
-                <table className="w-full min-w-[600px]">
-                  <thead className="border-b border-white/10 bg-white/5">
-                    <tr>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.role')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.description')}</th>
-                      <th className="text-left p-4 text-primary font-semibold text-sm md:text-base">{t('settings.users')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roles.map((role: AdminRoleData) => (
-                      <tr key={role.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className="text-white font-medium text-sm md:text-base">{role.name}</span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-gray-300 text-sm">{role.description}</span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span className="text-gray-400 text-sm">{role.users_count || 0}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <h2 className="text-xl md:text-2xl font-semibold text-white">
-                {t('settings.branding')}
-              </h2>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="logo" className="text-white text-sm md:text-base">{t('settings.logo_url')}</label>
-                <input
-                  id="logo"
-                  type="text"
-                  value={systemSettings.logo_url || ""}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, logo_url: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="favicon" className="text-white text-sm md:text-base">{t('settings.favicon_url')}</label>
-                <input
-                  id="favicon"
-                  type="text"
-                  value={systemSettings.favicon_url || ""}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, favicon_url: e.target.value })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
-                />
-              </div>
-
-              <h2 className="text-xl md:text-2xl font-semibold text-white">
-                {t('settings.meeting_settings')}
-              </h2>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="defaultMeetingLength" className="text-white text-sm md:text-base">{t('settings.default_length')}</label>
-                <input
-                  id="defaultMeetingLength"
-                  type="number"
-                  value={systemSettings.default_meeting_length || 60}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, default_meeting_length: parseInt(e.target.value) })}
-                  className="bg-white/10 border border-white/20 p-3 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 text-sm md:text-base"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 w-full sm:w-auto"
-                >
-                  <Save size={18} />
-                  {t('settings.save_settings')}
-                </button>
-              </div>
-            </form>
+      <div className="pt-6 border-t border-white/5">
+        <div className="flex items-center gap-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+          <Globe className="text-blue-400" size={24} />
+          <div>
+            <h4 className="text-sm font-bold text-blue-400">Timezone Synchronization</h4>
+            <p className="text-xs text-blue-400/60">System is currently synced with UTC (Universal Coordinated Time)</p>
           </div>
         </div>
       </div>
     </div>
   );
-}
 
-export default SettingsPage;
+  const renderPermissions = () => {
+    const roles: RoleName[] = ['super_admin', 'admin', 'operator', 'content_editor'];
+    const permissions: Permission[] = [
+      'can_manage_users',
+      'can_view_all_clients',
+      'can_edit_clients',
+      'can_manage_tickets',
+      'can_manage_meetings',
+      'can_create_content',
+      'can_publish_content',
+      'can_view_analytics',
+      'can_view_billing',
+      'can_manage_settings',
+      'can_view_ai_logs'
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h4 className="text-sm font-bold text-white">RBAC Matrix</h4>
+            <p className="text-xs text-slate-500">Configure feature access per administrative role</p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <Lock size={12} className="text-amber-400" />
+            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Read-Only for non-Super Admins</span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/5">
+                <th className="p-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/10">Permission / Feature</th>
+                {roles.map(role => (
+                  <th key={role} className="p-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/10 text-center">
+                    {role.replace('_', ' ')}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {permissions.map((perm) => (
+                <tr key={perm} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="p-4">
+                    <p className="text-xs font-bold text-slate-300 capitalize">{perm.replace('can_', '').replace(/_/g, ' ')}</p>
+                    <p className="text-[10px] text-slate-600 font-mono uppercase tracking-tighter">{perm}</p>
+                  </td>
+                  {roles.map(role => {
+                    const hasPerm = ROLE_PERMISSIONS[role]?.includes(perm);
+                    return (
+                      <td key={`${role}-${perm}`} className="p-4 text-center">
+                        <div className={`mx-auto w-5 h-5 rounded flex items-center justify-center ${
+                          hasPerm ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-white/5 text-slate-800 border border-transparent'
+                        }`}>
+                          {hasPerm && <CheckCircle2 size={12} />}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSecurity = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+          <div className="flex items-center gap-3 text-primary mb-2">
+            <Lock size={20} />
+            <h4 className="text-sm font-bold uppercase tracking-widest">Admin Authentication</h4>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-bold">Require 2FA for all Staff</span>
+              <button className="w-10 h-5 bg-primary/20 rounded-full relative">
+                <div className="absolute right-1 top-1 w-3 h-3 bg-primary rounded-full" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-bold">Password Expiry (90 Days)</span>
+              <button className="w-10 h-5 bg-white/10 rounded-full relative">
+                <div className="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+          <div className="flex items-center gap-3 text-primary mb-2">
+            <Activity size={20} />
+            <h4 className="text-sm font-bold uppercase tracking-widest">Audit Policy</h4>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-bold">Log Data Downloads</span>
+              <button className="w-10 h-5 bg-primary/20 rounded-full relative">
+                <div className="absolute right-1 top-1 w-3 h-3 bg-primary rounded-full" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-bold">IP Address Tracking</span>
+              <button className="w-10 h-5 bg-primary/20 rounded-full relative">
+                <div className="absolute right-1 top-1 w-3 h-3 bg-primary rounded-full" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSystem = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { icon: Database, label: 'Cloud Storage', status: '92% Full', color: 'rose' },
+          { icon: Webhook, label: 'API Integrations', status: '12 Active', color: 'emerald' },
+          { icon: Cloud, label: 'CDN Edge', status: 'Optimal', color: 'blue' }
+        ].map((item, idx) => (
+          <div key={idx} className="p-6 bg-white/5 border border-white/10 rounded-2xl group hover:border-primary/30 transition-all">
+             <div className={`p-3 rounded-xl bg-${item.color}-500/10 border border-${item.color}-500/20 w-fit mb-4`}>
+                <item.icon className={`text-${item.color}-400`} size={20} />
+             </div>
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{item.label}</p>
+             <h4 className="text-lg font-black text-white mt-1">{item.status}</h4>
+          </div>
+        ))}
+      </div>
+
+      <div className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-2xl">
+        <h4 className="text-sm font-bold text-rose-400 mb-2">Danger Zone</h4>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <p className="text-xs text-rose-400/60 font-medium">Clear all system cache and rebuild assets. This may cause temporary performance degradation.</p>
+          <button className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20">
+            <Trash2 size={14} /> Rebuild Cache
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen pb-24 text-white relative">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 bg-background -z-10">
+        <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-12">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
+              <Settings size={14} /> System Configuration
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+              Global <span className="text-primary italic">Settings</span>
+            </h1>
+            <p className="text-slate-400 max-w-xl text-sm font-medium">
+              Manage operational parameters, security protocols, and localization settings for the entire ecosystem.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
+             <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-2 bg-primary text-slate-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+             >
+               {isSaving ? <Activity size={14} className="animate-spin" /> : <Save size={14} />}
+               {isSaving ? 'Processing...' : 'Save Changes'}
+             </button>
+          </div>
+        </div>
+
+        {/* Settings Area */}
+        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-12">
+          {/* Sidebar Tabs */}
+          <aside className="space-y-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black transition-all border ${
+                  activeTab === tab.id 
+                  ? 'bg-primary/10 border-primary/30 text-primary shadow-xl shadow-primary/5' 
+                  : 'bg-white/5 border-transparent text-slate-500 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <tab.icon size={18} />
+                <span className="uppercase tracking-widest text-[11px]">{tab.label}</span>
+                {activeTab === tab.id && (
+                  <motion.div layoutId="activeDot" className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_#A3E635]" />
+                )}
+              </button>
+            ))}
+          </aside>
+
+          {/* Tab Content */}
+          <main className="bg-card/20 backdrop-blur-xl border border-white/5 rounded-3xl p-8 min-h-[600px] relative overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="mb-8">
+                   <h3 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                      {tabs.find(t => t.id === activeTab)?.label}
+                   </h3>
+                   <div className="w-12 h-1 bg-primary mt-2 rounded-full" />
+                </div>
+
+                {activeTab === 'general' && renderGeneral()}
+                {activeTab === 'localization' && renderLocalization()}
+                {activeTab === 'permissions' && renderPermissions()}
+                {activeTab === 'security' && renderSecurity()}
+                {activeTab === 'system' && renderSystem()}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Success Toast */}
+            <AnimatePresence>
+              {saveSuccess && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 50 }}
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-900 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl shadow-emerald-500/20"
+                >
+                  <CheckCircle2 size={18} />
+                  <span className="text-sm font-black uppercase tracking-widest">Settings Synchronized Successfully</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -5,7 +5,7 @@ import { Users, DollarSign, TrendingUp, Calendar, ShieldCheck, Download, LayoutG
 import { useLanguageStore } from "@/store/languageStore";
 
 export default function SubscriptionsManagementPage() {
-  const { t } = useLanguageStore();
+  const { t, formatCurrency } = useLanguageStore();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -103,7 +103,7 @@ export default function SubscriptionsManagementPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              {[
                { label: t('subscriptions.total_active'), value: data.analytics.total_subscriptions, icon: Users, color: 'text-blue-400' },
-               { label: t('subscriptions.revenue_mrr'), value: `$${(data.analytics.total_mrr || 0).toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-400' },
+               { label: t('subscriptions.revenue_mrr'), value: formatCurrency(data.analytics.total_mrr || 0), icon: TrendingUp, color: 'text-emerald-400' },
                { label: t('subscriptions.activation'), value: `${data.analytics.activation_rate}%`, icon: ShieldCheck, color: 'text-purple-400' },
                { label: t('subscriptions.churn_rate'), value: `${data.analytics.churn_rate}%`, icon: Calendar, color: 'text-rose-400' }
              ].map((stat, i) => (
@@ -137,7 +137,7 @@ export default function SubscriptionsManagementPage() {
                       </div>
                       <div className="flex justify-between items-end">
                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('subscriptions.monthly_yield')}</span>
-                         <span className="text-xl font-black text-emerald-400">${details.monthly_revenue.toLocaleString()}</span>
+                         <span className="text-xl font-black text-emerald-400">{formatCurrency(details.monthly_revenue)}</span>
                       </div>
                    </div>
                 </div>
@@ -178,7 +178,7 @@ export default function SubscriptionsManagementPage() {
                             </span>
                          </td>
                          <td className="py-6 px-8 text-right">
-                            <span className="text-sm font-black text-white">${sub.last_payment_amount}</span>
+                            <span className="text-sm font-black text-white">{formatCurrency(sub.last_payment_amount)}</span>
                          </td>
                          <td className="py-6 px-8 text-right">
                             <span className="text-xs text-slate-500">{sub.last_payment_date ? new Date(sub.last_payment_date).toLocaleDateString() : 'N/A'}</span>

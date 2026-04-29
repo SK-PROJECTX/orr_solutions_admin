@@ -9,16 +9,26 @@ import { useWalletStore } from '@/store/walletStore';
 import { useLanguageStore } from '@/store/languageStore';
 
 export default function FinancialStatsOverview() {
-  const { t } = useLanguageStore();
   const { statistics } = useInvoiceStore();
-  const { wallets } = useWalletStore();
+  const { wallets, transactions } = useWalletStore();
+  const { formatCurrency, t } = useLanguageStore();
+
+  console.log('[FinancialStats] Current Wallet Data:', {
+    walletsCount: wallets.length,
+    transactionsCount: transactions.length
+  });
  
   const aggregateWalletBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
+  const aggregateRevenue = transactions
+    .filter(tx => tx.type === 'debit' && tx.status === 'completed')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
+  console.log('[FinancialStats] Calculated Aggregate Revenue:', aggregateRevenue);
 
   const stats = [
     {
       label: t('hub.stats.total_paid'),
-      value: `$${statistics.totalPaid.toLocaleString()}`,
+      value: formatCurrency(aggregateRevenue),
       icon: <DollarSign className="text-emerald-400" size={24} />,
       trend: '+12.5%',
       trendUp: true,
@@ -26,7 +36,7 @@ export default function FinancialStatsOverview() {
     },
     {
       label: t('hub.stats.total_outstanding'),
-      value: `$${statistics.totalOutstanding.toLocaleString()}`,
+      value: formatCurrency(statistics.totalOutstanding),
       icon: <FileText className="text-blue-400" size={24} />,
       trend: '-2.4%',
       trendUp: false,
@@ -42,7 +52,7 @@ export default function FinancialStatsOverview() {
     },
     {
       label: t('hub.stats.total_wallet'),
-      value: `$${aggregateWalletBalance.toLocaleString()}`,
+      value: formatCurrency(aggregateWalletBalance),
       icon: <Wallet className="text-purple-400" size={24} />,
       trend: '+5.2%',
       trendUp: true,

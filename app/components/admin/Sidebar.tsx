@@ -13,14 +13,22 @@ import {
   Settings,
   UserCheck,
   Wallet,
-  X
+  X,
+  LayoutGrid,
+  PieChart,
+  Bell,
+  Lock,
+  Search,
+  ChevronLast,
+  SquareArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../../../lib/hooks/auth";
 import { useLanguageStore } from "@/store/languageStore";
 import { ThemeToggle } from "../ThemeToggle";
+import LanguageToggle from "@/app/components/ui/LanguageToggle";
 
 type OpenState = {
   home: boolean;
@@ -30,6 +38,8 @@ type OpenState = {
   content: boolean;
   analytics: boolean;
   payments: boolean;
+  vault: boolean;
+  settings: boolean;
 };
 
 type NavItem = {
@@ -55,8 +65,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     content: false,
     analytics: false,
     payments: true,
+    vault: true,
+    settings: true,
   });
   const [subOpen, setSubOpen] = useState<{ [key: string]: boolean }>({});
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const toggle = (key: keyof OpenState) => setOpen({ ...open, [key]: !open[key] });
   const toggleSub = (key: string) => setSubOpen({ ...subOpen, [key]: !subOpen[key] });
@@ -77,20 +90,37 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       {/* Sidebar */}
-      <aside className={`w-64 h-screen bg-card text-white flex flex-col justify-between p-4 flex-shrink-0 overflow-y-auto transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed z-50`}>
+      <aside className={`h-screen bg-card text-white flex flex-col justify-between p-4 flex-shrink-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out border-r border-white/5 ${
+        isMinimized ? 'w-20' : 'w-64'
+      } ${isOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 fixed md:relative z-50 print:hidden shadow-xl`}>
+        
         <div>
-          <div className="flex items-center justify-between px-2 mb-8">
-            <img src="/images/logo.svg" alt="ORR Solutions" className="w-fit h-auto" />
-            <ThemeToggle />
+          {/* Header: Logo & Toggle */}
+          <div className={`flex items-center mb-12 transition-all ${isMinimized ? 'justify-center' : 'justify-between'}`}>
+            <div className="flex items-center gap-2 overflow-hidden">
+              <img 
+                src="/images/logo.svg" 
+                alt="Logo" 
+                className={`${isMinimized ? 'w-12 h-12' : 'h-16 w-auto'} transition-all brightness-0 invert`} 
+              />
+            </div>
+
+            <button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="hidden md:flex w-9 h-9 bg-white/5 hover:bg-white/10 rounded-xl items-center justify-center transition-colors border border-white/10"
+            >
+              {isMinimized ? <ChevronLast size={20} /> : <SquareArrowLeft size={20} />}
+            </button>
           </div>
 
-          <nav className="space-y-1">
-            {/* Home / Dashboard */}
+          <nav className="space-y-10">
+            {/* Group: Home */}
             <SidebarGroup
               label={t('sidebar.home_dashboard')}
-              icon={Home}
+              icon={<Home size={24} />}
               open={open.home}
+              isMinimized={isMinimized}
               onClick={() => toggle("home")}
               items={[
                 { label: t('sidebar.dashboard'), href: "/dashboard/" }
@@ -101,11 +131,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Operational Dashboard */}
+            {/* Group: Operational */}
             <SidebarGroup
               label={t('sidebar.operational_dashboard')}
-              icon={Settings}
+              icon={<Settings size={24} />}
               open={open.operational}
+              isMinimized={isMinimized}
               onClick={() => toggle("operational")}
               items={[
                 { label: t('sidebar.quick_actions'), href: "/operational/quick-actions" },
@@ -136,11 +167,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Consultation Management */}
+            {/* Group: Consultation */}
             <SidebarGroup
               label={t('sidebar.consultation_management')}
-              icon={UserCheck}
+              icon={<UserCheck size={24} />}
               open={open.consultation}
+              isMinimized={isMinimized}
               onClick={() => toggle("consultation")}
               items={[
                 {
@@ -169,11 +201,33 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Tickets & Communication */}
+            {/* Group: Document Vault */}
+            <SidebarGroup
+              label={t('sidebar.document_vault')}
+              icon={<FileText size={24} />}
+              open={open.vault}
+              isMinimized={isMinimized}
+              onClick={() => toggle("vault")}
+              items={[
+                { label: t('sidebar.vault_all'), href: "/document-vault/all" },
+                { label: t('sidebar.vault_intake'), href: "/document-vault/intake" },
+                { label: t('sidebar.vault_access'), href: "/document-vault/access-rules" },
+                { label: t('sidebar.vault_internal'), href: "/document-vault/internal" },
+                { label: t('sidebar.vault_versions'), href: "/document-vault/versions" },
+                { label: t('sidebar.vault_audit'), href: "/document-vault/audit" }
+              ]}
+              pathname={pathname}
+              subOpen={subOpen}
+              toggleSub={toggleSub}
+              onLinkClick={onClose}
+            />
+
+            {/* Group: Tickets */}
             <SidebarGroup
               label={t('sidebar.tickets_communication')}
-              icon={MessageSquare}
+              icon={<MessageSquare size={24} />}
               open={open.tickets}
+              isMinimized={isMinimized}
               onClick={() => toggle("tickets")}
               items={[
                 { label: t('sidebar.all_tickets'), href: "/tickets" },
@@ -188,11 +242,33 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Content Management */}
+            {/* Group: Payments */}
+            <SidebarGroup
+              label={t('sidebar.payment_management')}
+              icon={<Wallet size={24} />}
+              open={open.payments}
+              isMinimized={isMinimized}
+              onClick={() => toggle("payments")}
+              items={[
+                { label: t('sidebar.payments_billings'), href: "/payment-management/subscriptions" },
+                { label: t('sidebar.wallet_logs'), href: "/payment-management/wallet" },
+                { label: t('sidebar.financial_management'), href: "/payment-management/hub" },
+                { label: t('sidebar.pro_rata_approval'), href: "/payment-management/pro-rata" },
+                { label: t('sidebar.invoicing'), href: "/payment-management/invoicing" },
+                { label: t('sidebar.payment_disputes'), href: "/payment-management/disputes" }
+              ]}
+              pathname={pathname}
+              subOpen={subOpen}
+              toggleSub={toggleSub}
+              onLinkClick={onClose}
+            />
+
+            {/* Group: Content */}
             <SidebarGroup
               label={t('sidebar.content_management')}
-              icon={FileText}
+              icon={<FileText size={24} />}
               open={open.content}
+              isMinimized={isMinimized}
               onClick={() => toggle("content")}
               items={[
                 { label: t('sidebar.homepage_content'), href: "/content-management" },
@@ -218,11 +294,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Analytics & Insights */}
+            {/* Group: Analytics */}
             <SidebarGroup
               label={t('sidebar.analytics_insights')}
-              icon={BarChart3}
+              icon={<BarChart3 size={24} />}
               open={open.analytics}
+              isMinimized={isMinimized}
               onClick={() => toggle("analytics")}
               items={[
                 { label: t('sidebar.behaviour_analytics'), href: "/analytics/behaviour" },
@@ -237,19 +314,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onLinkClick={onClose}
             />
 
-            {/* Payment Management */}
+            {/* Group: Settings */}
             <SidebarGroup
-              label={t('sidebar.payment_management')}
-              icon={Wallet}
-              open={open.payments}
-              onClick={() => toggle("payments")}
+              label={t('sidebar.settings')}
+              icon={<Settings size={24} />}
+              open={open.settings}
+              isMinimized={isMinimized}
+              onClick={() => toggle("settings")}
               items={[
-                { label: t('sidebar.payments_billings'), href: "/payment-management/subscriptions" },
-                { label: t('sidebar.wallet_logs'), href: "/payment-management/wallet" },
-                { label: t('sidebar.financial_management'), href: "/payment-management/hub" },
-                { label: t('sidebar.pro_rata_approval'), href: "/payment-management/pro-rata" },
-                { label: t('sidebar.invoicing'), href: "/payment-management/invoicing" },
-                { label: t('sidebar.payment_disputes'), href: "/payment-management/disputes" }
+                { label: t('sidebar.global_settings'), href: "/settings" },
+                { label: t('sidebar.audit_logs'), href: "/document-vault/audit" }
               ]}
               pathname={pathname}
               subOpen={subOpen}
@@ -259,23 +333,46 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </nav>
         </div>
 
-        <div className="bg-primary text-background rounded-xl p-3 mt-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-foreground font-bold">
-              {user?.username?.[0]?.toUpperCase() || 'A'}
+        <div className="mt-12 space-y-6">
+          {/* Settings Card: DISPLAY & LANGUAGE */}
+          {!isMinimized && (
+            <div className="px-1 transition-opacity duration-300">
+              <div className="bg-transparent border border-white/20 rounded-[2.5rem] p-8 space-y-6">
+                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] block px-1">
+                  Display & Language
+                </span>
+                <div className="flex items-center justify-between gap-4">
+                  <LanguageToggle />
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                    <ThemeToggle />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="leading-tight text-[12px] font-medium">
-              {user?.username || t('sidebar.admin')}
-              <div className="text-[10px] opacity-80 truncate max-w-[120px]">{user?.email || ''}</div>
+          )}
+
+          {/* User Card: Theme Aware */}
+          <div className={`bg-primary/10 border border-primary/20 text-white rounded-[2rem] p-4 flex items-center transition-all ${isMinimized ? 'justify-center mx-1 h-14' : 'justify-between h-20 px-5'}`}>
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black overflow-hidden border border-primary/30 flex-shrink-0">
+                <span className="text-sm">{user?.username?.[0]?.toUpperCase() || 'A'}</span>
+              </div>
+              {!isMinimized && (
+                <div className="leading-tight overflow-hidden animate-in fade-in duration-500">
+                  <div className="font-bold truncate max-w-[120px] text-[13px]">{user?.username || t('sidebar.admin')}</div>
+                  <div className="text-[10px] opacity-60 truncate max-w-[120px] font-medium">{user?.email}</div>
+                </div>
+              )}
             </div>
+            {!isMinimized && (
+              <button
+                onClick={handleLogout}
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0 text-primary"
+              >
+                <LogOut size={20} />
+              </button>
+            )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-2 hover:bg-background/20 rounded-lg transition-colors"
-            title={t('sidebar.logout')}
-          >
-            <LogOut size={16} />
-          </button>
         </div>
       </aside>
     </>
@@ -284,17 +381,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 function SidebarGroup({
   label,
-  icon: Icon,
+  icon,
   open,
   onClick,
   items,
   pathname,
   subOpen,
   toggleSub,
-  onLinkClick
+  onLinkClick,
+  isMinimized
 }: {
   label: string;
-  icon: any;
+  icon: React.ReactNode;
   open: boolean;
   onClick: () => void;
   items: NavItem[];
@@ -302,6 +400,7 @@ function SidebarGroup({
   subOpen: { [key: string]: boolean };
   toggleSub: (key: string) => void;
   onLinkClick: () => void;
+  isMinimized?: boolean;
 }) {
   const isActive = items.some(item =>
     pathname === item.href ||
@@ -312,110 +411,82 @@ function SidebarGroup({
   );
 
   return (
-    <div>
+    <div className="space-y-4">
       <div
-        className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer text-sm transition text-white ${isActive ? "bg-lemon text-black" : "hover:bg-primary hover:bg-opacity-20"
+        className={`flex items-center gap-4 cursor-pointer transition-all duration-300 ${isMinimized ? 'justify-center' : 'justify-between'
+          } ${isActive ? "text-white" : "text-white/60 hover:text-white"
           }`}
-        onClick={onClick}
+        onClick={() => !isMinimized && onClick()}
       >
-        <div className="flex items-center gap-3">
-          <Icon size={16} />
-          {label}
+        <div className="flex items-center gap-4">
+          <div className={`flex-shrink-0 transition-colors ${isActive ? "text-primary" : "text-white/40"}`}>
+            {icon}
+          </div>
+          {!isMinimized && (
+            <span className={`text-[15px] font-bold tracking-tight animate-in fade-in slide-in-from-left-2 duration-300 ${
+              isActive ? "text-white" : "text-white/60"
+            }`}>
+              {label}
+            </span>
+          )}
         </div>
-        <ChevronDown size={16} className={`${open ? "rotate-180" : ""} transition`} />
+
+        {!isMinimized && (
+          <ChevronDown
+            size={18}
+            className={`transition-transform duration-500 opacity-40 ${open ? "rotate-180" : ""}`}
+          />
+        )}
       </div>
 
-      {open && items.length > 0 && (
-        <div className="ml-6 mt-1 space-y-1">
+      {!isMinimized && open && items.length > 0 && (
+        <div className="pl-10 space-y-4 animate-in fade-in slide-in-from-top-1 duration-300">
           {items.map((item) => (
-            <NavItemComponent
-              key={item.href}
-              item={item}
-              pathname={pathname}
-              subOpen={subOpen}
-              toggleSub={toggleSub}
-              onLinkClick={onLinkClick}
-              level={0}
-            />
+            <div key={item.href} className="relative">
+              {item.subItems ? (
+                <div>
+                  <div
+                    onClick={() => toggleSub(item.href)}
+                    className={`flex items-center justify-between text-[15px] font-bold cursor-pointer transition-colors ${pathname === item.href || item.subItems.some(sub => pathname === sub.href) ? "text-white" : "text-white/60 hover:text-white"
+                      }`}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronRight size={16} className={`transition-transform duration-300 opacity-40 ${subOpen[item.href] ? 'rotate-90' : ''}`} />
+                  </div>
+                  {subOpen[item.href] && (
+                    <div className="mt-3 ml-4 space-y-3 animate-in slide-in-from-left-1 duration-200 border-l border-white/10 pl-4">
+                      {item.subItems.map((subItem) => (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          onClick={onLinkClick}
+                          className={`block text-[14px] font-medium transition-all ${pathname === subItem.href
+                            ? "text-white"
+                            : "text-white/40 hover:text-white"
+                            }`}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href={item.href}
+                  onClick={onLinkClick}
+                  className={`block text-[15px] font-bold transition-all ${pathname === item.href
+                    ? "text-white"
+                    : "text-white/60 hover:text-white"
+                    }`}
+                >
+                  {item.label}
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       )}
     </div>
-  );
-}
-
-function NavItemComponent({
-  item,
-  pathname,
-  subOpen,
-  toggleSub,
-  onLinkClick,
-  level
-}: {
-  item: NavItem;
-  pathname: string;
-  subOpen: { [key: string]: boolean };
-  toggleSub: (key: string) => void;
-  onLinkClick: () => void;
-  level: number;
-}) {
-  const hasSubItems = item.subItems && item.subItems.length > 0;
-  const isActive = pathname === item.href || item.subItems?.some(sub =>
-    pathname === sub.href || sub.subItems?.some(nested => pathname === nested.href)
-  );
-
-  if (hasSubItems) {
-    return (
-      <div>
-        <div className="flex items-center justify-between px-3 py-1 text-sm rounded hover:bg-primary hover:bg-opacity-10">
-          <Link
-            href={item.href}
-            onClick={onLinkClick}
-            className={`flex-1 ${isActive ? "text-lemon" : "text-white"
-              }`}
-          >
-            {item.label}
-          </Link>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSub(item.href);
-            }}
-            className="p-1 hover:bg-white/10 rounded"
-          >
-            {subOpen[item.href] ?
-              <ChevronDown size={14} className="transition" /> :
-              <ChevronRight size={14} className="transition" />
-            }
-          </button>
-        </div>
-        {subOpen[item.href] && (
-          <div className="ml-4 mt-1 space-y-1">
-            {item.subItems!.map((subItem) => (
-              <NavItemComponent
-                key={subItem.href}
-                item={subItem}
-                pathname={pathname}
-                subOpen={subOpen}
-                toggleSub={toggleSub}
-                onLinkClick={onLinkClick}
-                level={level + 1}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href={item.href}
-      onClick={onLinkClick}
-      className={`block px-3 py-1 text-${level > 0 ? 'xs' : 'sm'} rounded cursor-pointer hover:bg-primary hover:bg-opacity-10 ${pathname === item.href ? "text-lemon" : "text-white opacity-70"
-        }`}
-    >
-      {item.label}
-    </Link>
   );
 }

@@ -4,10 +4,14 @@ import { en } from '../lib/i18n/locales/en';
 import { it } from '../lib/i18n/locales/it';
 
 type Language = 'en' | 'it';
+type Currency = 'USD' | 'EUR' | 'GBP';
 
 interface LanguageState {
   language: Language;
+  currency: Currency;
   setLanguage: (lang: Language) => void;
+  setCurrency: (curr: Currency) => void;
+  formatCurrency: (amount: number) => string;
   t: (key: string, params?: Record<string, any>) => string;
 }
 
@@ -16,11 +20,29 @@ const translations = {
   it
 };
 
+const CURRENCY_RATES: Record<Currency, { rate: number; symbol: string }> = {
+  USD: { rate: 1, symbol: '$' },
+  EUR: { rate: 0.92, symbol: '€' },
+  GBP: { rate: 0.79, symbol: '£' }
+};
+
 export const useLanguageStore = create<LanguageState>()(
   persist(
     (set, get) => ({
       language: 'en',
+      currency: 'USD',
       setLanguage: (lang: Language) => set({ language: lang }),
+      setCurrency: (curr: Currency) => set({ currency: curr }),
+      formatCurrency: (amount: number) => {
+        const { currency } = get();
+        const { rate, symbol } = CURRENCY_RATES[currency];
+        const converted = amount * rate;
+        
+        return `${symbol}${converted.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
+      },
       t: (key: string, params?: Record<string, any>) => {
         const { language } = get();
         const keys = key.split('.');

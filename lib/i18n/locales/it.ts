@@ -98,11 +98,23 @@ export const it = {
     pro_rata_approval: "Approvazione Pro-rata",
     invoicing: "Fatturazione",
     payment_disputes: "Controversie di Pagamento",
+    document_vault: "Vault Documenti",
+    vault_all: "Tutti i Documenti",
+    vault_intake: "Coda di Caricamento",
+    vault_access: "Regole di Accesso",
+    vault_internal: "Documenti Interni (ORR)",
+    vault_versions: "Controllo Versioni",
+    vault_audit: "Log di Audit",
+    settings: "Impostazioni di Sistema",
+    global_settings: "Configurazione Globale",
+    audit_logs: "Log di Audit di Sistema",
     logout: "Esci",
     admin: "Amministratore"
   },
   dashboard: {
-    wallet_balance: "Saldo Portafoglio",
+    wallet_balance: "Saldo Totale Portafoglio",
+    wallet_revenue: "Entrate Totali",
+    wallet_payments: "Dai pagamenti del portafoglio",
     available_credits: "Crediti disponibili",
     upcoming_consultations: "Consulenze in arrivo",
     next_7_days: "Prossimi 7 giorni",
@@ -338,7 +350,9 @@ export const it = {
     schedule_meeting: "Pianifica Riunione",
     schedule_meeting_desc: "Prenota una nuova riunione cliente",
     send_message: "Invia Messaggio",
-    send_message_desc: "Crea un nuovo ticket o messaggio",
+    send_message_desc: "Invia un messaggio diretto a un cliente",
+    upload_document: "Carica Documento",
+    upload_document_desc: "Aggiungi un nuovo documento al vault",
     notifications: "Notifiche di Sistema",
     notifications_subtitle: "Avvisi e aggiornamenti di sistema importanti",
     no_notifications: "Nessuna notifica",
@@ -949,7 +963,7 @@ export const it = {
     welcome_back: "Ben Tornato",
     tagline: "Ascolta. Risolvi. Ottimizza.",
     company_name: "ORR Solutions",
-    sign_in_desc: "Accedi alla tua dashboard",
+    sign_in_desc: "Accedi alla dashboard di amministrazione.",
     email: "Email",
     password: "Password",
     remember_me: "Ricordami",
@@ -1276,6 +1290,38 @@ export const it = {
       title: "Webhook Contenziosi Esterni",
       desc: "Il sistema è attualmente in ascolto delle notifiche di contenzioso Stripe/PayPal. Questi record vengono aggiornati automaticamente alle transizioni di stato.",
       history_btn: "Cronologia Contenziosi"
+    }
+  },
+  vault: {
+    infrastructure: "Infrastruttura Vault",
+    title: "Documento",
+    vault: "Vault",
+    subtitle: "Gestione del ciclo di vita dei documenti di livello aziendale, controllo degli accessi e versioning storico.",
+    upload_new: "Carica Nuovo Documento",
+    search_placeholder: "Cerca per titolo, cliente o progetto...",
+    all_visibility: "Tutta la Visibilità",
+    client_facing: "Rivolto al Cliente",
+    internal_only: "Interno (Solo ORR)",
+    all_categories: "Tutte le Categorie",
+    storage_status: "Stato Archiviazione",
+    table: {
+      doc_info: "Documento / Info",
+      client_structure: "Cliente / Struttura",
+      status_security: "Stato / Sicurezza",
+      visibility: "Visibilità",
+      actions: "Azioni",
+      no_docs: "Nessun documento trovato con questi criteri"
+    },
+    scans: {
+      passed: "Superata",
+      failed: "Fallita",
+      scanning: "Scansione..."
+    },
+    access: {
+      immediate: "Immediato",
+      locked: "Bloccato",
+      payment_linked: "Legato al Pagamento",
+      invoice_linked: "Legato alla Fattura"
     }
   }
 };
