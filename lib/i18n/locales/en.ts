@@ -105,11 +105,16 @@ export const en = {
     vault_internal: "Internal Documents (ORR)",
     vault_versions: "Version Control & History",
     vault_audit: "Audit & Activity Logs",
+    settings: "System Settings",
+    global_settings: "Global Configuration",
+    audit_logs: "System Audit Logs",
     logout: "Logout",
     admin: "Admin"
   },
   dashboard: {
-    wallet_balance: "Wallet Balance",
+    wallet_balance: "Total Wallet Balance",
+    wallet_revenue: "Total Revenue",
+    wallet_payments: "From wallet payments",
     available_credits: "Available credits",
     upcoming_consultations: "Upcoming Consultations",
     next_7_days: "Next 7 days",

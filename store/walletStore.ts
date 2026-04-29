@@ -67,7 +67,7 @@ const MOCK_WALLETS: UserWallet[] = [
     userId: 'c1',
     userName: 'Acme Corp',
     userEmail: 'billing@acme.com',
-    balance: 5000,
+    balance: 10000,
     currency: 'USD',
     lastUpdated: '2026-04-20T10:00:00Z'
   },
@@ -75,7 +75,7 @@ const MOCK_WALLETS: UserWallet[] = [
     userId: 'c2',
     userName: 'Global Tech',
     userEmail: 'finance@globaltech.io',
-    balance: 1250.50,
+    balance: 4215,
     currency: 'USD',
     lastUpdated: '2026-04-21T09:00:00Z'
   },
@@ -86,6 +86,22 @@ const MOCK_WALLETS: UserWallet[] = [
     balance: 0,
     currency: 'USD',
     lastUpdated: '2026-03-15T11:00:00Z'
+  },
+  {
+    userId: 'c4',
+    userName: 'Olowonishaye Sunkanmi',
+    userEmail: 'sunkanmi@olowonishaye.com',
+    balance: 1500,
+    currency: 'USD',
+    lastUpdated: '2026-04-28T10:00:00Z'
+  },
+  {
+    userId: 'c5',
+    userName: 'Abdulhammed Shittu',
+    userEmail: 'shittu@abdulhammed.com',
+    balance: 2400,
+    currency: 'USD',
+    lastUpdated: '2026-04-28T11:00:00Z'
   }
 ];
 
@@ -112,6 +128,94 @@ const MOCK_TRANSACTIONS: WalletTransaction[] = [
     status: 'completed',
     timestamp: '2026-04-21T09:00:00Z',
     referenceId: '2'
+  },
+  {
+    id: 'tx3',
+    userId: 'c1',
+    userName: 'Acme Corp',
+    type: 'debit',
+    amount: 45,
+    currency: 'USD',
+    description: 'Expert Consultation Meeting - 30 mins',
+    status: 'completed',
+    timestamp: '2026-04-25T14:00:00Z'
+  },
+  {
+    id: 'tx4',
+    userId: 'c3',
+    userName: 'Nexus Systems',
+    type: 'debit',
+    amount: 220,
+    currency: 'USD',
+    description: 'Quarterly Strategic Analysis Report',
+    status: 'completed',
+    timestamp: '2026-04-26T11:30:00Z'
+  },
+  {
+    id: 'tx5',
+    userId: 'c2',
+    userName: 'Global Tech',
+    type: 'debit',
+    amount: 150,
+    currency: 'USD',
+    description: 'Monthly Maintenance Fee',
+    status: 'completed',
+    timestamp: '2026-04-27T10:00:00Z'
+  },
+  {
+    id: 'tx6',
+    userId: 'c1',
+    userName: 'Acme Corp',
+    type: 'debit',
+    amount: 45,
+    currency: 'USD',
+    description: 'Expert Consultation Meeting - 30 mins',
+    status: 'completed',
+    timestamp: '2026-04-28T09:00:00Z'
+  },
+  {
+    id: 'tx7',
+    userId: 'c4',
+    userName: 'Olowonishaye Sunkanmi',
+    type: 'debit',
+    amount: 199.99,
+    currency: 'USD',
+    description: 'Monthly Pro Subscription',
+    status: 'completed',
+    timestamp: '2026-04-28T10:05:00Z'
+  },
+  {
+    id: 'tx8',
+    userId: 'c5',
+    userName: 'Abdulhammed Shittu',
+    type: 'debit',
+    amount: 450,
+    currency: 'USD',
+    description: 'Strategic Infrastructure Audit',
+    status: 'completed',
+    timestamp: '2026-04-28T11:15:00Z'
+  },
+  {
+    id: 'tx9',
+    userId: 'c1',
+    userName: 'Acme Corp',
+    type: 'debit',
+    amount: 1500,
+    currency: 'USD',
+    description: 'Annual Security Retainer',
+    status: 'completed',
+    timestamp: '2026-04-28T12:00:00Z'
+  },
+  {
+    id: 'tx10',
+    userId: 'c2',
+    userName: 'Global Tech',
+    type: 'debit',
+    amount: 850,
+    currency: 'USD',
+    description: 'Cloud Infrastructure Management',
+    status: 'completed',
+    timestamp: '2026-04-28T13:30:00Z'
   }
 ];
 
@@ -150,28 +254,43 @@ export const useWalletStore = create<WalletState>()(
             }
             return {
               ...w,
-              userName: name
+              userName: name,
+              balance: typeof w.balance === 'number' ? w.balance : parseFloat(w.balance || 0)
             };
           });
 
           // Fetch Transactions
           const txRes = await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/transactions/`);
           const txRaw = await txRes.json();
-          const txData = txRaw.data || txRaw || {};
+          console.log('[WalletStore] Raw Transactions Response:', txRaw);
+          
+          const txData = txRaw.data || txRaw;
+          const txArray = Array.isArray(txData) ? txData : (txData.transactions || []);
           
           // Map backend fields to frontend store
-          const mappedTransactions = (txData.transactions || []).map((t: any) => ({
-            id: t.id?.toString() || Math.random().toString(),
-            userId: t.user || 0,
-            userName: t.client_name || 'Client',
-            type: t.amount < 0 ? 'debit' : 'credit', // Corrected logic: negative is debit, positive is credit
-            amount: Math.abs(parseFloat(t.amount)),
-            currency: t.currency || 'USD',
-            description: t.billing_title || 'Wallet Transaction',
-            status: ['paid', 'succeeded', 'complete', 'completed'].includes(t.status?.toLowerCase()) ? 'completed' : 'pending',
-            timestamp: t.transaction_date || t.created_at,
-            referenceId: t.reference_id
-          }));
+          const mappedTransactions = txArray.map((t: any) => {
+            const amount = parseFloat(t.amount || 0);
+            // Detect type based on amount or specific billing_title/type fields if they exist
+            let type: 'credit' | 'debit' = amount < 0 ? 'debit' : 'credit';
+            
+            // Subscriptions are usually debits (payments)
+            if (t.billing_title?.toLowerCase().includes('subscription') || t.billing_title?.toLowerCase().includes('pro')) {
+               type = 'debit';
+            }
+
+            return {
+              id: t.id?.toString() || t.transaction_id?.toString() || Math.random().toString(),
+              userId: t.user || t.user_id || 0,
+              userName: t.client_name || t.user_name || t.user || 'Client',
+              type,
+              amount: Math.abs(amount),
+              currency: t.currency || 'USD',
+              description: t.billing_title || t.description || 'Wallet Transaction',
+              status: ['paid', 'succeeded', 'complete', 'completed'].includes(t.status?.toLowerCase()) ? 'completed' : 'pending',
+              timestamp: t.transaction_date || t.created_at || t.timestamp,
+              referenceId: t.reference_id || t.transaction_id
+            };
+          });
 
           // Fetch Audit Trail for System Events
           const auditRes = await auth.makeAuthenticatedRequest(`${baseUrl}/admin-portal/v1/wallet-logs/audit-trail/`);
@@ -194,6 +313,10 @@ export const useWalletStore = create<WalletState>()(
             transactions: mappedTransactions,
             systemEvents: mappedEvents,
             isLoading: false 
+          });
+          console.log('[WalletStore] Successfully updated store with live data:', {
+            wallets: mappedWallets.length,
+            transactions: mappedTransactions.length
           });
         } catch (error) {
           console.error("Error fetching wallet data:", error);

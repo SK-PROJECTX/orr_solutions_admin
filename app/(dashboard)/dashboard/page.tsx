@@ -33,12 +33,13 @@ import WelcomeHero from "@/app/components/dashboard/WelcomeHero";
 import QuickActions from "@/app/components/dashboard/QuickActions";
 import ActivityFeed from "@/app/components/dashboard/ActivityFeed";
 import { useLanguageStore } from "@/store/languageStore";
+import { useWalletStore } from "@/store/walletStore";
 
 function page() {
   const router = useRouter();
   const role = useRole();
   const isSuperAdmin = useIsSuperAdmin();
-  const { t, language } = useLanguageStore();
+  const { t, language, formatCurrency } = useLanguageStore();
 
   const defaultMetrics: DashboardMetrics = {
     active_clients: 0,
@@ -57,8 +58,10 @@ function page() {
   const [recentContent, setRecentContent] = useState<ContentListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [totalWalletBalance, setTotalWalletBalance] = useState<number>(0);
   const [upcomingConsultations, setUpcomingConsultations] = useState<number>(0);
+  const { wallets, transactions, fetchData: fetchWalletData } = useWalletStore();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -129,13 +132,6 @@ function page() {
         setUpcomingMeetings(meetings as MeetingListItem[]);
         setRecentContent(content as ContentListItem[]);
 
-        // Set wallet balance from billing stats
-        const billingData = extractData(billingStatsData);
-        if (billingData && "total_revenue" in billingData) {
-          const revenue = billingData.total_revenue;
-          setWalletBalance(typeof revenue === "number" ? revenue : (typeof revenue === "string" ? parseFloat(revenue) : 0));
-        }
-
         setUpcomingConsultations(meetings.length);
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
@@ -146,7 +142,21 @@ function page() {
     };
 
     fetchDashboardData();
-  }, [t]);
+    fetchWalletData();
+  }, [t, fetchWalletData]);
+
+  useEffect(() => {
+    // Calculate total revenue from wallet payments (debits)
+    const walletRevenue = transactions
+      .filter(tx => tx.type === 'debit' && tx.status === 'completed')
+      .reduce((sum, tx) => sum + tx.amount, 0);
+    
+    setTotalRevenue(walletRevenue);
+
+    // Calculate total wallet balance (sum of all user balances)
+    const aggregateBalance = wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
+    setTotalWalletBalance(aggregateBalance);
+  }, [transactions, wallets]);
 
   if (loading) {
     return (
@@ -170,14 +180,24 @@ function page() {
           <WelcomeHero />
 
           {/* PART 2: KEY INSIGHTS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Wallet Balance Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Revenue (Wallet-based) */}
             <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.wallet_balance')}</h3>
+                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.wallet_revenue')}</h3>
                 <Wallet size={18} className="text-green-400 group-hover:scale-110 transition-transform" />
               </div>
-              <p className="text-3xl font-bold text-white">€{walletBalance.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(totalRevenue)}</p>
+              <p className="text-xs text-gray-400 mt-2">{t('dashboard.wallet_payments')}</p>
+            </div>
+
+            {/* Total Wallet Balance Card */}
+            <div className="bg-gradient-to-br from-white/15 to-white/5 rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all duration-300 group">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-300">{t('dashboard.wallet_balance')}</h3>
+                <Wallet size={18} className="text-emerald-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <p className="text-3xl font-bold text-white">{formatCurrency(totalWalletBalance)}</p>
               <p className="text-xs text-gray-400 mt-2">{t('dashboard.available_credits')}</p>
             </div>
 
@@ -278,9 +298,8 @@ function page() {
                     <div className="bg-green-500/30 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Wallet className="w-6 h-6 text-green-400" />
                     </div>
-                    <span className="text-xs text-green-300 bg-green-500/20 px-2 py-1 rounded-full">€</span>
                   </div>
-                  <p className="text-2xl font-bold text-white mb-1">€{walletBalance.toFixed(0)}</p>
+                  <p className="text-2xl font-bold text-white mb-1">{formatCurrency(totalRevenue)}</p>
                   <p className="text-sm text-gray-400">{t('dashboard.revenue')}</p>
                 </div>
               </div>

@@ -9,8 +9,8 @@ import InvoiceDocument from './InvoiceDocument';
 import { useLanguageStore } from '@/store/languageStore';
 
 export default function InvoiceManager() {
-  const { t } = useLanguageStore();
   const { invoices, settings } = useInvoiceStore();
+  const { formatCurrency, t } = useLanguageStore();
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -122,7 +122,7 @@ export default function InvoiceManager() {
                       <p className="text-xs text-slate-500">{invoice.clientEmail}</p>
                     </td>
                     <td className="py-5 px-6">
-                      <p className="text-sm font-black text-white">${invoice.totalAmount.toLocaleString()}</p>
+                      <p className="text-sm font-black text-white">{formatCurrency(invoice.totalAmount)}</p>
                     </td>
                     <td className="py-5 px-6">
                       <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(invoice.status)}`}>

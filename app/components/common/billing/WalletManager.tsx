@@ -25,7 +25,7 @@ import { useWalletStore, TransactionType, SystemEvent } from '@/store/walletStor
 import { useLanguageStore } from '@/store/languageStore';
 
 export default function WalletManager() {
-  const { t } = useLanguageStore();
+  const { t, formatCurrency } = useLanguageStore();
   const { wallets, transactions, systemEvents, processRefund, exportTransactions } = useWalletStore();
   const [activeTab, setActiveTab] = useState<'balances' | 'history' | 'events'>('balances');
   const [searchQuery, setSearchQuery] = useState('');
@@ -177,8 +177,7 @@ export default function WalletManager() {
                     <div className="space-y-1">
                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('dashboard.wallet_balance')}</p>
                       <p className="text-3xl font-black text-emerald-400">
-                        <span className="text-lg mr-1 opacity-50">$</span>
-                        {wallet.balance.toLocaleString()}
+                        {formatCurrency(wallet.balance)}
                       </p>
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -245,7 +244,7 @@ export default function WalletManager() {
                         </div>
                       </td>
                       <td className={`py-6 px-8 text-lg font-black text-right ${tx.type === 'credit' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {tx.type === 'credit' ? '+' : '-'}${tx.amount.toLocaleString()}
+                        {tx.type === 'credit' ? '+' : '-'}{formatCurrency(tx.amount)}
                       </td>
                       <td className="py-6 px-8">
                         <div className="flex flex-col gap-2">

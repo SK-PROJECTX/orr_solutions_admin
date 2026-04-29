@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-card border-b border-white/10 sticky top-0 z-40">
+    <header className="md:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-white/10 sticky top-0 z-40">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
