@@ -100,6 +100,8 @@ export const en = {
     all_items: "All Items",
     document_vault: "Document Vault",
     vault_all: "All Documents",
+    vault_studio: "Document Studio",
+    vault_folders: "Folder Structures",
     vault_intake: "Upload & Intake Queue",
     vault_access: "Access & Unlock Rules",
     vault_internal: "Internal Documents (ORR)",

@@ -119,23 +119,50 @@ export default function UploadDocumentModal({ isOpen, onClose }: UploadDocumentM
 
             <div className="p-8 max-h-[70vh] overflow-y-auto">
               {step === 'file' ? (
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-white/10 rounded-3xl p-12 flex flex-col items-center gap-6 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
-                >
-                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                      <Upload size={32} />
-                   </div>
-                   <div className="text-center space-y-2">
-                      <p className="text-lg font-black text-white uppercase tracking-tight">Drop documents here</p>
-                      <p className="text-sm text-slate-500 font-medium max-w-xs">Supports Office, PDF, Media, and Archives. Max 500MB per file.</p>
-                   </div>
-                   <input 
-                     type="file" 
-                     ref={fileInputRef}
-                     onChange={handleFileChange}
-                     className="hidden" 
-                   />
+                <div className="space-y-8">
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-white/10 rounded-3xl p-12 flex flex-col items-center gap-6 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
+                  >
+                     <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <Upload size={32} />
+                     </div>
+                     <div className="text-center space-y-2">
+                        <p className="text-lg font-black text-white uppercase tracking-tight">Drop documents here</p>
+                        <p className="text-sm text-slate-500 font-medium max-w-xs">Supports Office, PDF, Media, and Archives. Max 500MB per file.</p>
+                     </div>
+                     <input 
+                       type="file" 
+                       ref={fileInputRef}
+                       onChange={handleFileChange}
+                       className="hidden" 
+                     />
+                  </div>
+
+                  <div className="space-y-4">
+                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center italic">Or Create Native Asset</p>
+                     <div className="grid grid-cols-3 gap-4">
+                        {[
+                           { id: 'doc', label: 'Google Doc', icon: FileText, color: 'text-blue-400' },
+                           { id: 'sheet', label: 'Google Sheet', icon: FileText, color: 'text-emerald-400' },
+                           { id: 'slide', label: 'Google Slide', icon: FileText, color: 'text-amber-400' }
+                        ].map(item => (
+                           <button 
+                             key={item.id}
+                             type="button"
+                             onClick={() => {
+                               setSelectedFile(new File([""], `Untitled ${item.label}`)); // Mock file
+                               setFormData(prev => ({ ...prev, title: `Untitled ${item.label}` }));
+                               setStep('metadata');
+                             }}
+                             className="flex flex-col items-center gap-3 p-6 bg-white/5 border border-white/10 rounded-3xl hover:border-primary/30 hover:bg-white/10 transition-all group"
+                           >
+                              <item.icon size={24} className={`${item.color} group-hover:scale-110 transition-transform`} />
+                              <span className="text-[10px] font-black uppercase text-slate-400">{item.label}</span>
+                           </button>
+                        ))}
+                     </div>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">

@@ -32,6 +32,16 @@ export interface DocumentAccessRule {
   description: string;
 }
 
+export interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  client?: string;
+  project?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Document {
   id: string;
   title: string;
@@ -45,6 +55,7 @@ export interface Document {
   currentVersion: number;
   versions: DocumentVersion[];
   accessRule: DocumentAccessRule;
+  folderId?: string;
   createdAt: string;
   updatedAt: string;
   lastAccessedAt?: string;
@@ -59,6 +70,7 @@ export interface Document {
 
 interface VaultStore {
   documents: Document[];
+  folders: Folder[];
   auditLogs: AuditLog[];
   isLoading: boolean;
   error: string | null;
@@ -73,6 +85,11 @@ interface VaultStore {
   addFeedback: (docId: string, author: string, content: string) => Promise<void>;
   batchUpdate: (ids: string[], updates: Partial<Document>) => Promise<void>;
   addAuditLog: (log: Omit<AuditLog, 'id' | 'timestamp'>) => void;
+
+  // Folder Actions
+  createFolder: (name: string, parentId: string | null, client?: string, project?: string) => void;
+  updateFolder: (id: string, updates: Partial<Folder>) => void;
+  deleteFolder: (id: string) => void;
 }
 
 export const useVaultStore = create<VaultStore>()(
@@ -154,6 +171,16 @@ export const useVaultStore = create<VaultStore>()(
           createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
           updatedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
           accessCount: 5
+        }
+      ],
+      folders: [
+        {
+          id: 'FLD-001',
+          name: 'Financial Reports',
+          parentId: null,
+          client: 'Acme Corp',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         }
       ],
       auditLogs: [],
@@ -330,6 +357,35 @@ export const useVaultStore = create<VaultStore>()(
           timestamp: new Date().toISOString()
         };
         set(state => ({ auditLogs: [newLog, ...state.auditLogs] }));
+      },
+
+      createFolder: (name, parentId, client, project) => {
+        const newFolder: Folder = {
+          id: `FLD-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+          name,
+          parentId,
+          client,
+          project,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        set(state => ({ folders: [...state.folders, newFolder] }));
+      },
+
+      updateFolder: (id, updates) => {
+        set(state => ({
+          folders: state.folders.map(f => 
+            f.id === id ? { ...f, ...updates, updatedAt: new Date().toISOString() } : f
+          )
+        }));
+      },
+
+      deleteFolder: (id) => {
+        set(state => ({
+          folders: state.folders.filter(f => f.id !== id),
+          // Optionally move docs out of folder
+          documents: state.documents.map(d => d.folderId === id ? { ...d, folderId: undefined } : d)
+        }));
       }
     }),
     {
