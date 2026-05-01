@@ -116,6 +116,7 @@ function page() {
         const tickets = extractArray(ticketsData);
         const meetings = extractArray(meetingsData);
         const content = extractArray(contentData);
+        const billingStats = extractData(billingStatsData);
 
         setMetrics({
           active_clients: dashboardData?.active_clients || clientStats?.active_clients || 0,
@@ -133,6 +134,13 @@ function page() {
         setRecentContent(content as ContentListItem[]);
 
         setUpcomingConsultations(meetings.length);
+        
+        // Use real total revenue from backend
+        if (billingStats && billingStats.total_revenue !== undefined) {
+          setTotalRevenue(billingStats.total_revenue);
+        } else {
+          setTotalRevenue(0);
+        }
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
         setError(t('common.error') + ": " + t('dashboard.failed_load_dashboard'));
@@ -146,17 +154,10 @@ function page() {
   }, [t, fetchWalletData]);
 
   useEffect(() => {
-    // Calculate total revenue from wallet payments (debits)
-    const walletRevenue = transactions
-      .filter(tx => tx.type === 'debit' && tx.status === 'completed')
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    
-    setTotalRevenue(walletRevenue);
-
     // Calculate total wallet balance (sum of all user balances)
     const aggregateBalance = wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
     setTotalWalletBalance(aggregateBalance);
-  }, [transactions, wallets]);
+  }, [wallets]);
 
   if (loading) {
     return (
