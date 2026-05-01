@@ -28,7 +28,7 @@ export default function FinancialStatsOverview() {
   const stats = [
     {
       label: t('hub.stats.total_paid'),
-      value: formatCurrency(aggregateRevenue),
+      value: formatCurrency(statistics.totalPaid || 0),
       icon: <DollarSign className="text-emerald-400" size={24} />,
       trend: '+12.5%',
       trendUp: true,
