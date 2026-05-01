@@ -1,174 +1,204 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
+  Activity, 
   Search, 
   Filter, 
+  Calendar, 
+  User, 
   FileText, 
-  Clock,
-  User,
-  Activity,
+  Upload, 
+  Trash2, 
+  Settings2,
+  ChevronDown,
   ArrowUpRight,
   ShieldCheck,
-  ShieldAlert,
-  Eye,
-  Trash2,
-  Plus,
-  Download
+  Zap,
+  RefreshCw,
+  Clock
 } from 'lucide-react';
-
 import { useVaultStore, AuditLog } from '@/store/vaultStore';
-import { useLanguageStore } from '@/store/languageStore';
 
 export default function AuditLogsPage() {
-  const { t } = useLanguageStore();
   const { auditLogs } = useVaultStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterAction, setFilterAction] = useState<string>('all');
 
-  const filteredLogs = useMemo(() => {
-    return auditLogs.filter(log => {
-      const matchesSearch = log.docTitle.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            log.performedBy.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesAction = filterAction === 'all' || log.action === filterAction;
-      return matchesSearch && matchesAction;
-    });
-  }, [auditLogs, searchQuery, filterAction]);
+  const filteredLogs = auditLogs.filter(log => 
+    log.docTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    log.performedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    log.action.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getActionIcon = (action: string) => {
+  const getActionIcon = (action: AuditLog['action']) => {
     switch (action) {
-      case 'upload': return <Plus className="text-emerald-400" size={14} />;
-      case 'download': return <Download className="text-blue-400" size={14} />;
-      case 'visibility_change': return <Eye className="text-amber-400" size={14} />;
-      case 'unlock': return <ShieldCheck className="text-primary" size={14} />;
-      case 'delete': return <Trash2 className="text-rose-400" size={14} />;
-      default: return <Activity className="text-slate-400" size={14} />;
+      case 'upload': return <Upload size={14} className="text-emerald-400" />;
+      case 'delete': return <Trash2 size={14} className="text-rose-400" />;
+      case 'metadata_update': return <Settings2 size={14} className="text-blue-400" />;
+      case 'version_add': return <RefreshCw size={14} className="text-amber-400" />;
+      case 'visibility_change': return <Activity size={14} className="text-purple-400" />;
+      default: return <FileText size={14} className="text-slate-400" />;
     }
   };
 
+  const getActionBadge = (action: AuditLog['action']) => {
+     const colors: Record<string, string> = {
+        upload: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        delete: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+        metadata_update: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+        version_add: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+        visibility_change: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+        unlock: 'bg-primary/10 text-primary border-primary/20',
+        download: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+     };
+     return (
+        <span className={`px-2 py-0.5 rounded border text-[8px] font-black uppercase tracking-[0.2em] ${colors[action] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+           {action.replace('_', ' ')}
+        </span>
+     );
+  };
+
   return (
-    <div className="min-h-screen pb-24 text-white relative overflow-hidden">
-      {/* Background Decor */}
+    <div className="min-h-screen pb-24 text-white relative">
       <div className="fixed inset-0 bg-background -z-10">
-        <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {/* Header */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
-            <Activity size={14} />
-            Governance Layer
+        <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.3em]">
+              <ShieldCheck size={14} />
+              Immutable Audit Trail
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase italic">
+              Activity <span className="text-primary italic">Logs</span>
+            </h1>
+            <p className="text-slate-400 max-w-xl text-sm font-medium">
+              Real-time monitoring of document lifecycles, access events, and administrative overrides across the entire workspace.
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase italic">
-            Audit & <span className="text-primary italic">Activity Logs</span>
-          </h1>
-          <p className="text-slate-400 max-w-xl text-sm font-medium">
-            Complete traceability for every document interaction, from upload to client download and access state transitions.
-          </p>
+
+          <div className="flex gap-4">
+             <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl text-xs font-black uppercase tracking-[0.1em] hover:bg-white/10 transition-all">
+               <Calendar size={18} />
+               Export CSV
+             </button>
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-3xl p-4 flex flex-col md:flex-row items-center gap-4">
+        {/* Filters */}
+        <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-3xl p-4 flex flex-col lg:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input 
               type="text" 
-              placeholder="Filter by document or administrator..."
+              placeholder="Filter by admin, document, or action..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-primary/50"
             />
           </div>
-          <select 
-            value={filterAction}
-            onChange={(e) => setFilterAction(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-slate-400 focus:outline-none w-full md:w-auto"
-          >
-            <option value="all">All Actions</option>
-            <option value="upload">Uploads</option>
-            <option value="download">Downloads</option>
-            <option value="visibility_change">Visibility Changes</option>
-            <option value="unlock">Unlock Events</option>
-          </select>
+          <div className="flex gap-2 w-full lg:w-auto">
+             <select className="flex-1 lg:flex-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none">
+                <option>All Actions</option>
+                <option>Uploads</option>
+                <option>Deletions</option>
+                <option>Access</option>
+             </select>
+             <select className="flex-1 lg:flex-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none">
+                <option>Last 24 Hours</option>
+                <option>Last 7 Days</option>
+                <option>Last 30 Days</option>
+             </select>
+          </div>
         </div>
 
-        {/* Logs Table */}
+        {/* Timeline View */}
         <div className="bg-card/20 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/5 bg-white/5">
-                  <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp / Session</th>
-                  <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Entity / Document</th>
-                  <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Action</th>
+                  <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Event Timeline</th>
                   <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Administrator</th>
+                  <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Asset Context</th>
                   <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                <AnimatePresence mode='popLayout'>
-                  {filteredLogs.map((log, idx) => (
-                    <motion.tr 
-                      key={log.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                      className="group hover:bg-white/[0.02] transition-colors"
-                    >
-                      <td className="py-6 px-8">
-                        <div className="flex flex-col">
-                           <p className="text-xs font-black text-white">{new Date(log.timestamp).toLocaleDateString()}</p>
-                           <p className="text-[10px] text-slate-500 font-bold">{new Date(log.timestamp).toLocaleTimeString()}</p>
-                        </div>
-                      </td>
-                      <td className="py-6 px-8">
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
-                              <FileText size={14} />
-                           </div>
-                           <p className="text-sm font-bold text-white uppercase tracking-tight">{log.docTitle}</p>
-                        </div>
-                      </td>
-                      <td className="py-6 px-8">
-                        <div className="flex justify-center">
-                           <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                              {getActionIcon(log.action)}
-                              <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">{log.action.replace('_', ' ')}</span>
-                           </div>
-                        </div>
-                      </td>
-                      <td className="py-6 px-8">
-                         <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-black">
-                               {log.performedBy[0]}
-                            </div>
-                            <p className="text-xs font-black text-slate-300">{log.performedBy}</p>
-                         </div>
-                      </td>
-                      <td className="py-6 px-8 text-right">
-                         <p className="text-[10px] font-bold text-slate-500 italic">{log.details}</p>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-
-                {filteredLogs.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-24 text-center">
-                       <div className="flex flex-col items-center gap-4 text-slate-500">
-                          <Activity size={48} className="opacity-10" />
-                          <p className="text-sm font-black uppercase tracking-widest opacity-30">No activity logs recorded yet.</p>
+                {filteredLogs.map((log, idx) => (
+                  <motion.tr 
+                    key={log.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    className="group hover:bg-white/[0.02] transition-colors"
+                  >
+                    <td className="py-6 px-8">
+                       <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center">
+                             <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                {getActionIcon(log.action)}
+                             </div>
+                          </div>
+                          <div>
+                             <div className="flex items-center gap-2">
+                                {getActionBadge(log.action)}
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">
+                                   {new Date(log.timestamp).toLocaleTimeString()}
+                                </span>
+                             </div>
+                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                {new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                             </p>
+                          </div>
                        </div>
                     </td>
-                  </tr>
-                )}
+
+                    <td className="py-6 px-8">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary uppercase">
+                             {log.performedBy.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <p className="text-xs font-black text-white uppercase italic tracking-tight">{log.performedBy}</p>
+                       </div>
+                    </td>
+
+                    <td className="py-6 px-8">
+                       <div className="flex items-center gap-2">
+                          <FileText size={14} className="text-slate-500" />
+                          <p className="text-xs font-bold text-slate-200 uppercase tracking-tight">{log.docTitle}</p>
+                       </div>
+                       <p className="text-[9px] text-primary/60 font-black uppercase tracking-[0.2em] mt-1">{log.docId}</p>
+                    </td>
+
+                    <td className="py-6 px-8 text-right">
+                       <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[250px] ml-auto">
+                          {log.details}
+                       </p>
+                    </td>
+                  </motion.tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
+
+        {filteredLogs.length === 0 && (
+           <div className="py-32 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center relative overflow-hidden">
+                 <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+                 <Zap size={40} className="text-primary relative z-10" />
+              </div>
+              <div className="space-y-2">
+                 <h3 className="text-2xl font-black text-white uppercase italic">Zero Anomalies Detected</h3>
+                 <p className="text-slate-500 text-sm max-w-sm mx-auto">No activity logs matching your current filters. The system is operating within normal parameters.</p>
+              </div>
+           </div>
+        )}
       </div>
     </div>
   );

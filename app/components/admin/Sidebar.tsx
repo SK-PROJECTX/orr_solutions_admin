@@ -210,6 +210,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onClick={() => toggle("vault")}
               items={[
                 { label: t('sidebar.vault_all'), href: "/document-vault/all" },
+                { label: t('sidebar.vault_studio'), href: "/document-vault/studio" },
+                { label: t('sidebar.vault_folders'), href: "/document-vault/folders" },
                 { label: t('sidebar.vault_intake'), href: "/document-vault/intake" },
                 { label: t('sidebar.vault_access'), href: "/document-vault/access-rules" },
                 { label: t('sidebar.vault_internal'), href: "/document-vault/internal" },

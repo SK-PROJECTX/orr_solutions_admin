@@ -2,20 +2,21 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  FileText, 
-  Eye, 
-  MoreVertical, 
-  History, 
-  Lock, 
-  Unlock, 
-  ShieldCheck, 
-  ShieldAlert, 
+import {
+  Plus,
+  Search,
+  Filter,
+  FileText,
+  Eye,
+  MoreVertical,
+  History,
+  Lock,
+  Unlock,
+  ShieldCheck,
+  ShieldAlert,
   Clock,
   Trash2,
+  Upload,
   ExternalLink,
   ChevronRight,
   MessageSquare,
@@ -28,6 +29,7 @@ import {
 
 import { useVaultStore, Document, FileType, Visibility, ScanStatus } from '@/store/vaultStore';
 import { useLanguageStore } from '@/store/languageStore';
+import Link from 'next/link';
 
 import UploadDocumentModal from '@/app/(dashboard)/document-vault/UploadDocumentModal';
 import DocumentDetailView from '@/app/(dashboard)/document-vault/DocumentDetailView';
@@ -35,12 +37,12 @@ import DocumentDetailView from '@/app/(dashboard)/document-vault/DocumentDetailV
 export default function DocumentVaultPage() {
   const { t } = useLanguageStore();
   const { documents, isLoading, toggleVisibility, deleteDocument, batchUpdate } = useVaultStore();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisibility, setFilterVisibility] = useState<Visibility | 'all'>('all');
   const [filterCategory, setFilterCategory] = useState<string | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<ScanStatus | 'all'>('all');
-  
+
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -52,8 +54,8 @@ export default function DocumentVaultPage() {
 
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc => {
-      const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            doc.client.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.client.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesVisibility = filterVisibility === 'all' || doc.visibility === filterVisibility;
       const matchesCategory = filterCategory === 'all' || doc.category === filterCategory;
       const matchesStatus = filterStatus === 'all' || doc.scanStatus === filterStatus;
@@ -62,11 +64,11 @@ export default function DocumentVaultPage() {
   }, [documents, searchQuery, filterVisibility, filterCategory, filterStatus]);
 
   const stats = useMemo(() => {
-     return {
-        missingCategory: documents.filter(d => !d.category || d.category === '').length,
-        noUnlockRule: documents.filter(d => d.visibility === 'client' && d.accessRule.type === 'immediate').length, // Warning for high value docs maybe?
-        scanning: documents.filter(d => d.scanStatus === 'scanning').length,
-     };
+    return {
+      missingCategory: documents.filter(d => !d.category || d.category === '').length,
+      noUnlockRule: documents.filter(d => d.visibility === 'client' && d.accessRule.type === 'immediate').length, // Warning for high value docs maybe?
+      scanning: documents.filter(d => d.scanStatus === 'scanning').length,
+    };
   }, [documents]);
 
   const getFileIcon = (type: FileType) => {
@@ -88,11 +90,20 @@ export default function DocumentVaultPage() {
   };
 
   const toggleSelectAll = (checked: boolean) => {
-     setSelectedDocs(checked ? filteredDocuments.map(d => d.id) : []);
+    setSelectedDocs(checked ? filteredDocuments.map(d => d.id) : []);
   };
 
   const toggleSelect = (id: string) => {
-     setSelectedDocs(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setSelectedDocs(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkArchive = async () => {
+    if (confirm(`Are you sure you want to archive ${selectedDocs.length} documents?`)) {
+      for (const id of selectedDocs) {
+        await deleteDocument(id);
+      }
+      setSelectedDocs([]);
+    }
   };
 
   return (
@@ -115,111 +126,146 @@ export default function DocumentVaultPage() {
               All <span className="text-primary italic">Documents</span>
             </h1>
             <p className="text-slate-400 max-w-xl text-sm font-medium">
-               Master grid for enterprise assets. Manage lifecycle, monitor health, and orchestrate visibility across the workspace.
+              Master grid for enterprise assets. Manage lifecycle, monitor health, and orchestrate visibility across the workspace.
             </p>
           </div>
 
           <div className="flex gap-4">
-             <button 
-               onClick={() => setIsUploadModalOpen(true)}
-               className="flex items-center gap-2 px-6 py-3 bg-primary text-slate-900 rounded-2xl text-xs font-black uppercase tracking-[0.1em] hover:bg-lemon transition-all shadow-xl shadow-primary/10"
-             >
-               <Plus size={18} />
-               {t('vault.upload_new')}
-             </button>
+            <button
+              onClick={() => setIsUploadModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-primary text-slate-900 rounded-2xl text-xs font-black uppercase tracking-[0.1em] hover:bg-lemon transition-all shadow-xl shadow-primary/10"
+            >
+              <Plus size={18} />
+              {t('vault.upload_new')}
+            </button>
           </div>
         </div>
 
         {/* Health Indicators */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                 <CheckCircle2 size={20} />
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">System Health</p>
+              <p className="text-xs font-bold text-white uppercase tracking-tight">All Scans Validated</p>
+            </div>
+          </div>
+
+          {stats.missingCategory > 0 && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                <AlertTriangle size={20} />
               </div>
               <div>
-                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">System Health</p>
-                 <p className="text-xs font-bold text-white uppercase tracking-tight">All Scans Validated</p>
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Action Required</p>
+                <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.missingCategory} Missing Category</p>
               </div>
-           </div>
-           
-           {stats.missingCategory > 0 && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-4 flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500">
-                    <AlertTriangle size={20} />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Action Required</p>
-                    <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.missingCategory} Missing Category</p>
-                 </div>
-              </div>
-           )}
+            </div>
+          )}
 
-           {stats.noUnlockRule > 0 && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-3xl p-4 flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-                    <Unlock size={20} />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Audit Suggestion</p>
-                    <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.noUnlockRule} Immediate Assets</p>
-                 </div>
+          {stats.noUnlockRule > 0 && (
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-3xl p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <Unlock size={20} />
               </div>
-           )}
+              <div>
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Audit Suggestion</p>
+                <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.noUnlockRule} Immediate Assets</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Creation Hub */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { id: 'doc', label: 'New Google Doc', icon: FileText, color: 'text-blue-400', bg: 'bg-blue-400/5', border: 'border-blue-400/10' },
+            { id: 'sheet', label: 'New Google Sheet', icon: FileText, color: 'text-emerald-400', bg: 'bg-emerald-400/5', border: 'border-emerald-400/10' },
+            { id: 'slide', label: 'New Google Slide', icon: FileText, color: 'text-amber-400', bg: 'bg-amber-400/5', border: 'border-amber-400/10' },
+            { id: 'upload', label: 'Upload Local File', icon: Upload, color: 'text-primary', bg: 'bg-primary/5', border: 'border-primary/10' }
+          ].map(item => (
+            <motion.button
+              key={item.id}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                if (item.id === 'upload') {
+                  setIsUploadModalOpen(true);
+                } else {
+                  window.location.href = `/document-vault/studio?create=${item.id}`;
+                }
+              }}
+              className={`${item.bg} ${item.border} border p-6 rounded-[32px] flex flex-col items-center gap-4 group transition-all hover:bg-white/5 shadow-xl shadow-black/20`}
+            >
+              <div className={`w-12 h-12 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
+                <item.icon size={24} />
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Create</p>
+                <p className="text-sm font-black text-white uppercase italic tracking-tight">{item.label}</p>
+              </div>
+            </motion.button>
+          ))}
+        </section>
 
         {/* Main Controls */}
         <div className="flex flex-col lg:flex-row gap-6">
-           <div className="flex-1 bg-card/30 backdrop-blur-md border border-white/10 rounded-3xl p-4 flex flex-col md:flex-row items-center gap-4">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input 
-                  type="text" 
-                  placeholder={t('vault.search_placeholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-primary/50"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2 w-full md:w-auto">
-                 <select 
-                   value={filterVisibility}
-                   onChange={(e) => setFilterVisibility(e.target.value as any)}
-                   className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none"
-                 >
-                    <option value="all">All Visibility</option>
-                    <option value="client">Client-Facing</option>
-                    <option value="internal">Internal Only</option>
-                 </select>
-                 <select 
-                   value={filterStatus}
-                   onChange={(e) => setFilterStatus(e.target.value as any)}
-                   className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none"
-                 >
-                    <option value="all">All Status</option>
-                    <option value="passed">Passed</option>
-                    <option value="scanning">Scanning</option>
-                    <option value="failed">Failed</option>
-                 </select>
-              </div>
-           </div>
-
-           {selectedDocs.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-primary/20 border border-primary/40 rounded-3xl p-4 flex items-center gap-6"
+          <div className="flex-1 bg-card/30 backdrop-blur-md border border-white/10 rounded-3xl p-4 flex flex-col md:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+              <input
+                type="text"
+                placeholder={t('vault.search_placeholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-primary/50"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <select
+                value={filterVisibility}
+                onChange={(e) => setFilterVisibility(e.target.value as any)}
+                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none"
               >
-                 <p className="text-[10px] font-black text-primary uppercase whitespace-nowrap">{selectedDocs.length} Selected</p>
-                 <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-primary text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-lemon transition-all">
-                       Archive All
-                    </button>
-                    <button className="px-4 py-2 bg-white/10 text-white border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/20 transition-all">
-                       Bulk Tag
-                    </button>
-                 </div>
-              </motion.div>
-           )}
+                <option value="all">All Visibility</option>
+                <option value="client">Client-Facing</option>
+                <option value="internal">Internal Only</option>
+              </select>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as any)}
+                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none"
+              >
+                <option value="all">All Status</option>
+                <option value="passed">Passed</option>
+                <option value="scanning">Scanning</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+          </div>
+
+          {selectedDocs.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-primary/20 border border-primary/40 rounded-3xl p-4 flex items-center gap-6"
+            >
+              <p className="text-[10px] font-black text-primary uppercase whitespace-nowrap">{selectedDocs.length} Selected</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBulkArchive}
+                  className="px-4 py-2 bg-primary text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-lemon transition-all"
+                >
+                  Archive All
+                </button>
+                <button className="px-4 py-2 bg-white/10 text-white border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/20 transition-all">
+                  Bulk Tag
+                </button>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Data Grid */}
@@ -229,12 +275,12 @@ export default function DocumentVaultPage() {
               <thead>
                 <tr className="border-b border-white/5 bg-white/5">
                   <th className="py-6 px-8 w-10">
-                     <input 
-                       type="checkbox" 
-                       checked={selectedDocs.length === filteredDocuments.length && filteredDocuments.length > 0}
-                       onChange={(e) => toggleSelectAll(e.target.checked)}
-                       className="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
-                     />
+                    <input
+                      type="checkbox"
+                      checked={selectedDocs.length === filteredDocuments.length && filteredDocuments.length > 0}
+                      onChange={(e) => toggleSelectAll(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
+                    />
                   </th>
                   <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Document / Health</th>
                   <th className="py-6 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest">Client Structure</th>
@@ -245,7 +291,7 @@ export default function DocumentVaultPage() {
               <tbody className="divide-y divide-white/5">
                 <AnimatePresence mode='popLayout'>
                   {filteredDocuments.map((doc, idx) => (
-                    <motion.tr 
+                    <motion.tr
                       key={doc.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -253,12 +299,12 @@ export default function DocumentVaultPage() {
                       className="group hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="py-6 px-8">
-                         <input 
-                           type="checkbox" 
-                           checked={selectedDocs.includes(doc.id)}
-                           onChange={() => toggleSelect(doc.id)}
-                           className="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
-                         />
+                        <input
+                          type="checkbox"
+                          checked={selectedDocs.includes(doc.id)}
+                          onChange={() => toggleSelect(doc.id)}
+                          className="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
+                        />
                       </td>
                       <td className="py-6 px-8">
                         <div className="flex items-center gap-4">
@@ -275,41 +321,66 @@ export default function DocumentVaultPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-3 mt-1">
-                               <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">v{doc.currentVersion} • {doc.versions.length} Total</p>
-                               {doc.visibility === 'internal' && <span className="text-[8px] font-black bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20 uppercase tracking-[0.2em]">Restricted</span>}
+                              <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">v{doc.currentVersion} • {doc.versions.length} Total</p>
+                              {doc.visibility === 'internal' && <span className="text-[8px] font-black bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20 uppercase tracking-[0.2em]">Restricted</span>}
                             </div>
                           </div>
                         </div>
                       </td>
-                      
+
                       <td className="py-6 px-8">
                         <p className="text-xs font-bold text-white uppercase tracking-tight">{doc.client}</p>
                         <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-0.5">{doc.project}</p>
                       </td>
 
                       <td className="py-6 px-8">
-                         <div className="flex flex-col items-center gap-2">
-                            {getScanBadge(doc.scanStatus)}
-                            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
-                               {doc.accessRule.type === 'immediate' ? (
-                                  <span className="text-emerald-500/60">Immediate</span>
-                               ) : (
-                                  <span className="text-amber-500/60 flex items-center gap-1"><Lock size={8} /> {doc.accessRule.linkedId}</span>
-                               )}
-                            </div>
-                         </div>
+                        <div className="flex flex-col items-center gap-2">
+                          {getScanBadge(doc.scanStatus)}
+                          <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                            {doc.accessRule.type === 'immediate' ? (
+                              <span className="text-emerald-500/60">Immediate</span>
+                            ) : (
+                              <span className="text-amber-500/60 flex items-center gap-1"><Lock size={8} /> {doc.accessRule.linkedId}</span>
+                            )}
+                          </div>
+                        </div>
                       </td>
 
                       <td className="py-6 px-8 text-right">
-                         <button 
-                           onClick={() => setSelectedDoc(doc)}
-                           className="p-3 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition-all"
-                         >
-                            <ChevronRight size={18} />
-                         </button>
+                        <Link
+                          href={`/document-vault/${doc.id}`}
+                          className="p-3 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition-all inline-block"
+                        >
+                          <ChevronRight size={18} />
+                        </Link>
                       </td>
                     </motion.tr>
                   ))}
+                  {filteredDocuments.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-32 text-center">
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex flex-col items-center gap-6"
+                        >
+                          <div className="w-24 h-24 rounded-[40px] bg-white/5 border border-white/10 flex items-center justify-center text-slate-700">
+                            <FileText size={48} />
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="text-2xl font-black text-white uppercase italic">Vault Empty</h3>
+                            <p className="text-slate-500 text-sm max-w-sm mx-auto font-medium">No documents matching your current filters. Start by uploading a new repository asset.</p>
+                          </div>
+                          <button
+                            onClick={() => setIsUploadModalOpen(true)}
+                            className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all"
+                          >
+                            Initialize Upload
+                          </button>
+                        </motion.div>
+                      </td>
+                    </tr>
+                  )}
                 </AnimatePresence>
               </tbody>
             </table>
