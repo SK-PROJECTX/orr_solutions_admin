@@ -4,12 +4,11 @@ import { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS, it } from "date-fns/locale";
-import { MoreVertical, Loader, CheckCircle, Clock, User as UserIcon } from "lucide-react";
+import { Loader, CheckCircle, Clock, User as UserIcon, ChevronLeft, ChevronRight, Menu, Search, HelpCircle, Settings, Plus, Calendar as CalendarIcon } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { meetingAPI, authAPI } from "@/app/services";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./calendar.css";
-import { Calendar as CalendarIcon } from "lucide-react";
 
 interface Event {
   id: number;
@@ -112,19 +111,19 @@ function page() {
   const getStatusColor = (status: string): string => {
     switch (status?.toLowerCase()) {
       case "confirmed":
-        return "bg-green-500";
+        return "#13BE77";
       case "requested":
-        return "bg-yellow-500";
+        return "#EAB308";
       case "rescheduled":
-        return "bg-orange-500";
+        return "#F59E0B";
       case "declined":
-        return "bg-red-500";
+        return "#EF4444";
       case "completed":
-        return "bg-blue-500";
+        return "#3B82F6";
       case "cancelled":
-        return "bg-gray-500";
+        return "#6B7280";
       default:
-        return "bg-gray-400";
+        return "#9CA3AF";
     }
   };
 
@@ -136,212 +135,187 @@ function page() {
     setDate(new Date());
   };
 
+  const handleNavigate = (action: 'PREV' | 'NEXT') => {
+    let newDate = new Date(date);
+    if (view === 'month') {
+      newDate.setMonth(date.getMonth() + (action === 'NEXT' ? 1 : -1));
+    } else if (view === 'week') {
+      newDate.setDate(date.getDate() + (action === 'NEXT' ? 7 : -7));
+    } else if (view === 'day') {
+      newDate.setDate(date.getDate() + (action === 'NEXT' ? 1 : -1));
+    } else if (view === 'agenda') {
+      newDate.setMonth(date.getMonth() + (action === 'NEXT' ? 1 : -1));
+    }
+    setDate(newDate);
+  };
+
   return (
-    <div>
-      <div className="min-h-screen text-white relative overflow-hidden star">
-        <div className="absolute inset-0 bg-[url('/stars.svg')] opacity-20 pointer-events-none" />
+    <div className="flex flex-col h-full min-h-[600px] bg-[#202124] text-[#e8eaed] font-sans">
+      {/* Top Navigation Bar - Google Calendar Style */}
+      <header className="flex items-center justify-between px-4 py-2 border-b border-[#3c4043] bg-[#202124] flex-shrink-0 min-h-[64px] overflow-x-auto">
+        <div className="flex items-center gap-4">
 
-        <div className="relative z-10 p-2 sm:p-4 lg:p-8">
-          <div className="bg-card backdrop-blur-sm rounded-2xl p-3 sm:p-6 lg:p-8 flex flex-col gap-4 sm:gap-6 lg:gap-8 border border-white/10 shadow-2xl">
-            <div className="animate-fade-in">
-              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-white">
-                {t('schedule_meetings.my_assigned')}
-              </h1>
-              <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('schedule_meetings.manage_track')}</p>
-              {currentUser && (
-                <div className="flex items-center gap-2 mt-2 text-xs sm:text-sm text-gray-300">
-                  <UserIcon size={14} className="sm:w-4 sm:h-4" />
-                  <span className="truncate">{t('schedule_meetings.logged_in_as')}: {currentUser.full_name || currentUser.username}</span>
-                </div>
-              )}
+
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="text-primary" size={28} />
+            <span className="text-[22px] font-normal text-white tracking-wide hidden sm:block">Calendar</span>
+          </div>
+
+          <div className="flex items-center ml-2 sm:ml-12 gap-4">
+            <button
+              onClick={goToToday}
+              className="px-4 py-1.5 text-sm font-medium text-[#e8eaed] border border-[#5f6368] rounded hover:bg-white/5 transition-colors hidden sm:block"
+            >
+              {t('schedule_meetings.today')}
+            </button>
+
+            <div className="flex items-center gap-1">
+              <button onClick={() => handleNavigate('PREV')} className="p-2 hover:bg-white/10 rounded-full text-[#e8eaed] transition-colors">
+                <ChevronLeft size={20} />
+              </button>
+              <button onClick={() => handleNavigate('NEXT')} className="p-2 hover:bg-white/10 rounded-full text-[#e8eaed] transition-colors">
+                <ChevronRight size={20} />
+              </button>
+              <h2 className="text-[22px] font-normal text-[#e8eaed] ml-2 sm:ml-4 min-w-[150px]">
+                {format(date, view === 'day' ? 'MMMM d, yyyy' : 'MMMM yyyy')}
+              </h2>
             </div>
+          </div>
+        </div>
 
-            <div className="flex flex-col overflow-x-auto xl:grid xl:grid-cols-[320px_1fr] gap-4 lg:gap-6">
-              {/* Left Sidebar - Meeting Requests List */}
-              <div className="flex flex-col gap-4 max-h-[280px] xl:max-h-[600px] order-2 xl:order-1">
-                <div>
-                  <h3 className="text-sm font-semibold text-white">{t('schedule_meetings.my_meetings')}</h3>
-                  <p className="text-xs text-black mt-1">
-                    {t('schedule_meetings.meetings_assigned')}
-                  </p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden md:flex items-center gap-2 text-[#e8eaed]">
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Search size={20} /></button>
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><HelpCircle size={20} /></button>
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Settings size={20} /></button>
+          </div>
+
+          <select
+            value={view}
+            onChange={(e) => setView(e.target.value as View)}
+            className="bg-transparent text-[#e8eaed] text-sm font-medium border border-[#5f6368] rounded px-3 py-1.5 hover:bg-white/5 outline-none cursor-pointer"
+          >
+            <option className="bg-[#202124]" value="month">{t('schedule_meetings.month')}</option>
+            <option className="bg-[#202124]" value="week">{t('schedule_meetings.week')}</option>
+            <option className="bg-[#202124]" value="day">{t('schedule_meetings.day')}</option>
+            <option className="bg-[#202124]" value="agenda">{t('schedule_meetings.agenda')}</option>
+          </select>
+
+          {currentUser && (
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center border border-primary/30">
+              <span className="text-sm font-bold">{(currentUser.full_name || currentUser.username || 'U').charAt(0).toUpperCase()}</span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* Left Sidebar */}
+        <aside className="w-[256px] flex-shrink-0 flex flex-col bg-[#202124] overflow-y-auto hidden lg:flex">
+          <div className="p-4 pl-6">
+            <button className="flex items-center gap-3 bg-white text-[#202124] px-4 py-3 rounded-[24px] hover:bg-gray-100 transition-shadow shadow-[0_1px_2px_0_rgba(60,64,67,0.3),0_1px_3px_1px_rgba(60,64,67,0.15)] w-auto font-medium mb-8">
+              <Plus size={20} className="text-red-500" />
+              <span className="pr-2">Create</span>
+            </button>
+
+            <h3 className="text-sm font-medium text-[#e8eaed] mb-3 flex items-center gap-2">
+              My meetings
+            </h3>
+
+            <div className="space-y-1 mt-2">
+              {events.slice(0, 10).map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => {
+                    setDate(event.start);
+                    setSelectedEvent(event);
+                  }}
+                  className={`p-2 rounded-md cursor-pointer text-sm flex flex-col gap-1 ${selectedEvent?.id === event.id ? "bg-primary/20 text-primary" : "hover:bg-white/5"
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: event.resource.color }} />
+                    <span className="truncate flex-1 text-[#e8eaed] font-medium">{event.title}</span>
+                  </div>
+                  <span className="text-xs text-[#9aa0a6] ml-6">{format(event.start, "MMM d, HH:mm")}</span>
                 </div>
-                <div className="bg-gradient-to-b  overflow-y-auto from-white/15 to-white/5 h-full p-3 lg:p-4 rounded-xl flex flex-col gap-3 border border-white/10 shadow-lg">
-                  {events.map((event) => (
-                    <div
-                      key={event.id}
-                      onClick={() => setSelectedEvent(event)}
-                      className={`p-2 lg:p-3 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${selectedEvent?.id === event.id
-                          ? "bg-primary/20 border border-primary shadow-lg"
-                          : "hover:bg-white/15 border border-transparent"
-                        }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs lg:text-sm font-medium truncate">{event.title}</p>
-                          <p className="text-xs text-gray-400 truncate">
-                            {event.meetingType}
-                          </p>
-                          <div className="text-xs text-black mt-1 flex items-center gap-2">
-                            <CalendarIcon size={13} className="text-primary flex-shrink-0" />
-                            <span className="hidden lg:inline truncate">{format(event.start, "MMM d, yyyy HH:mm")}</span>
-                            <span className="lg:hidden truncate">{format(event.start, "MMM d")}</span>
-                          </div>
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${event.status === "requested"
-                              ? "bg-yellow-500/30 text-yellow-400"
-                              : event.status === "confirmed"
-                                ? "bg-green-500/30 text-green-400"
-                                : event.status === "rescheduled"
-                                  ? "bg-orange-500/30 text-orange-400"
-                                  : event.status === "declined"
-                                    ? "bg-red-500/30 text-red-400"
-                                    : event.status === "completed"
-                                      ? "bg-blue-500/30 text-blue-400"
-                                      : "bg-gray-500/30 text-gray-400"
-                            }`}
-                        >
-                          {event.status === "confirmed" && <CheckCircle size={12} />}
-                          {event.status === "requested" && <Clock size={12} />}
-                          <span className="hidden sm:inline">{t(`meetings.${event.status === 'confirmed' ? 'confirmed' : event.status}` as any) || event.status}</span>
-                          <span className="sm:hidden">{event.status.charAt(0).toUpperCase()}</span>
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* Calendar Grid Area */}
+        <main className="flex-1 flex flex-col min-w-0 bg-[#202124] relative">
+          <div className="flex-1 calendar-wrapper">
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: "100%" }}
+              view={view}
+              culture={language}
+              onView={(vw: View) => {
+                if (vw === "work_week") {
+                  setView("week");
+                  return;
+                }
+                setView(vw);
+              }}
+              date={date}
+              onNavigate={(newDate: Date) => setDate(newDate)}
+              onSelectEvent={setSelectedEvent}
+              selectable
+              eventPropGetter={(event: Event) => ({
+                style: {
+                  backgroundColor: event.resource.color,
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "white",
+                  fontSize: "12px",
+                },
+              })}
+            />
+          </div>
+
+          {/* Floating Selected Event Details (Google Calendar style card) */}
+          {selectedEvent && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[448px] max-w-[90vw] bg-[#202124] rounded-lg shadow-[0_24px_38px_3px_rgba(0,0,0,0.14),0_9px_46px_8px_rgba(0,0,0,0.12),0_11px_15px_-7px_rgba(0,0,0,0.2)] border border-[#3c4043] z-50 overflow-hidden animate-fade-in flex flex-col">
+
+              {/* Card Header with controls */}
+              <div className="flex justify-end items-center p-2 bg-[#202124]">
+                <button onClick={() => setSelectedEvent(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-[#9aa0a6] hover:text-[#e8eaed]">
+                  <span className="sr-only">Close</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" focusable="false" className="fill-current"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
+                </button>
               </div>
 
-              {/* Right Side - Calendar */}
-              <div className="bg-gradient-to-br from-white/15 to-white/5 p-3 lg:p-6 rounded-xl flex flex-col border border-white/10 shadow-lg order-1 xl:order-2">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 lg:mb-6 gap-3">
-                  <h2 className="text-base lg:text-lg font-semibold text-white">{t('schedule_meetings.schedule_events')}</h2>
-                  <div className="flex flex-wrap items-center gap-2 lg:gap-3 w-full lg:w-auto">
-                    <button
-                      onClick={goToToday}
-                      className="bg-primary hover:bg-primary/80 text-white text-xs px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-                    >
-                      {t('schedule_meetings.today')}
-                    </button>
-                    <select
-                      value={view}
-                      onChange={(e) => setView(e.target.value as View)}
-                      className="bg-white/10 hover:bg-white/20 text-xs border border-white/30 rounded-lg px-3 py-2 text-white cursor-pointer transition-all duration-200 flex-1 lg:flex-none min-w-[100px]"
-                    >
-                      <option className="bg-gray-800" value="month">
-                        {t('schedule_meetings.month')}
-                      </option>
-                      <option className="bg-gray-800" value="week">
-                        {t('schedule_meetings.week')}
-                      </option>
-                      <option className="bg-gray-800" value="day">
-                        {t('schedule_meetings.day')}
-                      </option>
-                      <option className="bg-gray-800" value="agenda">
-                        {t('schedule_meetings.agenda')}
-                      </option>
-                    </select>
-                    <button className="text-gray-400 hover:text-primary transition-colors duration-200 p-2 hover:bg-white/10 rounded-lg">
-                      <MoreVertical size={16} className="lg:w-[18px] lg:h-[18px]" />
-                    </button>
-                  </div>
-                </div>
+              <div className="p-4 pt-0">
+                <div className="flex gap-4">
+                  <div className="w-4 h-4 rounded-sm mt-1.5 flex-shrink-0" style={{ backgroundColor: selectedEvent.resource.color }} />
+                  <div className="flex-1">
+                    <h2 className="text-[22px] font-normal text-[#e8eaed] leading-7 mb-1">
+                      {selectedEvent.title}
+                    </h2>
+                    <p className="text-[14px] text-[#e8eaed] mb-6">
+                      {format(selectedEvent.start, "EEEE, MMMM d")} ⋅ {format(selectedEvent.start, "h:mm a")} - {format(selectedEvent.end, "h:mm a")}
+                    </p>
 
-                {/* React Big Calendar */}
-                <div className="flex-1 bg-white/5 rounded-lg overflow-hidden calendar-wrapper border border-white/10 min-h-[400px] lg:min-h-[500px] h-full">
-                  <div className="w-full h-full overflow-auto">
-                    <Calendar
-                      localizer={localizer}
-                      events={events}
-                      startAccessor="start"
-                      endAccessor="end"
-                      style={{ height: "100%", minHeight: "400px" }}
-                      view={view}
-                      culture={language}
-                      onView={(vw: View) => {
-                        // react-big-calendar may emit views like "work_week"; normalize to "week"
-                        if (vw === "work_week") {
-                          setView("week");
-                          return;
-                        }
-                        setView(vw);
-                      }}
-                      date={date}
-                      onNavigate={(newDate: Date) => setDate(newDate)}
-                      onSelectEvent={setSelectedEvent}
-                      popup
-                      selectable
-                      eventPropGetter={(event: Event) => ({
-                        style: {
-                          height: "100%",
-                          backgroundColor:
-                            event.status === "requested"
-                              ? "#EAB308"
-                              : event.status === "confirmed"
-                                ? "#22C55E"
-                                : event.status === "rescheduled"
-                                  ? "#F59E0B"
-                                  : event.status === "declined"
-                                    ? "#EF4444"
-                                    : event.status === "completed"
-                                      ? "#3B82F6"
-                                      : "#6B7280",
-                          border: "none",
-                          borderRadius: "4px",
-                          color: "white",
-                          fontSize: "12px",
-                        },
-                      })}
-                    />
-                  </div>
-                </div>
+                    <div className="flex items-center gap-4 text-[#e8eaed] mb-4">
+                      <Clock size={20} className="text-[#9aa0a6]" />
+                      <span className="text-sm">{t(`meetings.${selectedEvent.status === 'confirmed' ? 'confirmed' : selectedEvent.status}` as any) || selectedEvent.status}</span>
+                    </div>
 
-                {/* Selected Event Details */}
-                {selectedEvent && (
-                  <div className="mt-4 p-3 lg:p-5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/30 shadow-lg animate-fade-in">
-                    <div className="flex flex-col lg:flex-row justify-between items-start mb-4 gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-white text-sm lg:text-base truncate">
-                          {selectedEvent.title}
-                        </h3>
-                        <p className="text-xs lg:text-sm text-gray-400 mt-1 truncate">
-                          {t('schedule_meetings.client')}: {selectedEvent.clientName}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-white text-xs px-3 py-1 rounded-full font-medium flex-shrink-0 ${selectedEvent.status === "requested"
-                            ? "bg-yellow-500/30 text-yellow-300"
-                            : selectedEvent.status === "confirmed"
-                              ? "bg-primary/30 text-primary"
-                              : selectedEvent.status === "rescheduled"
-                                ? "bg-orange-500/30 text-orange-300"
-                                : selectedEvent.status === "declined"
-                                  ? "bg-red-500/30 text-red-300"
-                                  : "bg-gray-500/30 text-gray-300"
-                          }`}
-                      >
-                        {t(`meetings.${selectedEvent.status === 'confirmed' ? 'confirmed' : selectedEvent.status}` as any) || selectedEvent.status}
-                      </span>
+                    <div className="flex items-center gap-4 text-[#e8eaed] mb-4">
+                      <UserIcon size={20} className="text-[#9aa0a6]" />
+                      <span className="text-sm">{selectedEvent.clientName} ({getMeetingTypeDisplay(selectedEvent.meetingType)})</span>
                     </div>
-                    <div className="text-xs text-gray-400 space-y-2 mb-4">
-                      <p className="break-words">
-                        <span className="text-gray-300">{t('schedule_meetings.time')}:</span> {format(selectedEvent.start, "MMM d, yyyy HH:mm")} - {format(selectedEvent.end, "HH:mm")}
-                      </p>
-                      <p className="break-words">
-                        <span className="text-gray-300">{t('schedule_meetings.type')}:</span> {getMeetingTypeDisplay(selectedEvent.meetingType)}
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+
+                    <div className="pt-4 mt-2 flex flex-wrap gap-2 justify-end">
                       {selectedEvent.status === "requested" && (
                         <>
-                          <button
-                            onClick={() => handleMeetingAction(selectedEvent.id, 'confirm')}
-                            disabled={actionLoading === selectedEvent.id}
-                            className="text-xs bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1"
-                          >
-                            {actionLoading === selectedEvent.id ? <Loader className="animate-spin" size={12} /> : <CheckCircle size={12} />}
-                            {t('meetings.confirm')}
-                          </button>
                           <button
                             onClick={() => {
                               const newDateTime = prompt("Enter new date and time (YYYY-MM-DD HH:MM):");
@@ -352,19 +326,17 @@ function page() {
                               }
                             }}
                             disabled={actionLoading === selectedEvent.id}
-                            className="text-xs bg-blue-500/30 hover:bg-blue-500/40 text-blue-300 px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-blue-500/30"
+                            className="text-sm hover:bg-white/5 text-[#e8eaed] px-4 py-2 rounded font-medium transition-colors"
                           >
                             {t('schedule_meetings.reschedule')}
                           </button>
                           <button
-                            onClick={() => {
-                              const reason = prompt("Reason for declining (optional):");
-                              handleMeetingAction(selectedEvent.id, 'decline', { notes: reason || '' });
-                            }}
+                            onClick={() => handleMeetingAction(selectedEvent.id, 'confirm')}
                             disabled={actionLoading === selectedEvent.id}
-                            className="text-xs bg-red-500/30 hover:bg-red-500/40 text-red-300 px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-red-500/30"
+                            className="text-sm bg-[#8ab4f8] hover:bg-[#aecbfa] disabled:opacity-50 text-[#202124] px-4 py-2 rounded font-medium transition-colors flex items-center gap-2"
                           >
-                            {t('meetings.decline')}
+                            {actionLoading === selectedEvent.id ? <Loader className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                            {t('meetings.confirm')}
                           </button>
                         </>
                       )}
@@ -372,25 +344,11 @@ function page() {
                         <>
                           <button
                             onClick={() => {
-                              const newDateTime = prompt("Enter new date and time (YYYY-MM-DD HH:MM):");
-                              if (newDateTime) {
-                                handleMeetingAction(selectedEvent.id, 'reschedule', {
-                                  confirmed_datetime: new Date(newDateTime).toISOString()
-                                });
-                              }
-                            }}
-                            disabled={actionLoading === selectedEvent.id}
-                            className="text-xs bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 text-white px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200"
-                          >
-                            {t('schedule_meetings.reschedule')}
-                          </button>
-                          <button
-                            onClick={() => {
                               const notes = prompt("Meeting notes (optional):");
                               handleMeetingAction(selectedEvent.id, 'complete', { notes: notes || '' });
                             }}
                             disabled={actionLoading === selectedEvent.id}
-                            className="text-xs bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                            className="text-sm bg-[#8ab4f8] hover:bg-[#aecbfa] disabled:opacity-50 text-[#202124] px-4 py-2 rounded font-medium transition-colors"
                           >
                             {t('schedule_meetings.mark_complete')}
                           </button>
@@ -398,11 +356,11 @@ function page() {
                       )}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          )}
+        </main>
       </div>
     </div>
   );
