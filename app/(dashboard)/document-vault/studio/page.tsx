@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
    FileText,
+   ExternalLink,
    Zap,
    Save,
    Share2,
@@ -50,6 +51,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguageStore } from '@/store/languageStore';
+import UploadDocumentModal from '@/app/(dashboard)/document-vault/UploadDocumentModal';
 
 interface DocumentAsset {
    id: string;
@@ -61,9 +63,21 @@ interface DocumentAsset {
    folderId: string | null;
 }
 
+import { useVaultStore } from '@/store/vaultStore';
+import { useClientStore } from '@/store/clientStore';
+
 export default function DocumentStudioPage() {
    const { t } = useLanguageStore();
-   const [activeDocument, setActiveDocument] = useState<DocumentAsset | null>(null);
+   const { documents: drafts, folders: storeFolders, fetchDocuments, fetchFolders, createGoogleDoc, createFolder: storeCreateFolder } = useVaultStore();
+   const { clients, fetchClients } = useClientStore();
+
+   React.useEffect(() => {
+      fetchDocuments();
+      fetchFolders();
+      fetchClients();
+   }, [fetchDocuments, fetchFolders, fetchClients]);
+
+   const [activeDocument, setActiveDocument] = useState<any | null>(null);
    const [isSaving, setIsSaving] = useState(false);
    const [font, setFont] = useState('Inter');
    const [fontSize, setFontSize] = useState('14');
@@ -75,59 +89,73 @@ export default function DocumentStudioPage() {
    const [sharedClients, setSharedClients] = useState<string[]>([]);
    const [pages, setPages] = useState([1]);
    const [isFullScreen, setIsFullScreen] = useState(false);
-   const [drafts, setDrafts] = useState<DocumentAsset[]>([
-      { id: '1', title: 'Q2 Strategy Report', type: 'doc', lastEdited: '10m ago', progress: 85, content: 'Strategic alignment for Q2 focuses on infrastructure scaling and AI integration layers...', folderId: 'f1' },
-      { id: '2', title: 'Client Budget Projection', type: 'sheet', lastEdited: '2h ago', progress: 40, content: '', folderId: 'f2' },
-      { id: '3', title: 'Infrastructure Audit V2', type: 'doc', lastEdited: 'Yesterday', progress: 100, content: 'Audit results indicate a 40% improvement in latency across all primary nodes.', folderId: 'f1' },
-      { id: '4', title: 'Investor Pitch Deck', type: 'slide', lastEdited: '3h ago', progress: 60, content: '', folderId: null }
-   ]);
+   const [showNewAssetModal, setShowNewAssetModal] = useState(false);
+   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+   const [newAssetData, setNewAssetData] = useState({
+      title: '',
+      type: 'doc' as 'doc' | 'sheet' | 'slide',
+      clientId: '',
+      folderId: '' as string | null
+   });
 
-   const [folders, setFolders] = useState([
-      { id: 'f1', name: 'Strategic Reports', isOpen: true },
-      { id: 'f2', name: 'Finance & Budgets', isOpen: false }
-   ]);
+   React.useEffect(() => {
+      if (clients.length > 0 && !newAssetData.clientId) {
+         setNewAssetData(prev => ({ ...prev, clientId: clients[0].id }));
+      }
+   }, [clients, newAssetData.clientId]);
+
+   const [folders, setFolders] = useState<any[]>([]);
+
+   React.useEffect(() => {
+      setFolders(storeFolders.map(f => ({ ...f, isOpen: true })));
+   }, [storeFolders]);
 
    const handleSave = () => {
       setIsSaving(true);
       setTimeout(() => setIsSaving(false), 2000);
    };
 
+   const handleCreateAsset = async () => {
+      if (!newAssetData.clientId) {
+         alert("Please select a client.");
+         return;
+      }
+      
+      const docTypeMap = { doc: 'google_doc', sheet: 'google_sheet', slide: 'google_slide' };
+      setIsSaving(true);
+      try {
+         await createGoogleDoc(
+            newAssetData.title || `Untitled ${newAssetData.type}`, 
+            newAssetData.clientId, 
+            docTypeMap[newAssetData.type],
+            newAssetData.folderId
+         );
+         setShowNewAssetModal(false);
+         setNewAssetData({ title: '', type: 'doc', clientId: clients[0]?.id || '', folderId: null });
+      } catch (err) {
+         console.error(err);
+      } finally {
+         setIsSaving(false);
+      }
+   };
+
+
    const createNewDocument = (type: 'doc' | 'sheet' | 'slide', folderId: string | null = null) => {
-      const id = Math.random().toString(36).substr(2, 9);
-      const titles = { doc: 'Untitled Document', sheet: 'Untitled Spreadsheet', slide: 'Untitled Presentation' };
-      const newDoc: DocumentAsset = { 
-         id, 
-         title: titles[type], 
-         type, 
-         content: '', 
-         lastEdited: 'Just now', 
-         progress: 0, 
-         folderId 
-      };
-      setDrafts(prev => [newDoc, ...prev]);
-      setActiveDocument(newDoc);
+      setNewAssetData(prev => ({ ...prev, type, folderId }));
+      setShowNewAssetModal(true);
       setShowNewMenu(false);
    };
 
    const createFolder = () => {
-      const newFolder = {
-         id: 'f' + Math.random().toString(36).substr(2, 5),
-         name: 'New Folder',
-         isOpen: true
-      };
-      setFolders(prev => [...prev, newFolder]);
+      const name = prompt("Enter folder name:", "New Folder");
+      if (name) {
+         storeCreateFolder(name, null);
+      }
    };
 
    const toggleFolder = (id: string) => {
       setFolders(prev => prev.map(f => f.id === id ? { ...f, isOpen: !f.isOpen } : f));
    };
-
-   const clients = [
-      { id: 1, name: 'Alex Thompson', company: 'Global Tech' },
-      { id: 2, name: 'Sarah Chen', company: 'Innovate AI' },
-      { id: 3, name: 'Marcus Miller', company: 'Nexus Systems' },
-      { id: 4, name: 'Elena Rodriguez', company: 'Starlight Media' }
-   ];
 
    const toggleShareClient = (name: string) => {
       setSharedClients(prev =>
@@ -223,7 +251,7 @@ export default function DocumentStudioPage() {
                      <input
                         type="text"
                         value={activeDocument?.title}
-                        onChange={(e) => setActiveDocument(prev => prev ? { ...prev, title: e.target.value } : null)}
+                        onChange={(e) => setActiveDocument((prev: any) => prev ? { ...prev, title: e.target.value } : null)}
                         className={`w-full bg-transparent border-none focus:outline-none text-4xl uppercase italic tracking-tighter text-white ${isBold ? 'font-black' : 'font-normal'} ${isItalic ? 'italic' : ''}`}
                         style={{ fontSize: `${parseInt(fontSize) * 2.5}px` }}
                         placeholder="Document Title"
@@ -237,7 +265,7 @@ export default function DocumentStudioPage() {
                      onChange={(e) => {
                         if (pageNumber === 1) {
                            const content = e.target.value;
-                           setActiveDocument(prev => prev ? { ...prev, content } : null);
+                           setActiveDocument((prev: any) => prev ? { ...prev, content } : null);
                         }
                      }}
                      className="w-full bg-transparent border-none focus:outline-none resize-none min-h-[500px] leading-relaxed text-slate-400 placeholder:text-slate-600 overflow-hidden"
@@ -285,7 +313,7 @@ export default function DocumentStudioPage() {
             <input
                type="text"
                value={activeDocument?.title}
-               onChange={(e) => setActiveDocument(prev => prev ? { ...prev, title: e.target.value } : null)}
+               onChange={(e) => setActiveDocument((prev: any) => prev ? { ...prev, title: e.target.value } : null)}
                className="bg-transparent border-none focus:outline-none text-xl font-black uppercase italic tracking-tighter text-white w-full"
                placeholder="Sheet Title"
             />
@@ -353,7 +381,7 @@ export default function DocumentStudioPage() {
                   <input
                      type="text"
                      value={activeDocument?.title}
-                     onChange={(e) => setActiveDocument(prev => prev ? { ...prev, title: e.target.value } : null)}
+                     onChange={(e) => setActiveDocument((prev: any) => prev ? { ...prev, title: e.target.value } : null)}
                      className={`w-full bg-transparent border-none focus:outline-none text-6xl font-black italic uppercase tracking-tighter text-white ${isBold ? 'font-black' : 'font-bold'}`}
                      style={{ fontFamily: font }}
                      placeholder="Presentation Title"
@@ -364,7 +392,7 @@ export default function DocumentStudioPage() {
                   <input
                      type="text"
                      value={activeDocument?.content || 'Infrastructure Architecture Phase 01'}
-                     onChange={(e) => setActiveDocument(prev => prev ? { ...prev, content: e.target.value } : null)}
+                     onChange={(e) => setActiveDocument((prev: any) => prev ? { ...prev, content: e.target.value } : null)}
                      className="w-full bg-transparent border-none focus:outline-none text-2xl text-slate-400 font-medium tracking-tight"
                      placeholder="Slide Description"
                   />
@@ -525,8 +553,20 @@ export default function DocumentStudioPage() {
                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-primary">
                         <Sparkles size={12} /> Creation Studio
                      </div>
-                     <h1 className="text-xl font-black uppercase italic tracking-tighter">
+                     <h1 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-4">
                         {activeDocument ? activeDocument.title : 'Initialize Workspace'}
+                        {activeDocument?.link && (
+                           <a 
+                              href={activeDocument.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="p-1.5 bg-primary/20 hover:bg-primary/40 rounded-lg text-primary transition-all flex items-center gap-2"
+                              title="Open in Google Drive"
+                           >
+                              <ExternalLink size={14} />
+                              <span className="text-[8px] font-black uppercase tracking-widest">Live Editor</span>
+                           </a>
+                        )}
                      </h1>
                   </div>
                </div>
@@ -647,12 +687,12 @@ export default function DocumentStudioPage() {
                                  {folder.isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                  <Folder size={16} className={folder.isOpen ? 'text-primary' : 'text-slate-600'} />
                                  <span className="text-[11px] font-black uppercase tracking-tight flex-1 text-left">{folder.name}</span>
-                                 <span className="text-[9px] font-bold text-slate-700">{drafts.filter(d => d.folderId === folder.id).length}</span>
+                                 <span className="text-[9px] font-bold text-slate-700">{drafts.filter(d => d.folderId?.toString() === folder.id.toString()).length}</span>
                               </button>
                               
                               {folder.isOpen && (
                                  <div className="ml-4 pl-4 border-l border-white/5 space-y-2 py-1">
-                                    {drafts.filter(d => d.folderId === folder.id).map(draft => (
+                                    {drafts.filter(d => d.folderId?.toString() === folder.id.toString()).map(draft => (
                                        <button
                                           key={draft.id}
                                           onClick={() => setActiveDocument(draft as any)}
@@ -661,16 +701,16 @@ export default function DocumentStudioPage() {
                                              : 'bg-transparent border-transparent text-slate-500 hover:bg-white/5 hover:text-slate-300'
                                              }`}
                                        >
-                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${draft.type === 'doc' ? 'bg-blue-500/20 text-blue-400' : draft.type === 'sheet' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${((draft as any).type === 'docx' || (draft as any).type === 'doc' || (draft as any).type === 'google_doc') ? 'bg-blue-500/20 text-blue-400' : ((draft as any).type === 'xlsx' || (draft as any).type === 'sheet' || (draft as any).type === 'google_sheet') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
                                              }`}>
-                                             {draft.type === 'doc' ? <FileText size={16} /> : draft.type === 'sheet' ? <Grid3X3 size={16} /> : <Presentation size={16} />}
+                                             {((draft as any).type === 'docx' || (draft as any).type === 'doc' || (draft as any).type === 'google_doc') ? <FileText size={16} /> : ((draft as any).type === 'xlsx' || (draft as any).type === 'sheet' || (draft as any).type === 'google_sheet') ? <Grid3X3 size={16} /> : <Presentation size={16} />}
                                           </div>
                                           <div className="text-left flex-1 min-w-0">
                                              <p className="text-[11px] font-black uppercase truncate tracking-tight">{draft.title}</p>
                                           </div>
                                        </button>
                                     ))}
-                                    {drafts.filter(d => d.folderId === folder.id).length === 0 && (
+                                    {drafts.filter(d => d.folderId?.toString() === folder.id.toString()).length === 0 && (
                                        <p className="text-[9px] text-slate-700 italic py-2">No assets in this container.</p>
                                     )}
                                  </div>
@@ -684,8 +724,7 @@ export default function DocumentStudioPage() {
                               <Layers size={14} />
                               <span className="text-[10px] font-black uppercase tracking-[0.2em]">Uncategorized Assets</span>
                            </div>
-                           <div className="space-y-2">
-                              {drafts.filter(d => !d.folderId).map(draft => (
+                           <div className="space-y-2">                                    {drafts.filter(d => !d.folderId).map(draft => (
                                  <button
                                     key={draft.id}
                                     onClick={() => setActiveDocument(draft as any)}
@@ -694,20 +733,21 @@ export default function DocumentStudioPage() {
                                        : 'bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
                                        }`}
                                  >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${draft.type === 'doc' ? 'bg-blue-500/20 text-blue-400' : draft.type === 'sheet' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${((draft as any).type === 'docx' || (draft as any).type === 'doc' || (draft as any).type === 'google_doc') ? 'bg-blue-500/20 text-blue-400' : ((draft as any).type === 'xlsx' || (draft as any).type === 'sheet' || (draft as any).type === 'google_sheet') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
                                        }`}>
-                                       {draft.type === 'doc' ? <FileText size={20} /> : draft.type === 'sheet' ? <Grid3X3 size={20} /> : <Presentation size={20} />}
+                                       {((draft as any).type === 'docx' || (draft as any).type === 'doc' || (draft as any).type === 'google_doc') ? <FileText size={20} /> : ((draft as any).type === 'xlsx' || (draft as any).type === 'sheet' || (draft as any).type === 'google_sheet') ? <Grid3X3 size={20} /> : <Presentation size={20} />}
                                     </div>
                                     <div className="text-left flex-1 min-w-0">
                                        <p className={`text-sm font-black uppercase truncate ${activeDocument?.id === draft.id ? 'text-white' : 'text-slate-300'}`}>
                                           {draft.title}
                                        </p>
                                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 mt-0.5">
-                                          {draft.lastEdited}
+                                          {(draft as any).updatedAt || (draft as any).lastEdited}
                                        </p>
                                     </div>
                                  </button>
                               ))}
+
                            </div>
                         </div>
                      </div>
@@ -727,9 +767,67 @@ export default function DocumentStudioPage() {
                         className="flex-1 flex flex-col overflow-hidden"
                      >
                         <Toolbar />
-                        {activeDocument.type === 'doc' && <DocEditor />}
-                        {activeDocument.type === 'sheet' && <SheetEditor />}
-                        {activeDocument.type === 'slide' && <SlideEditor />}
+                        {(activeDocument.link || activeDocument.webViewLink) ? (
+                           <div className="flex-1 bg-[#010409] flex flex-col">
+                              <div className="h-10 bg-white/5 border-b border-white/10 flex items-center justify-between px-6">
+                                 <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${activeDocument.type === 'pdf' ? 'bg-red-500' : (activeDocument.type === 'docx' || activeDocument.type === 'xlsx' || activeDocument.type === 'pptx') ? 'bg-blue-400' : 'bg-primary'}`} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                       {activeDocument.type === 'pdf' ? 'PDF Asset View' : (activeDocument.documentSource?.startsWith('google_')) ? 'Live Infrastructure Sync' : 'Office Asset Preview'}
+                                    </span>
+                                 </div>
+                                 <div className="flex items-center gap-4">
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Collaborative Mode Active</span>
+                                    <a 
+                                       href={activeDocument.link || activeDocument.webViewLink} 
+                                       target="_blank" 
+                                       rel="noopener noreferrer"
+                                       className="text-[9px] font-black uppercase tracking-widest text-primary hover:text-lemon transition-colors"
+                                    >
+                                       Open Full Suite
+                                    </a>
+                                 </div>
+                              </div>
+                              <iframe 
+                                 src={(() => {
+                                    const link = activeDocument.link || activeDocument.webViewLink;
+                                    const isGoogleNative = activeDocument.documentSource?.startsWith('google_') || link.includes('docs.google.com');
+                                    
+                                    // If it's a PDF, always use the link directly
+                                    if (activeDocument.type === 'pdf') return link;
+                                    
+                                    // If it's a Google Native doc (doc, sheet, slide), use the link directly 
+                                    // (backend already formats it as /edit?rm=minimal)
+                                    if (isGoogleNative) return link;
+                                    
+                                    // If it's an uploaded Office file, use the Google Viewer
+                                    if (['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt'].includes(activeDocument.type)) {
+                                       return `https://docs.google.com/viewer?url=${encodeURIComponent(link)}&embedded=true`;
+                                    }
+                                    
+                                    return link;
+                                 })()}
+                                 className="flex-1 w-full border-none bg-white"
+                                 title={activeDocument.title}
+                              />
+                           </div>
+                        ) : (activeDocument.type === 'doc' || activeDocument.type === 'docx') ? (
+                           <DocEditor />
+                        ) : (activeDocument.type === 'sheet' || activeDocument.type === 'xlsx') ? (
+                           <SheetEditor />
+                        ) : (activeDocument.type === 'slide' || activeDocument.type === 'pptx') ? (
+                           <SlideEditor />
+                        ) : (
+                           <div className="flex-1 bg-[#010409] p-12 overflow-y-auto flex flex-col items-center justify-center">
+                              <div className="w-full max-w-4xl bg-white/[0.03] border border-white/5 rounded-[40px] shadow-2xl p-16 flex flex-col items-center gap-8 text-center">
+                                 <Loader2 size={40} className="text-primary animate-spin" />
+                                 <div className="space-y-4">
+                                    <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">Initializing Editor</h2>
+                                    <p className="text-slate-500 max-w-md mx-auto">Connecting to infrastructure layer... If this persists, please re-upload the asset.</p>
+                                 </div>
+                              </div>
+                           </div>
+                        )}
                      </motion.div>
                   ) : (
                      <div className="flex-1 flex items-center justify-center bg-[#010409]">
@@ -808,7 +906,133 @@ export default function DocumentStudioPage() {
          {/* Modals */}
          <AnimatePresence>
             {showShareModal && <ShareModal />}
+            {showNewAssetModal && (
+               <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+               >
+                  <motion.div
+                     initial={{ scale: 0.9, y: 20 }}
+                     animate={{ scale: 1, y: 0 }}
+                     className="w-full max-w-xl bg-[#0d1117] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl"
+                  >
+                     <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                        <div>
+                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">New Repository Asset</h3>
+                           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Initialize Professional Infrastructure</p>
+                        </div>
+                        <button onClick={() => setShowNewAssetModal(false)} className="p-3 hover:bg-white/5 rounded-2xl text-slate-500 transition-all border border-white/5">
+                           <X size={24} />
+                        </button>
+                     </div>
+
+                     <div className="p-8 space-y-8">
+                        <div className="space-y-3">
+                           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Asset Title</p>
+                           <input
+                              type="text"
+                              value={newAssetData.title}
+                              onChange={(e) => setNewAssetData(prev => ({ ...prev, title: e.target.value }))}
+                              placeholder="e.g. Q4 Financial Architecture"
+                              className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 text-sm font-medium focus:outline-none focus:border-primary/50 transition-all placeholder:text-slate-600 text-white"
+                           />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                           {[
+                              { type: 'doc', icon: FileText, label: 'Document', color: 'text-blue-400', bg: 'bg-blue-400/10' },
+                              { type: 'sheet', icon: Grid3X3, label: 'Spreadsheet', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+                              { type: 'slide', icon: Presentation, label: 'Presentation', color: 'text-amber-400', bg: 'bg-amber-400/10' }
+                           ].map((item) => (
+                              <button
+                                 key={item.type}
+                                 onClick={() => setNewAssetData(prev => ({ ...prev, type: item.type as any }))}
+                                 className={`p-6 rounded-[32px] border-2 transition-all flex flex-col items-center gap-4 ${newAssetData.type === item.type ? 'border-primary bg-primary/5 shadow-[0_0_20px_rgba(205,255,0,0.1)]' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                              >
+                                 <div className={`w-12 h-12 rounded-2xl ${item.bg} flex items-center justify-center ${item.color}`}>
+                                    <item.icon size={24} />
+                                 </div>
+                                 <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                              </button>
+                           ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                           <div className="space-y-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Target Client</p>
+                              <div className="relative">
+                                 <select
+                                    value={newAssetData.clientId}
+                                    onChange={(e) => setNewAssetData(prev => ({ ...prev, clientId: e.target.value }))}
+                                    className="w-full bg-[#1a1f26] border border-white/10 rounded-2xl py-4 px-5 text-xs font-bold focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer text-white"
+                                 >
+                                    {clients.map(c => (
+                                       <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
+                                    ))}
+                                 </select>
+                                 <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                              </div>
+                           </div>
+
+                           <div className="space-y-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Repository Folder</p>
+                              <div className="relative">
+                                 <select
+                                    value={newAssetData.folderId || ''}
+                                    onChange={(e) => {
+                                       const fId = e.target.value;
+                                       const folder = storeFolders.find(f => f.id.toString() === fId);
+                                       setNewAssetData(prev => ({ 
+                                          ...prev, 
+                                          folderId: fId || null,
+                                          clientId: folder?.client || prev.clientId
+                                       }));
+                                    }}
+                                    className="w-full bg-[#1a1f26] border border-white/10 rounded-2xl py-4 px-5 text-xs font-bold focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer text-white"
+                                 >
+                                    <option value="" className="bg-slate-900 italic">Root Directory</option>
+                                    {storeFolders.map(f => (
+                                       <option key={f.id} value={f.id} className="bg-slate-900">{f.name}</option>
+                                    ))}
+                                 </select>
+                                 <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-2 py-4 bg-white/5 rounded-3xl border border-white/5">
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Want to upload an existing file instead?</p>
+                            <button 
+                                onClick={() => { setShowNewAssetModal(false); setIsUploadModalOpen(true); }}
+                                className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline"
+                            >
+                                Click here
+                            </button>
+                        </div>
+                     </div>
+
+                     <div className="p-8 bg-white/[0.02] border-t border-white/5 flex gap-4">
+                        <button
+                           onClick={() => setShowNewAssetModal(false)}
+                           className="flex-1 py-5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all text-slate-400"
+                        >
+                           Cancel
+                        </button>
+                        <button
+                           onClick={handleCreateAsset}
+                           disabled={isSaving}
+                           className="flex-[2] py-5 bg-primary text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-lemon transition-all shadow-[0_0_30px_rgba(205,255,0,0.2)] disabled:opacity-50 disabled:cursor-wait"
+                        >
+                           {isSaving ? 'Initializing Architecture...' : 'Generate Repository Asset'}
+                        </button>
+                     </div>
+                  </motion.div>
+               </motion.div>
+            )}
          </AnimatePresence>
+         <UploadDocumentModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
       </div>
    );
 }

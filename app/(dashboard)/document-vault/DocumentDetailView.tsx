@@ -31,7 +31,7 @@ interface DocumentDetailViewProps {
 }
 
 export default function DocumentDetailView({ doc, onClose }: DocumentDetailViewProps) {
-   const { updateDocumentMetadata, uploadNewVersion, addFeedback, isLoading } = useVaultStore();
+   const { updateDocumentMetadata, uploadNewVersion, isLoading } = useVaultStore();
    const [activeTab, setActiveTab] = useState<'details' | 'versions' | 'feedback'>('details');
    const [feedbackInput, setFeedbackInput] = useState('');
 
@@ -51,7 +51,7 @@ export default function DocumentDetailView({ doc, onClose }: DocumentDetailViewP
    const handleSendFeedback = (e: React.FormEvent) => {
       e.preventDefault();
       if (!feedbackInput.trim()) return;
-      addFeedback(doc.id, 'Admin Portal', feedbackInput);
+      // addFeedback(doc.id, 'Admin Portal', feedbackInput);
       setFeedbackInput('');
    };
 
@@ -212,14 +212,14 @@ export default function DocumentDetailView({ doc, onClose }: DocumentDetailViewP
                                     <div className="flex justify-between items-start">
                                        <div>
                                           <div className="flex items-center gap-2 mb-1">
-                                             <span className="text-xs font-black text-white uppercase">Version {v.versionNumber}</span>
+                                             <span className="text-xs font-black text-white uppercase">Version {v.version_number}</span>
                                              {i === 0 && <span className="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-widest">Active</span>}
                                           </div>
-                                          <p className="text-xs text-slate-400 mb-3">{v.fileName}</p>
+                                          <p className="text-xs text-slate-400 mb-3">{v.file_name}</p>
                                           <div className="flex flex-wrap gap-4 text-[9px] font-bold text-slate-600 uppercase tracking-widest">
-                                             <div className="flex items-center gap-1.5"><Clock size={10} /> {new Date(v.uploadedAt).toLocaleString()}</div>
-                                             <div className="flex items-center gap-1.5"><User size={10} /> {v.uploadedBy}</div>
-                                             <div className="flex items-center gap-1.5"><ShieldCheck size={10} /> {Math.round(v.fileSize / 1024 / 1024 * 100) / 100} MB</div>
+                                             <div className="flex items-center gap-1.5"><Clock size={10} /> {new Date(v.created_at).toLocaleString()}</div>
+                                             <div className="flex items-center gap-1.5"><User size={10} /> {v.uploaded_by_name}</div>
+                                             <div className="flex items-center gap-1.5"><ShieldCheck size={10} /> {Math.round(v.file_size / 1024 / 1024 * 100) / 100} MB</div>
                                           </div>
                                        </div>
                                        <div className="flex gap-2">

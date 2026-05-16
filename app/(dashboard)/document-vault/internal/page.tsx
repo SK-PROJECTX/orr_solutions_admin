@@ -14,13 +14,19 @@ import {
   AlertTriangle,
   ChevronRight,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  Download,
+  Settings2,
+  Trash2,
+  ExternalLink
 } from 'lucide-react';
-import { useVaultStore } from '@/store/vaultStore';
+import { useVaultStore, Document } from '@/store/vaultStore';
+import DocumentDetailView from '@/app/(dashboard)/document-vault/DocumentDetailView';
 
 export default function InternalDocumentsPage() {
   const { documents, isLoading } = useVaultStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
 
   const internalDocs = documents.filter(doc => 
     doc.visibility === 'internal' && 
@@ -137,12 +143,22 @@ export default function InternalDocumentsPage() {
                     </td>
 
                     <td className="py-6 px-8 text-right">
-                       <div className="flex justify-end gap-2">
-                          <button className="p-3 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition-all">
+                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button 
+                             onClick={() => setSelectedDoc(doc)}
+                             className="p-3 bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-2xl transition-all"
+                             title="View Details"
+                          >
                              <Eye size={18} />
                           </button>
-                          <button className="p-3 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition-all">
-                             <History size={18} />
+                          <button className="p-3 bg-white/5 text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 rounded-2xl transition-all" title="Download Asset">
+                             <Download size={18} />
+                          </button>
+                          <button className="p-3 bg-white/5 text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 rounded-2xl transition-all" title="Configuration">
+                             <Settings2 size={18} />
+                          </button>
+                          <button className="p-3 bg-white/5 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all" title="Archive Asset">
+                             <Trash2 size={18} />
                           </button>
                        </div>
                     </td>
@@ -165,6 +181,15 @@ export default function InternalDocumentsPage() {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+         {selectedDoc && (
+            <DocumentDetailView 
+               doc={selectedDoc} 
+               onClose={() => setSelectedDoc(null)} 
+            />
+         )}
+      </AnimatePresence>
     </div>
   );
 }

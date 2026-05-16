@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { vaultApi } from '../lib/vault-api';
 
 export type FileType = 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'zip' | 'image' | 'video' | 'archive' | 'other';
 export type Visibility = 'client' | 'internal';
@@ -7,39 +7,47 @@ export type ScanStatus = 'scanning' | 'passed' | 'failed' | 'skipped';
 
 export interface AuditLog {
   id: string;
-  action: 'upload' | 'download' | 'visibility_change' | 'unlock' | 'delete' | 'version_add' | 'metadata_update';
-  docId: string;
-  docTitle: string;
+  action: string;
+  item: string;
   performedBy: string;
   timestamp: string;
   details: string;
+  time?: string;
+}
+
+export interface DocumentFeedback {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: string;
 }
 
 export interface DocumentVersion {
   id: string;
-  versionNumber: number;
-  fileUrl: string;
-  fileName: string;
-  fileSize: number;
-  uploadedAt: string;
-  uploadedBy: string; // Admin Name
-  hash: string; // For integrity
+  version_number: number;
+  file: string;
+  file_name: string;
+  file_size: number;
+  uploaded_by_name: string;
+  hash: string;
+  created_at: string;
 }
 
 export interface DocumentAccessRule {
   type: 'immediate' | 'payment_linked' | 'invoice_linked' | 'date_linked';
-  linkedId?: string; // Invoice ID or Payment ID
+  linkedId?: string;
   description: string;
 }
 
 export interface Folder {
   id: string;
   name: string;
-  parentId: string | null;
+  parent: string | null;
   client?: string;
   project?: string;
-  createdAt: string;
-  updatedAt: string;
+  doc_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Document {
@@ -47,25 +55,22 @@ export interface Document {
   title: string;
   description: string;
   client: string;
+  client_name: string;
   project: string;
   category: string;
+  document_type: string;
   type: FileType;
   visibility: Visibility;
   scanStatus: ScanStatus;
   currentVersion: number;
   versions: DocumentVersion[];
+  feedback?: DocumentFeedback[];
   accessRule: DocumentAccessRule;
   folderId?: string;
   createdAt: string;
   updatedAt: string;
   lastAccessedAt?: string;
   accessCount: number;
-  feedback?: {
-    id: string;
-    author: string;
-    content: string;
-    createdAt: string;
-  }[];
 }
 
 interface VaultStore {
@@ -76,320 +81,234 @@ interface VaultStore {
   error: string | null;
   
   // Actions
-  fetchDocuments: () => Promise<void>;
-  uploadDocument: (doc: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'accessCount' | 'versions' | 'currentVersion' | 'scanStatus'>, file: File) => Promise<void>;
+  fetchDocuments: (params?: any) => Promise<void>;
+  fetchDocumentById: (id: string) => Promise<void>;
+  fetchFolders: () => Promise<void>;
+  fetchActivity: () => Promise<void>;
+  uploadDocument: (doc: any, file: File) => Promise<void>;
+  createGoogleDoc: (title: string, clientId: string, type: string, folderId?: string | null) => Promise<void>;
   updateDocumentMetadata: (id: string, updates: Partial<Document>) => Promise<void>;
   uploadNewVersion: (id: string, file: File, uploadedBy: string) => Promise<void>;
   deleteDocument: (id: string) => Promise<void>;
   toggleVisibility: (id: string) => Promise<void>;
-  addFeedback: (docId: string, author: string, content: string) => Promise<void>;
   batchUpdate: (ids: string[], updates: Partial<Document>) => Promise<void>;
-  addAuditLog: (log: Omit<AuditLog, 'id' | 'timestamp'>) => void;
 
   // Folder Actions
-  createFolder: (name: string, parentId: string | null, client?: string, project?: string) => void;
-  updateFolder: (id: string, updates: Partial<Folder>) => void;
-  deleteFolder: (id: string) => void;
+  createFolder: (name: string, parentId: string | null, client?: string, project?: string) => Promise<void>;
+  updateFolder: (id: string, updates: Partial<Folder>) => Promise<void>;
+  deleteFolder: (id: string) => Promise<void>;
 }
 
-export const useVaultStore = create<VaultStore>()(
-  persist(
-    (set, get) => ({
-      documents: [
-        {
-          id: 'DOC-001',
-          title: 'Q1 Financial Strategy',
-          description: 'Comprehensive financial roadmap for the upcoming quarter.',
-          client: 'Acme Corp',
-          project: 'Strategic Growth 2024',
-          category: 'Finance',
-          type: 'pdf',
-          visibility: 'client',
-          scanStatus: 'passed',
-          currentVersion: 1,
-          versions: [
-            {
-              id: 'V1',
-              versionNumber: 1,
-              fileName: 'q1_strategy_v1.pdf',
-              fileUrl: '#',
-              fileSize: 2400000,
-              uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-              uploadedBy: 'Admin Sarah',
-              hash: 'sha256-abc123'
-            }
-          ],
-          accessRule: {
-            type: 'payment_linked',
-            linkedId: 'PAY-882',
-            description: 'Unlocked upon payment of Q1 Advisory Fee'
-          },
-          createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-          updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-          accessCount: 12,
-          feedback: [
-            { id: 'f1', author: 'John Doe (Client)', content: 'Excellent breakdown of the tax implications.', createdAt: new Date().toISOString() }
-          ]
-        },
-        {
-          id: 'DOC-002',
-          title: 'Internal Compliance Audit',
-          description: 'Internal working file for regulatory compliance check.',
-          client: 'ORR Internal',
-          project: 'Ops Compliance',
-          category: 'Legal',
-          type: 'xlsx',
-          visibility: 'internal',
-          scanStatus: 'passed',
-          currentVersion: 2,
-          versions: [
-            {
-              id: 'V1',
-              versionNumber: 1,
-              fileName: 'audit_draft.xlsx',
-              fileUrl: '#',
-              fileSize: 1200000,
-              uploadedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-              uploadedBy: 'Admin Mike',
-              hash: 'sha256-def456'
-            },
-            {
-              id: 'V2',
-              versionNumber: 2,
-              fileName: 'audit_final.xlsx',
-              fileUrl: '#',
-              fileSize: 1300000,
-              uploadedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-              uploadedBy: 'Admin Mike',
-              hash: 'sha256-ghi789'
-            }
-          ],
-          accessRule: {
-            type: 'immediate',
-            description: 'Internal access only'
-          },
-          createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-          updatedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-          accessCount: 5
-        }
-      ],
-      folders: [
-        {
-          id: 'FLD-001',
-          name: 'Financial Reports',
-          parentId: null,
-          client: 'Acme Corp',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-      ],
-      auditLogs: [],
-      isLoading: false,
-      error: null,
+export const useVaultStore = create<VaultStore>((set, get) => ({
+  documents: [],
+  folders: [],
+  auditLogs: [],
+  isLoading: false,
+  error: null,
 
-      fetchDocuments: async () => {
-        set({ isLoading: true });
-        // Simulation
-        setTimeout(() => set({ isLoading: false }), 500);
-      },
-
-      uploadDocument: async (docData, file) => {
-        set({ isLoading: true });
-        const newDoc: Document = {
-          ...docData,
-          id: `DOC-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          accessCount: 0,
-          currentVersion: 1,
-          scanStatus: 'scanning',
-          versions: [
-            {
-              id: 'V1',
-              versionNumber: 1,
-              fileName: file.name,
-              fileUrl: URL.createObjectURL(file),
-              fileSize: file.size,
-              uploadedAt: new Date().toISOString(),
-              uploadedBy: 'Current Admin',
-              hash: 'pending'
-            }
-          ]
-        };
-
-        set(state => ({ documents: [newDoc, ...state.documents] }));
+  fetchDocuments: async (params) => {
+    set({ isLoading: true });
+    try {
+      const data = await vaultApi.getDocuments(params);
+      // Map backend fields to frontend interface if necessary
+      const docs = data.map((d: any) => {
+        let rawType = d.document_type || d.type;
         
-        // Mock malware scan
-        setTimeout(() => {
-          set(state => ({
-            documents: state.documents.map(d => 
-              d.id === newDoc.id ? { ...d, scanStatus: 'passed' } : d
-            )
-          }));
-        }, 3000);
-
-        get().addAuditLog({
-          action: 'upload',
-          docId: newDoc.id,
-          docTitle: newDoc.title,
-          performedBy: 'Current Admin',
-          details: `Initial upload: ${file.name}`
-        });
-
-        set({ isLoading: false });
-      },
-
-      updateDocumentMetadata: async (id, updates) => {
-        const doc = get().documents.find(d => d.id === id);
-        set(state => ({
-          documents: state.documents.map(d => 
-            d.id === id ? { ...d, ...updates, updatedAt: new Date().toISOString() } : d
-          )
-        }));
+        // If type is missing, try to detect from title or link
+        if (!rawType) {
+            const nameSource = d.title || d.link || d.webViewLink || '';
+            const match = nameSource.match(/\.([a-z0-9]+)(\?.*)?$/i);
+            if (match) rawType = match[1];
+        }
         
-        if (doc) {
-          get().addAuditLog({
-            action: 'metadata_update',
-            docId: id,
-            docTitle: doc.title,
-            performedBy: 'Current Admin',
-            details: `Updated fields: ${Object.keys(updates).join(', ')}`
-          });
-        }
-      },
-
-      uploadNewVersion: async (id, file, uploadedBy) => {
-        const doc = get().documents.find(d => d.id === id);
-        set(state => ({
-          documents: state.documents.map(d => {
-            if (d.id === id) {
-              const newVersionNumber = d.currentVersion + 1;
-              const newVersion: DocumentVersion = {
-                id: `V${newVersionNumber}`,
-                versionNumber: newVersionNumber,
-                fileName: file.name,
-                fileUrl: URL.createObjectURL(file),
-                fileSize: file.size,
-                uploadedAt: new Date().toISOString(),
-                uploadedBy,
-                hash: 'pending'
-              };
-              return {
-                ...d,
-                currentVersion: newVersionNumber,
-                versions: [newVersion, ...d.versions],
-                updatedAt: new Date().toISOString()
-              };
-            }
-            return d;
-          })
-        }));
-
-        if (doc) {
-          get().addAuditLog({
-            action: 'version_add',
-            docId: id,
-            docTitle: doc.title,
-            performedBy: uploadedBy,
-            details: `Uploaded version ${doc.currentVersion + 1}: ${file.name}`
-          });
-        }
-      },
-
-      deleteDocument: async (id) => {
-        const doc = get().documents.find(d => d.id === id);
-        set(state => ({
-          documents: state.documents.filter(d => d.id !== id)
-        }));
-        if (doc) {
-           get().addAuditLog({
-              action: 'delete',
-              docId: id,
-              docTitle: doc.title,
-              performedBy: 'Current Admin',
-              details: 'Document permanently removed'
-           });
-        }
-      },
-
-      toggleVisibility: async (id) => {
-        const doc = get().documents.find(d => d.id === id);
-        const newVisibility = doc?.visibility === 'client' ? 'internal' : 'client';
-        set(state => ({
-          documents: state.documents.map(d => 
-            d.id === id ? { ...d, visibility: newVisibility } : d
-          )
-        }));
-        if (doc) {
-           get().addAuditLog({
-              action: 'visibility_change',
-              docId: id,
-              docTitle: doc.title,
-              performedBy: 'Current Admin',
-              details: `Visibility toggled to ${newVisibility}`
-           });
-        }
-      },
-
-      addFeedback: async (docId, author, content) => {
-        set(state => ({
-          documents: state.documents.map(d => 
-            d.id === docId ? { 
-              ...d, 
-              feedback: [...(d.feedback || []), { id: Date.now().toString(), author, content, createdAt: new Date().toISOString() }] 
-            } : d
-          )
-        }));
-      },
-
-      batchUpdate: async (ids, updates) => {
-        set(state => ({
-          documents: state.documents.map(d => 
-            ids.includes(d.id) ? { ...d, ...updates, updatedAt: new Date().toISOString() } : d
-          )
-        }));
-      },
-
-      addAuditLog: (logData) => {
-        const newLog: AuditLog = {
-          ...logData,
-          id: `LOG-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
-          timestamp: new Date().toISOString()
+        rawType = (rawType || 'pdf').toLowerCase().replace(/^\./, '');
+        
+        // Keep original document_source to distinguish between native and uploaded files
+        const docSource = d.document_source;
+        
+        const normalizedType = docSource === 'google_doc' ? 'docx' : 
+                             docSource === 'google_sheet' ? 'xlsx' : 
+                             docSource === 'google_slide' ? 'pptx' : 
+                             rawType;
+        
+        // Construct a reliable link - MUST come from backend
+        const link = d.link || d.webViewLink || d.document_url || '';
+        const finalLink = link ? (link.startsWith('http') ? link : `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend-105825824472.asia-southeast2.run.app'}${link}`) : '';
+        
+        return {
+          ...d,
+          title: d.title || d.name || 'Untitled Document',
+          type: normalizedType,
+          documentSource: docSource, // Store this explicitly
+          scanStatus: d.scan_status || d.scanStatus || 'passed',
+          accessRule: d.access_rule || d.accessRule,
+          createdAt: d.created_at || d.createdAt,
+          updatedAt: d.updated_at || d.updatedAt,
+          accessCount: d.download_count || d.accessCount || 0,
+          folderId: d.folder || d.folderId,
+          link: finalLink,
+          client: d.client_name || d.client,
         };
-        set(state => ({ auditLogs: [newLog, ...state.auditLogs] }));
-      },
-
-      createFolder: (name, parentId, client, project) => {
-        const newFolder: Folder = {
-          id: `FLD-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-          name,
-          parentId,
-          client,
-          project,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        set(state => ({ folders: [...state.folders, newFolder] }));
-      },
-
-      updateFolder: (id, updates) => {
-        set(state => ({
-          folders: state.folders.map(f => 
-            f.id === id ? { ...f, ...updates, updatedAt: new Date().toISOString() } : f
-          )
-        }));
-      },
-
-      deleteFolder: (id) => {
-        set(state => ({
-          folders: state.folders.filter(f => f.id !== id),
-          // Optionally move docs out of folder
-          documents: state.documents.map(d => d.folderId === id ? { ...d, folderId: undefined } : d)
-        }));
-      }
-    }),
-    {
-      name: 'vault-storage',
+      });
+      set({ documents: docs, isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to fetch documents', isLoading: false });
     }
-  )
-);
+  },
+
+  fetchDocumentById: async (id) => {
+    set({ isLoading: true });
+    try {
+      const d = await vaultApi.getDocument(id);
+      let rawType = (d.document_type || d.type || 'pdf').toLowerCase().replace(/^\./, '');
+      const docSource = d.document_source;
+      
+      const normalizedType = docSource === 'google_doc' ? 'docx' : 
+                           docSource === 'google_sheet' ? 'xlsx' : 
+                           docSource === 'google_slide' ? 'pptx' : 
+                           rawType;
+
+      // Construct a reliable link - MUST come from backend
+      const link = d.link || d.webViewLink || d.document_url || '';
+      const finalLink = link ? (link.startsWith('http') ? link : `${process.env.NEXT_PUBLIC_API_URL || 'https://orr-backend-105825824472.asia-southeast2.run.app'}${link}`) : '';
+
+      const mappedDoc = {
+        ...d,
+        type: normalizedType,
+        documentSource: docSource,
+        scanStatus: d.scan_status,
+        accessRule: d.access_rule,
+        createdAt: d.created_at,
+        updatedAt: d.updated_at,
+        accessCount: d.download_count,
+        folderId: d.folder,
+        link: finalLink,
+        client: d.client_name,
+        versions: (d.versions || []).map((v: any) => ({
+          id: v.id,
+          versionNumber: v.version_number,
+          file: v.file,
+          fileName: v.file_name,
+          fileSize: v.file_size,
+          uploadedBy: v.uploaded_by_name,
+          hash: v.hash,
+          uploadedAt: v.created_at
+        }))
+      };
+      set(state => ({
+        documents: state.documents.some(doc => doc.id.toString() === id.toString())
+          ? state.documents.map(doc => doc.id.toString() === id.toString() ? mappedDoc : doc)
+          : [...state.documents, mappedDoc],
+        isLoading: false
+      }));
+    } catch (error) {
+      set({ error: 'Failed to fetch document', isLoading: false });
+    }
+  },
+
+  fetchFolders: async () => {
+    set({ isLoading: true });
+    try {
+      const data = await vaultApi.getFolders();
+      set({ 
+        folders: data.map((f: any) => ({
+          ...f,
+          createdAt: f.created_at || f.createdAt,
+        })), 
+        isLoading: false 
+      });
+    } catch (error) {
+      set({ error: 'Failed to fetch folders', isLoading: false });
+    }
+  },
+
+  fetchActivity: async () => {
+    set({ isLoading: true });
+    try {
+      const data = await vaultApi.getActivity();
+      set({ auditLogs: data, isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to fetch activity', isLoading: false });
+    }
+  },
+
+  uploadDocument: async (docData, file) => {
+    set({ isLoading: true });
+    try {
+      await vaultApi.uploadDocument(docData, file);
+      await get().fetchDocuments();
+      set({ isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to upload document', isLoading: false });
+    }
+  },
+
+  createGoogleDoc: async (title, clientId, type, folderId = null) => {
+    set({ isLoading: true });
+    try {
+      await vaultApi.createGoogleDoc({ title, client_id: clientId, type, folder_id: folderId });
+      await get().fetchDocuments();
+    } catch (error) {
+      set({ error: 'Failed to create Google Doc', isLoading: false });
+    }
+  },
+
+  updateDocumentMetadata: async (id, updates) => {
+    try {
+      await vaultApi.updateDocument(id, updates);
+      await get().fetchDocuments();
+    } catch (error) {
+      set({ error: 'Failed to update document' });
+    }
+  },
+
+  uploadNewVersion: async (id, file, uploadedBy) => {
+    // API call for version upload
+  },
+
+  deleteDocument: async (id) => {
+    try {
+      await vaultApi.deleteDocument(id);
+      set(state => ({ documents: state.documents.filter(d => d.id !== id) }));
+    } catch (error) {
+      set({ error: 'Failed to delete document' });
+    }
+  },
+
+  toggleVisibility: async (id) => {
+    const doc = get().documents.find(d => d.id === id);
+    const newVisibility = doc?.visibility === 'client' ? 'internal' : 'client';
+    try {
+      await vaultApi.updateDocument(id, { visibility: newVisibility });
+      await get().fetchDocuments();
+    } catch (error) {
+      set({ error: 'Failed to toggle visibility' });
+    }
+  },
+
+  batchUpdate: async (ids, updates) => {
+    try {
+      await vaultApi.batchUpdate(ids, updates);
+      await get().fetchDocuments();
+    } catch (error) {
+      set({ error: 'Failed to batch update' });
+    }
+  },
+
+  createFolder: async (name, parent, client, project) => {
+    try {
+      await vaultApi.createFolder({ name, parent: parent || undefined, client });
+      await get().fetchFolders();
+    } catch (error) {
+      set({ error: 'Failed to create folder' });
+    }
+  },
+
+  updateFolder: async (id, updates) => {
+    // API call
+  },
+
+  deleteFolder: async (id) => {
+    // API call
+  }
+}));

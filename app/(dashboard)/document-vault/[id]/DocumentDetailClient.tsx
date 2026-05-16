@@ -33,20 +33,36 @@ import Link from 'next/link';
 
 export default function DocumentDetailClient({ params }: { params: { id: string } }) {
    const { id } = params;
-   const { documents, updateDocumentMetadata, uploadNewVersion, addFeedback, isLoading } = useVaultStore();
+   const { documents, fetchDocumentById, updateDocumentMetadata, uploadNewVersion, isLoading } = useVaultStore();
    
-   const doc = documents.find(d => d.id === id);
+   React.useEffect(() => {
+      fetchDocumentById(id);
+   }, [id, fetchDocumentById]);
+
+   const doc = documents.find(d => d.id.toString() === id.toString());
    
    const [activeTab, setActiveTab] = useState<'details' | 'versions' | 'audit' | 'ai'>('details');
    const [feedbackInput, setFeedbackInput] = useState('');
    const [isUploadingVersion, setIsUploadingVersion] = useState(false);
+
+   if (!doc && isLoading) {
+      return (
+         <div className="min-h-screen flex items-center justify-center text-white">
+            <div className="text-center space-y-4">
+               <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
+               <p className="text-sm font-black uppercase tracking-widest text-slate-500">Retrieving Asset...</p>
+            </div>
+         </div>
+      );
+   }
 
    if (!doc) {
       return (
          <div className="min-h-screen flex items-center justify-center text-white">
             <div className="text-center space-y-4">
                <h2 className="text-4xl font-black italic uppercase">Asset <span className="text-primary">Not Found</span></h2>
-               <Link href="/document-vault/all" className="inline-block text-sm font-bold text-primary hover:underline">Return to Vault</Link>
+               <p className="text-slate-500 text-sm max-w-xs mx-auto">The requested document could not be located in the current repository stack.</p>
+               <Link href="/document-vault/all" className="inline-block px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-primary transition-all">Return to Vault</Link>
             </div>
          </div>
       );
@@ -216,13 +232,13 @@ export default function DocumentDetailClient({ params }: { params: { id: string 
                                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-white/20 transition-all">
                                           <div className="space-y-2">
                                              <div className="flex items-center gap-3">
-                                                <span className="text-sm font-black text-white uppercase">v{v.versionNumber}.0</span>
+                                                <span className="text-sm font-black text-white uppercase">v{v.version_number}.0</span>
                                                 {i === 0 && <span className="text-[8px] font-black bg-primary text-slate-900 px-2 py-0.5 rounded uppercase tracking-widest">Current</span>}
                                              </div>
-                                             <p className="text-xs text-slate-400">{v.fileName}</p>
+                                             <p className="text-xs text-slate-400">{v.file_name}</p>
                                              <div className="flex gap-4 text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                                                <span className="flex items-center gap-1"><Clock size={10} /> {new Date(v.uploadedAt).toLocaleDateString()}</span>
-                                                <span className="flex items-center gap-1"><User size={10} /> {v.uploadedBy}</span>
+                                                <span className="flex items-center gap-1"><Clock size={10} /> {new Date(v.created_at).toLocaleDateString()}</span>
+                                                <span className="flex items-center gap-1"><User size={10} /> {v.uploaded_by_name}</span>
                                              </div>
                                           </div>
                                           <div className="flex gap-2">

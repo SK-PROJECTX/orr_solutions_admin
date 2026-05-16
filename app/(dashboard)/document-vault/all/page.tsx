@@ -36,12 +36,33 @@ import DocumentDetailView from '@/app/(dashboard)/document-vault/DocumentDetailV
 
 export default function DocumentVaultPage() {
   const { t } = useLanguageStore();
-  const { documents, isLoading, toggleVisibility, deleteDocument, batchUpdate } = useVaultStore();
+  const { documents, folders, isLoading, fetchDocuments, fetchFolders, toggleVisibility, deleteDocument, batchUpdate } = useVaultStore();
+
+  React.useEffect(() => {
+    fetchFolders();
+  }, [fetchFolders]);
+
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisibility, setFilterVisibility] = useState<Visibility | 'all'>('all');
   const [filterCategory, setFilterCategory] = useState<string | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<ScanStatus | 'all'>('all');
+  const [filterFolder, setFilterFolder] = useState<string | 'all'>('all');
+
+  // Handle folder filter from URL
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const folderId = params.get('folder');
+    if (folderId) {
+      setFilterFolder(folderId);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const params: any = {};
+    if (filterFolder !== 'all') params.folder_id = filterFolder;
+    fetchDocuments(params);
+  }, [fetchDocuments, filterFolder]);
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -59,9 +80,10 @@ export default function DocumentVaultPage() {
       const matchesVisibility = filterVisibility === 'all' || doc.visibility === filterVisibility;
       const matchesCategory = filterCategory === 'all' || doc.category === filterCategory;
       const matchesStatus = filterStatus === 'all' || doc.scanStatus === filterStatus;
-      return matchesSearch && matchesVisibility && matchesCategory && matchesStatus;
+      const matchesFolder = filterFolder === 'all' || doc.folderId?.toString() === filterFolder.toString();
+      return matchesSearch && matchesVisibility && matchesCategory && matchesStatus && matchesFolder;
     });
-  }, [documents, searchQuery, filterVisibility, filterCategory, filterStatus]);
+  }, [documents, searchQuery, filterVisibility, filterCategory, filterStatus, filterFolder]);
 
   const stats = useMemo(() => {
     return {
@@ -224,6 +246,16 @@ export default function DocumentVaultPage() {
               />
             </div>
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <select
+                value={filterFolder}
+                onChange={(e) => setFilterFolder(e.target.value)}
+                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase text-slate-400 focus:outline-none"
+              >
+                <option value="all">All Folders</option>
+                {folders.map(f => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
               <select
                 value={filterVisibility}
                 onChange={(e) => setFilterVisibility(e.target.value as any)}

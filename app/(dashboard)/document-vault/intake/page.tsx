@@ -23,7 +23,11 @@ import UploadDocumentModal from '../UploadDocumentModal';
 
 export default function IntakeQueuePage() {
   const { t } = useLanguageStore();
-  const { documents, deleteDocument } = useVaultStore();
+  const { documents, fetchDocuments, deleteDocument } = useVaultStore();
+
+  React.useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const pendingDocs = useMemo(() => {

@@ -30,13 +30,13 @@ export default function VersionManagementPage() {
         versions.push({ ...v, docTitle: doc.title, docId: doc.id });
       });
     });
-    return versions.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    return versions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [documents]);
 
   const filteredVersions = allVersions.filter(v => 
     v.docTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    v.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    v.uploadedBy.toLowerCase().includes(searchQuery.toLowerCase())
+    v.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.uploaded_by_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -94,9 +94,9 @@ export default function VersionManagementPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-3">
-                         <h3 className="text-xl font-black text-white group-hover:text-blue-400 transition-colors uppercase italic italic tracking-tight">{version.fileName}</h3>
+                         <h3 className="text-xl font-black text-white group-hover:text-blue-400 transition-colors uppercase italic italic tracking-tight">{version.file_name}</h3>
                          <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest">
-                           v{version.versionNumber}
+                           v{version.version_number}
                          </span>
                       </div>
                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
@@ -109,19 +109,19 @@ export default function VersionManagementPage() {
                      <div className="space-y-1">
                         <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">Uploaded By</p>
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                           <User size={12} className="text-blue-400" /> {version.uploadedBy}
+                           <User size={12} className="text-blue-400" /> {version.uploaded_by_name}
                         </div>
                      </div>
                      <div className="space-y-1">
                         <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">Timestamp</p>
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                           <Clock size={12} className="text-blue-400" /> {new Date(version.uploadedAt).toLocaleString()}
+                           <Clock size={12} className="text-blue-400" /> {new Date(version.created_at).toLocaleString()}
                         </div>
                      </div>
                      <div className="space-y-1">
                         <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">File Size</p>
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                           {(version.fileSize / 1024 / 1024).toFixed(2)} MB
+                           {(version.file_size / 1024 / 1024).toFixed(2)} MB
                         </div>
                      </div>
                      <div className="space-y-1">
