@@ -17,9 +17,15 @@ import {
   Briefcase
 } from 'lucide-react';
 import { useVaultStore, Folder as FolderType } from '@/store/vaultStore';
+import Link from 'next/link';
 
 export default function FolderManagementPage() {
-  const { folders, documents, createFolder, updateFolder, deleteFolder } = useVaultStore();
+  const { folders, documents, fetchFolders, fetchDocuments, createFolder, updateFolder, deleteFolder } = useVaultStore();
+
+  React.useEffect(() => {
+    fetchFolders();
+    fetchDocuments();
+  }, [fetchFolders, fetchDocuments]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -132,11 +138,14 @@ export default function FolderManagementPage() {
 
               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">
-                  Created {new Date(folder.createdAt).toLocaleDateString()}
+                  Created {new Date(folder.created_at).toLocaleDateString()}
                 </p>
-                <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-lemon transition-colors">
+                <Link 
+                  href={`/document-vault/all?folder=${folder.id}`}
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-lemon transition-colors"
+                >
                   View Contents <ChevronRight size={14} />
-                </button>
+                </Link>
               </div>
             </motion.div>
           ))}

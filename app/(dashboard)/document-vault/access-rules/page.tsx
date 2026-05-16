@@ -20,7 +20,11 @@ import {
 import { useVaultStore, DocumentAccessRule } from '@/store/vaultStore';
 
 export default function AccessRulesPage() {
-  const { documents, updateDocumentMetadata } = useVaultStore();
+  const { documents, fetchDocuments, updateDocumentMetadata } = useVaultStore();
+  
+  React.useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
   
   const clientFacingDocs = documents.filter(d => d.visibility === 'client');
   const lockedDocs = clientFacingDocs.filter(d => d.accessRule.type !== 'immediate');

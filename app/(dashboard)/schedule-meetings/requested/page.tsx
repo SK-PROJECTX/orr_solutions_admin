@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, User, Calendar, CheckCircle, XCircle, Edit, Loader, AlertCircle } from "lucide-react";
+import { Clock, User, Calendar, CheckCircle, XCircle, Edit, Loader, AlertCircle, MapPin, ExternalLink } from "lucide-react";
 import { meetingAPI, authAPI } from "@/app/services";
 import type { Meeting } from "@/app/services/types";
 import { useLanguageStore } from "@/store/languageStore";
@@ -157,6 +157,23 @@ export default function RequestedMeetingsPage() {
                               <p className="text-sm text-gray-300">
                                 <span className="font-medium text-white">{t('schedule_meetings.agenda')}:</span> {meeting.agenda}
                               </p>
+                            </div>
+                          )}
+                          {meeting.meeting_link && (
+                            <div className="bg-blue-500/10 rounded-lg p-3 mb-3 border border-blue-500/20">
+                              <div className="flex items-center gap-2">
+                                <MapPin size={16} className="text-blue-400" />
+                                <span className="font-medium text-blue-300">{t('schedule_meetings.meeting_link') || 'Meeting Link'}:</span>
+                                <a 
+                                  href={meeting.meeting_link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
+                                >
+                                  {t('schedule_meetings.join_meeting') || 'Join Meeting'}
+                                  <ExternalLink size={14} />
+                                </a>
+                              </div>
                             </div>
                           )}
                           {meeting.internal_notes && (

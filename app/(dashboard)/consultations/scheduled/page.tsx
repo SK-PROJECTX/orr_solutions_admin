@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, User, Loader, MapPin, Phone } from "lucide-react";
+import { Calendar, Clock, User, Loader, MapPin, Phone, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { meetingAPI } from "@/app/services";
 import Pagination from "@/app/components/common/Pagination";
@@ -15,6 +15,7 @@ interface Meeting {
   duration_minutes: number;
   status: string;
   agenda?: string;
+  meeting_link?: string;
   host?: {
     first_name: string;
     last_name: string;
@@ -124,6 +125,24 @@ export default function ScheduledConsultationsPage() {
                               <p className="text-sm text-gray-300">
                                 <strong>{t('consultations.agenda')}:</strong> {meeting.agenda}
                               </p>
+                            </div>
+                          )}
+
+                          {meeting.meeting_link && (
+                            <div className="bg-blue-500/10 rounded-lg p-3 mb-4 border border-blue-500/20 w-fit">
+                              <div className="flex items-center gap-2">
+                                <MapPin size={16} className="text-blue-400" />
+                                <span className="font-medium text-blue-300">Meeting Link:</span>
+                                <a 
+                                  href={meeting.meeting_link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 text-sm"
+                                >
+                                  Join Meeting
+                                  <ExternalLink size={14} />
+                                </a>
+                              </div>
                             </div>
                           )}
                         </div>

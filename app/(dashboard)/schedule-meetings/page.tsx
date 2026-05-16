@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS, it } from "date-fns/locale";
-import { Loader, CheckCircle, Clock, User as UserIcon, ChevronLeft, ChevronRight, Menu, Search, HelpCircle, Settings, Plus, Calendar as CalendarIcon } from "lucide-react";
+import { Loader, CheckCircle, Clock, User as UserIcon, ChevronLeft, ChevronRight, Menu, Search, HelpCircle, Settings, Plus, Calendar as CalendarIcon, MapPin, ExternalLink } from "lucide-react";
 import { useLanguageStore } from "@/store/languageStore";
 import { meetingAPI, authAPI } from "@/app/services";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -18,6 +18,7 @@ interface Event {
   status: string;
   clientName: string;
   meetingType: string;
+  meetingLink?: string;
   resource: { color: string };
 }
 
@@ -82,6 +83,7 @@ function page() {
           status: meeting.status,
           clientName: meeting.client_name,
           meetingType: meeting.meeting_type,
+          meetingLink: meeting.meeting_link,
           resource: { color: getStatusColor(meeting.status) },
         };
       });
@@ -312,6 +314,21 @@ function page() {
                       <UserIcon size={20} className="text-[#9aa0a6]" />
                       <span className="text-sm">{selectedEvent.clientName} ({getMeetingTypeDisplay(selectedEvent.meetingType)})</span>
                     </div>
+
+                    {selectedEvent.meetingLink && (
+                      <div className="flex items-center gap-4 text-blue-400 mb-4">
+                        <MapPin size={20} className="text-blue-400" />
+                        <a 
+                          href={selectedEvent.meetingLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm hover:underline flex items-center gap-1"
+                        >
+                          {t('schedule_meetings.join_meeting') || 'Join Meeting'}
+                          <ExternalLink size={14} />
+                        </a>
+                      </div>
+                    )}
 
                     <div className="pt-4 mt-2 flex flex-wrap gap-2 justify-end">
                       {selectedEvent.status === "requested" && (

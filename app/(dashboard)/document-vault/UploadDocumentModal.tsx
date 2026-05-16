@@ -16,6 +16,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useVaultStore, FileType, Visibility } from '@/store/vaultStore';
+import { useClientStore } from '@/store/clientStore';
+import { useEffect } from 'react';
 
 interface UploadDocumentModalProps {
   isOpen: boolean;
@@ -23,8 +25,16 @@ interface UploadDocumentModalProps {
 }
 
 export default function UploadDocumentModal({ isOpen, onClose }: UploadDocumentModalProps) {
-  const { uploadDocument, isLoading } = useVaultStore();
+  const { uploadDocument, createGoogleDoc, folders, fetchFolders, isLoading } = useVaultStore();
+  const { clients, fetchClients } = useClientStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchClients();
+      fetchFolders();
+    }
+  }, [isOpen, fetchClients, fetchFolders]);
 
   const [step, setStep] = useState<'file' | 'metadata'>('file');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -36,6 +46,7 @@ export default function UploadDocumentModal({ isOpen, onClose }: UploadDocumentM
     client: '',
     project: '',
     category: '',
+    folderId: '',
     visibility: 'client' as Visibility,
     accessRule: {
       type: 'immediate' as any,
@@ -67,13 +78,22 @@ export default function UploadDocumentModal({ isOpen, onClose }: UploadDocumentM
       });
     }, 100);
 
-    const type: FileType = selectedFile.name.endsWith('.pdf') ? 'pdf' : 
-                         selectedFile.name.endsWith('.xlsx') ? 'xlsx' : 'other';
+    const isGoogleDoc = selectedFile.name.includes('Google Doc');
+    const isGoogleSheet = selectedFile.name.includes('Google Sheet');
+    const isGoogleSlide = selectedFile.name.includes('Google Slide');
 
-    await uploadDocument({
-      ...formData,
-      type,
-    }, selectedFile);
+    if (isGoogleDoc || isGoogleSheet || isGoogleSlide) {
+      const gType = isGoogleDoc ? 'google_doc' : isGoogleSheet ? 'google_sheet' : 'google_slide';
+      await createGoogleDoc(formData.title, formData.client, gType, formData.folderId || null);
+    } else {
+      const type: FileType = selectedFile.name.endsWith('.pdf') ? 'pdf' : 
+                           selectedFile.name.endsWith('.xlsx') ? 'xlsx' : 'other';
+
+      await uploadDocument({
+        ...formData,
+        type,
+      }, selectedFile);
+    }
 
     setTimeout(() => {
       onClose();
@@ -179,14 +199,38 @@ export default function UploadDocumentModal({ isOpen, onClose }: UploadDocumentM
                       </div>
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Client Association</label>
-                         <input 
-                            type="text"
+                         <select 
                             required
-                            placeholder="e.g. Acme Corp"
                             value={formData.client}
                             onChange={(e) => setFormData({...formData, client: e.target.value})}
                             className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
-                         />
+                         >
+                            <option value="">Select Client</option>
+                            {clients.map(client => (
+                               <option key={client.id} value={client.id}>{client.name} ({client.company})</option>
+                            ))}
+                         </select>
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Repository Folder</label>
+                         <select 
+                            value={formData.folderId}
+                            onChange={(e) => {
+                               const fId = e.target.value;
+                               const folder = folders.find(f => f.id.toString() === fId);
+                               setFormData({
+                                  ...formData, 
+                                  folderId: fId,
+                                  client: folder?.client || formData.client
+                               });
+                            }}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                         >
+                            <option value="">Root Directory</option>
+                            {folders.map(folder => (
+                               <option key={folder.id} value={folder.id}>{folder.name}</option>
+                            ))}
+                         </select>
                       </div>
                    </div>
 

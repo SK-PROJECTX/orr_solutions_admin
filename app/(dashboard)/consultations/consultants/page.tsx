@@ -37,10 +37,10 @@ export default function AssignedConsultantsPage() {
 
         // Filter for admin users who can be consultants
         const adminUsers = Array.isArray(users) ? users.filter((user: any) =>
-          user.is_staff || user.groups?.some((group: any) =>
-            group.name?.toLowerCase().includes('admin') ||
-            group.name?.toLowerCase().includes('consultant')
-          )
+          user.role_name?.toLowerCase().includes('admin') ||
+          user.role_name?.toLowerCase().includes('consultant') ||
+          user.department?.toLowerCase().includes('consulting') ||
+          user.is_active === true
         ) : [];
 
         setAllConsultants(adminUsers);

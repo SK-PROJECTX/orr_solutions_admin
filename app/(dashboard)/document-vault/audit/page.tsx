@@ -22,13 +22,18 @@ import {
 import { useVaultStore, AuditLog } from '@/store/vaultStore';
 
 export default function AuditLogsPage() {
-  const { auditLogs } = useVaultStore();
+  const { auditLogs, fetchActivity } = useVaultStore();
+
+  React.useEffect(() => {
+    fetchActivity();
+  }, [fetchActivity]);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredLogs = auditLogs.filter(log => 
-    log.docTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.performedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.action.toLowerCase().includes(searchQuery.toLowerCase())
+    (log.item || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.performedBy || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (log.action || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getActionIcon = (action: AuditLog['action']) => {
@@ -170,9 +175,8 @@ export default function AuditLogsPage() {
                     <td className="py-6 px-8">
                        <div className="flex items-center gap-2">
                           <FileText size={14} className="text-slate-500" />
-                          <p className="text-xs font-bold text-slate-200 uppercase tracking-tight">{log.docTitle}</p>
+                          <p className="text-xs font-bold text-slate-200 uppercase tracking-tight">{log.item}</p>
                        </div>
-                       <p className="text-[9px] text-primary/60 font-black uppercase tracking-[0.2em] mt-1">{log.docId}</p>
                     </td>
 
                     <td className="py-6 px-8 text-right">
